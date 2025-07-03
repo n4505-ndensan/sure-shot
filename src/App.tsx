@@ -3,14 +3,13 @@ import "./App.scss";
 import { Component, createSignal, onMount } from "solid-js";
 import { fetchSelf } from "./fetchSelf";
 
-
 const App: Component = () => {
-  const [ports, setPorts] = createSignal<{ [key: string]: string }>({
-    "Loading...": "",
-  });
+  const [ports, setPorts] = createSignal<{ [key: string]: string } | undefined>(
+    undefined
+  );
 
   const searchPorts = () => {
-    setPorts({ "Loading...": "" });
+    setPorts(undefined);
     fetchSelf(`/find`)
       .then((response) => response.json())
       .then((json) => {
@@ -19,12 +18,53 @@ const App: Component = () => {
       })
       .catch((error) => {
         console.error("Error fetching from server:", error);
+        setPorts({});
       });
   };
 
   onMount(() => {
     searchPorts();
   });
+
+  const portList = () => {
+    if (!ports()) {
+      return <p>Loading...</p>;
+    } else if (Object.keys(ports()).length === 0) {
+      return <p>No ports found.</p>;
+    }
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          "flex-direction": "column",
+          "margin-top": "1rem",
+        }}
+      >
+        {Object.entries(ports()).map(([port, status]) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                "flex-direction": "row",
+                gap: "1rem",
+              }}
+            >
+              <p>{port}:</p>
+              <p
+                style={{
+                  "font-weight": "bold",
+                  color: status ? "limegreen" : "gray",
+                }}
+              >
+                {status ? "USED" : "-"}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -33,35 +73,7 @@ const App: Component = () => {
 
         <button onClick={searchPorts}>retry</button>
 
-        <div
-          style={{
-            display: "flex",
-            "flex-direction": "column",
-            "margin-top": "1rem",
-          }}
-        >
-          {Object.entries(ports()).map(([port, status]) => {
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  "flex-direction": "row",
-                  gap: "1rem",
-                }}
-              >
-                <p>{port}:</p>
-                <p
-                  style={{
-                    "font-weight": "bold",
-                    color: status ? "limegreen" : "gray",
-                  }}
-                >
-                  {status ? "USED" : "-"}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        {portList()}
       </div>
     </div>
   );
