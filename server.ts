@@ -2,7 +2,7 @@ import ip from "ip";
 
 import http from "node:http";
 import { networkInterfaces } from "node:os";
-import { getIpAddress } from "./src/getIpAddress";
+import { getIpAddress } from "./src/inquiry/getIpAddress";
 
 const port = Number(process.env.SERVER_PORT) || 8000;
 

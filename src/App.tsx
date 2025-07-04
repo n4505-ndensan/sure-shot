@@ -1,35 +1,18 @@
 import "./App.scss";
 
-import { Component, createSignal, onMount } from "solid-js";
-import { fetchSelf } from "./fetchSelf";
+import { Component, onMount } from "solid-js";
+import { updateServers } from "./inquiry/findAvailablePorts";
+import { globalStore } from "./store/GlobalStore";
 
 const App: Component = () => {
-  const [ports, setPorts] = createSignal<{ [key: string]: string } | undefined>(
-    undefined
-  );
-
-  const searchPorts = () => {
-    setPorts(undefined);
-    fetchSelf(`/find`)
-      .then((response) => response.json())
-      .then((json) => {
-        console.log("Response from server:", json);
-        setPorts(json);
-      })
-      .catch((error) => {
-        console.error("Error fetching from server:", error);
-        setPorts({});
-      });
-  };
-
   onMount(() => {
-    searchPorts();
+    updateServers();
   });
 
   const portList = () => {
-    if (!ports()) {
+    if (!globalStore.ports) {
       return <p>Loading...</p>;
-    } else if (Object.keys(ports()).length === 0) {
+    } else if (globalStore.ports.length === 0) {
       return <p>No ports found.</p>;
     }
 
@@ -41,7 +24,7 @@ const App: Component = () => {
           "margin-top": "1rem",
         }}
       >
-        {Object.entries(ports()).map(([port, status]) => {
+        {globalStore.ports.map(({ message, name, port, status }) => {
           return (
             <div
               style={{
@@ -57,7 +40,7 @@ const App: Component = () => {
                   color: status ? "limegreen" : "gray",
                 }}
               >
-                {status ? "USED" : "-"}
+                {status ? name : "-"}
               </p>
             </div>
           );
@@ -71,7 +54,7 @@ const App: Component = () => {
       <div style={{ padding: "2rem" }}>
         <h1 class="header">search ports</h1>
 
-        <button onClick={searchPorts}>retry</button>
+        <button onClick={updateServers}>retry</button>
 
         {portList()}
       </div>

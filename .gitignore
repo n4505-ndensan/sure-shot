@@ -28,3 +28,5 @@ gitignore
 Thumbs.db
 
 repomix-output.xml
+
+server/target
