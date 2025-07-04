@@ -20,6 +20,7 @@ export interface ReceivedMessage {
 	message: string;
 	message_type: string;
 	timestamp: string;
+	is_self: boolean;
 }
 
 export interface SendMessageRequest {

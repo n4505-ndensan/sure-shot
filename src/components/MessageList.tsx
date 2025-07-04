@@ -92,15 +92,15 @@ const MessageList: Component<Props> = (props) => {
           "margin-bottom": "1rem",
         }}
       >
-        <h2 style={{ margin: "0", "font-size": "14px", "font-weight": "bold" }}>
+        <p style={{ margin: "0", "font-size": "12px", "font-weight": "bold" }}>
           Messages ({messages().length})
-        </h2>
+        </p>
         <div
           style={{
             display: "flex",
             "align-items": "center",
             gap: "0.5rem",
-            "font-size": "10px",
+            "font-size": "12px",
           }}
         >
           <div
@@ -148,9 +148,13 @@ const MessageList: Component<Props> = (props) => {
               style={{
                 padding: "0.5rem",
                 margin: "0.25rem 0",
-                "background-color": "white",
+                "background-color": message.is_self ? "#e3f2fd" : "white",
                 "border-radius": "4px",
-                "border-left": "3px solid #007bff",
+                "border-left": message.is_self 
+                  ? "3px solid #2196f3" 
+                  : "3px solid #4caf50",
+                "margin-left": message.is_self ? "1rem" : "0",
+                "margin-right": message.is_self ? "0" : "1rem",
               }}
             >
               <div
@@ -161,23 +165,32 @@ const MessageList: Component<Props> = (props) => {
                   "margin-bottom": "0.25rem",
                 }}
               >
-                <strong style={{ "font-size": "12px", color: "#495057" }}>
-                  {message.from_name}
+                <strong style={{ 
+                  "font-size": "12px", 
+                  color: message.is_self ? "#1976d2" : "#495057"
+                }}>
+                  {message.is_self ? "You" : message.from_name}
                 </strong>
                 <span style={{ "font-size": "10px", color: "#6c757d" }}>
                   {formatTime(message.timestamp)}
                 </span>
               </div>
-              <div
-                style={{
-                  "font-size": "11px",
-                  color: "#6c757d",
-                  "margin-bottom": "0.25rem",
-                }}
-              >
-                from {message.from}
-              </div>
-              <div style={{ "font-size": "13px", color: "#212529" }}>
+              {!message.is_self && (
+                <div
+                  style={{
+                    "font-size": "12px",
+                    color: "#6c757d",
+                    "margin-bottom": "0.25rem",
+                  }}
+                >
+                  from {message.from}
+                </div>
+              )}
+              <div style={{ 
+                "font-size": "13px", 
+                color: "#212529",
+                "font-weight": message.is_self ? "500" : "normal",
+              }}>
                 {message.message}
               </div>
             </div>

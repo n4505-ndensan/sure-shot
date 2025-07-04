@@ -172,6 +172,7 @@ async fn send_message_to_server(
         message: message.to_string(),
         message_type: message_type.to_string(),
         timestamp: chrono::Utc::now().to_rfc3339(),
+        is_self: false, // 他の人から受信したメッセージとして扱う
     };
 
     let result = tokio::time::timeout(
@@ -225,6 +226,7 @@ struct ReceivedMessage {
     message: String,      // メッセージ本文
     message_type: String, // メッセージタイプ
     timestamp: String,    // 受信時刻
+    is_self: bool,        // 自分のメッセージかどうか
 }
 
 #[derive(Serialize, Deserialize)]
@@ -283,8 +285,10 @@ async fn main() {
         )
         .route("/send", {
             let ip = ip.clone();
+            let state = app_state.clone();
             post(move |Json(request): Json<SendMessageRequest>| {
                 let ip = ip.clone();
+                let state = state.clone();
                 async move {
                     let from_name = whoami();
                     let from_ip = ip.to_string();
@@ -297,6 +301,32 @@ async fn main() {
                         &request.message_type,
                     )
                     .await;
+
+                    // 送信成功時は自分のメッセージリストにも追加
+                    if result.is_ok() {
+                        let sent_message = ReceivedMessage {
+                            from: from_ip.clone(),
+                            from_name: from_name.clone(),
+                            message: request.message.clone(),
+                            message_type: request.message_type.clone(),
+                            timestamp: chrono::Utc::now().to_rfc3339(),
+                            is_self: true, // 自分が送信したメッセージ
+                        };
+
+                        // 自分のメッセージリストに追加
+                        {
+                            let mut messages = state.messages.lock().await;
+                            messages.push(sent_message.clone());
+
+                            // 最新100件のみ保持
+                            if messages.len() > 100 {
+                                messages.remove(0);
+                            }
+                        }
+
+                        // 自分のSSEクライアントにも配信
+                        let _ = state.message_broadcaster.send(sent_message);
+                    }
 
                     let response = match result {
                         Ok(()) => SendMessageResponse {
@@ -317,17 +347,22 @@ async fn main() {
         })
         .route("/receive", {
             let state = app_state.clone();
-            post(move |Json(message): Json<ReceivedMessage>| {
+            let ip = ip.clone();
+            post(move |Json(mut message): Json<ReceivedMessage>| {
                 let state = state.clone();
+                let ip = ip.clone();
                 async move {
+                    // 自分のIPと比較して is_self を設定
+                    message.is_self = message.from == ip.to_string();
+                    
                     // メッセージをログに出力
                     println!(
                         "📨 Received message from {} ({}): {}",
                         message.from_name, message.from, message.message
                     );
                     println!(
-                        "   Type: {}, Time: {}",
-                        message.message_type, message.timestamp
+                        "   Type: {}, Time: {}, Is Self: {}",
+                        message.message_type, message.timestamp, message.is_self
                     );
 
                     // メッセージを保存

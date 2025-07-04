@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Kill and Run Rust Server",
+			"type": "shell",
+			"command": "taskkill /F /IM server.exe 2>$null; cd server; cargo run",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$rustc"
+			],
+			"args": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Kill Server Only",
+			"type": "shell",
+			"command": "taskkill /F /IM server.exe",
+			"group": "build",
+			"isBackground": false,
+			"args": []
+		},
+		{
+			"label": "Start Dev Environment",
+			"type": "shell",
+			"command": "start cmd /k 'npm run dev' && timeout 3 && taskkill /F /IM server.exe 2>$null && cd server && cargo run",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$rustc"
+			],
+			"args": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		}
+	]
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "key": "ctrl+shift+r",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Kill and Run Rust Server"
+    },
+    {
+        "key": "ctrl+shift+k",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Kill Server Only"
+    }
+]
