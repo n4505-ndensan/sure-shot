@@ -301,7 +301,20 @@ async fn main() {
                 axum::Json(response)
             })
         })
-        .layer(CorsLayer::new().allow_origin(axum::http::HeaderValue::from_static("*")));
+        .layer(
+            CorsLayer::new()
+                .allow_origin(axum::http::HeaderValue::from_static("*"))
+                .allow_methods([
+                    axum::http::Method::GET,
+                    axum::http::Method::POST,
+                    axum::http::Method::OPTIONS,
+                ])
+                .allow_headers([
+                    axum::http::header::CONTENT_TYPE,
+                    axum::http::header::ACCEPT,
+                    axum::http::header::AUTHORIZATION,
+                ])
+        );
 
     // 内部管理APIサーバー (localhost:8001)
     let internal_app = Router::new()
