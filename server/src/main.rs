@@ -27,12 +27,58 @@ fn find_local_ip() -> Option<IpAddr> {
 
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
+use std::fs;
+use std::path::Path;
 
 // メッセージ保持とSSE配信用の状態
 #[derive(Clone)]
 struct AppState {
     messages: Arc<Mutex<Vec<ReceivedMessage>>>,
     message_broadcaster: broadcast::Sender<ReceivedMessage>,
+    config: Arc<Mutex<ServerConfig>>,
+}
+
+// サーバー設定
+#[derive(Serialize, Deserialize, Clone)]
+struct ServerConfig {
+    nickname: String,
+}
+
+impl Default for ServerConfig {
+    fn default() -> Self {
+        Self {
+            nickname: whoami(), // デフォルトは端末のユーザー名
+        }
+    }
+}
+
+impl ServerConfig {
+    fn load_or_create() -> Self {
+        let config_path = "sure-shot-config.toml";
+        
+        if Path::new(config_path).exists() {
+            match fs::read_to_string(config_path) {
+                Ok(content) => match toml::from_str(&content) {
+                    Ok(config) => return config,
+                    Err(e) => eprintln!("Failed to parse config file: {}", e),
+                },
+                Err(e) => eprintln!("Failed to read config file: {}", e),
+            }
+        }
+        
+        // 設定ファイルが存在しないか読み込みに失敗した場合、デフォルト設定を作成
+        let default_config = Self::default();
+        if let Err(e) = default_config.save() {
+            eprintln!("Failed to save default config: {}", e);
+        }
+        default_config
+    }
+    
+    fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let config_content = toml::to_string_pretty(self)?;
+        fs::write("sure-shot-config.toml", config_content)?;
+        Ok(())
+    }
 }
 
 // サブネット内のIPアドレスをチェックする関数
@@ -237,6 +283,27 @@ struct ReceiveMessageResponse {
     received_at: String,
 }
 
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+struct UpdateNicknameRequest {
+    nickname: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+struct UpdateNicknameResponse {
+    success: bool,
+    message: String,
+    old_nickname: String,
+    new_nickname: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+struct GetNicknameResponse {
+    nickname: String,
+}
+
 #[derive(Serialize)]
 #[typeshare]
 struct ServerInfo {
@@ -257,10 +324,14 @@ async fn main() {
     println!("Found local IP: {}", ip);
 
     // アプリケーション状態の初期化
+    let config = ServerConfig::load_or_create();
+    println!("Using nickname: {}", config.nickname);
+    
     let (message_broadcaster, _) = broadcast::channel(100);
     let app_state = AppState {
         messages: Arc::new(Mutex::new(Vec::new())),
         message_broadcaster,
+        config: Arc::new(Mutex::new(config)),
     };
 
     let port = 8000;
@@ -273,15 +344,21 @@ async fn main() {
     let external_app = Router::new()
         .route(
             "/ping",
-            get(|| async {
-                let username = whoami();
-                let response = PongResponse {
-                    message: "Pong".to_string(),
-                    name: username,
-                    is_self: true, // 自分自身からのレスポンス
-                };
-                axum::Json(response)
-            }),
+            {
+                let state = app_state.clone();
+                get(move || {
+                    let state = state.clone();
+                    async move {
+                        let config = state.config.lock().await;
+                        let response = PongResponse {
+                            message: "Pong".to_string(),
+                            name: config.nickname.clone(),
+                            is_self: true, // 自分自身からのレスポンス
+                        };
+                        axum::Json(response)
+                    }
+                })
+            }
         )
         .route("/send", {
             let ip = ip.clone();
@@ -290,7 +367,10 @@ async fn main() {
                 let ip = ip.clone();
                 let state = state.clone();
                 async move {
-                    let from_name = whoami();
+                    let config = state.config.lock().await;
+                    let from_name = config.nickname.clone();
+                    drop(config); // ロックを早期に解放
+                    
                     let from_ip = ip.to_string();
 
                     let result = send_message_to_server(
@@ -417,6 +497,52 @@ async fn main() {
                     });
 
                     Sse::new(stream).keep_alive(KeepAlive::default())
+                }
+            })
+        })
+        .route("/nickname", {
+            let state = app_state.clone();
+            get(move || {
+                let state = state.clone();
+                async move {
+                    let config = state.config.lock().await;
+                    let response = GetNicknameResponse {
+                        nickname: config.nickname.clone(),
+                    };
+                    axum::Json(response)
+                }
+            })
+        })
+        .route("/update-nickname", {
+            let state = app_state.clone();
+            post(move |Json(request): Json<UpdateNicknameRequest>| {
+                let state = state.clone();
+                async move {
+                    let mut config = state.config.lock().await;
+                    let old_nickname = config.nickname.clone();
+                    
+                    // ニックネームを更新
+                    config.nickname = request.nickname.clone();
+                    
+                    // 設定をファイルに保存
+                    let save_result = config.save();
+                    
+                    let response = match save_result {
+                        Ok(()) => UpdateNicknameResponse {
+                            success: true,
+                            message: "Nickname updated successfully".to_string(),
+                            old_nickname,
+                            new_nickname: request.nickname,
+                        },
+                        Err(err) => UpdateNicknameResponse {
+                            success: false,
+                            message: format!("Failed to save nickname: {}", err),
+                            old_nickname: old_nickname.clone(),
+                            new_nickname: old_nickname,
+                        },
+                    };
+                    
+                    axum::Json(response)
                 }
             })
         })
