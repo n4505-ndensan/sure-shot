@@ -1,4 +1,5 @@
-# Sure Shot
+<img src="public/sureshot.png" width=100>
+<br/>
 
 A **Local-First** Messaging Application.
 
