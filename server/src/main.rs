@@ -354,7 +354,7 @@ async fn main() {
                 async move {
                     // 自分のIPと比較して is_self を設定
                     message.is_self = message.from == ip.to_string();
-                    
+
                     // メッセージをログに出力
                     println!(
                         "📨 Received message from {} ({}): {}",

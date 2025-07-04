@@ -150,11 +150,11 @@ const MessageList: Component<Props> = (props) => {
                 margin: "0.25rem 0",
                 "background-color": message.is_self ? "#e3f2fd" : "white",
                 "border-radius": "4px",
-                "border-left": message.is_self 
-                  ? "3px solid #2196f3" 
+                "border-left": message.is_self
+                  ? "3px solid #2196f3"
                   : "3px solid #4caf50",
-                "margin-left": message.is_self ? "1rem" : "0",
-                "margin-right": message.is_self ? "0" : "1rem",
+                "margin-left": message.is_self ? "30%" : "0",
+                "margin-right": message.is_self ? "0" : "30%",
               }}
             >
               <div
@@ -165,32 +165,43 @@ const MessageList: Component<Props> = (props) => {
                   "margin-bottom": "0.25rem",
                 }}
               >
-                <strong style={{ 
-                  "font-size": "12px", 
-                  color: message.is_self ? "#1976d2" : "#495057"
-                }}>
-                  {message.is_self ? "You" : message.from_name}
-                </strong>
+                <div
+                  style={{
+                    display: "flex",
+                    "flex-direction": "row",
+                    "align-items": "baseline",
+                    gap: "0.25rem",
+                  }}
+                >
+                  <strong
+                    style={{
+                      "font-size": "12px",
+                      color: message.is_self ? "#1976d2" : "#495057",
+                    }}
+                  >
+                    {message.is_self ? "You" : message.from_name}
+                  </strong>
+                  <div
+                    style={{
+                      "font-size": "10px",
+                      color: "#6c757d",
+                      "margin-bottom": "0.25rem",
+                    }}
+                  >
+                    ({message.from})
+                  </div>
+                </div>
                 <span style={{ "font-size": "10px", color: "#6c757d" }}>
                   {formatTime(message.timestamp)}
                 </span>
               </div>
-              {!message.is_self && (
-                <div
-                  style={{
-                    "font-size": "12px",
-                    color: "#6c757d",
-                    "margin-bottom": "0.25rem",
-                  }}
-                >
-                  from {message.from}
-                </div>
-              )}
-              <div style={{ 
-                "font-size": "13px", 
-                color: "#212529",
-                "font-weight": message.is_self ? "500" : "normal",
-              }}>
+              <div
+                style={{
+                  "font-size": "12px",
+                  color: "#212529",
+                  "font-weight": message.is_self ? "500" : "normal",
+                }}
+              >
                 {message.message}
               </div>
             </div>
