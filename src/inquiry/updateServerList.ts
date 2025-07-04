@@ -1,19 +1,18 @@
 import { globalStore, setGlobalStore } from "../store/GlobalStore";
 
 export async function updateServerList() {
-  console.log("Checking ports...");
-  const address = window.location.hostname || "localhost";
+  setGlobalStore("servers", undefined);
 
   const res = await fetch(`http://localhost:8001/ping_servers`);
 
   if (!res.ok) {
     console.error("Failed to fetch ports:", res.statusText);
-    setGlobalStore("ports", {});
+    setGlobalStore("servers", []);
     return;
   }
 
   const data = await res.json();
-  console.log("Ports updated:", data);
-  setGlobalStore("ports", data.servers || []);
-  return globalStore.ports;
+  console.log("Servers updated:", data);
+  setGlobalStore("servers", [...data.servers]);
+  return globalStore.servers;
 }

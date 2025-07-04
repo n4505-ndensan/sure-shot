@@ -2,220 +2,63 @@ import "./App.scss";
 
 import { Component, onMount, createSignal } from "solid-js";
 import { updateServerList } from "./inquiry/updateServerList";
-import { sendMessage } from "./inquiry/sendMessage";
-import { globalStore } from "./store/GlobalStore";
+import ServerList from "./components/ServerList";
+import MessageInput from "./components/MessageInput";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");
-  const [message, setMessage] = createSignal("");
-  const [sendStatus, setSendStatus] = createSignal("");
-  const [isSending, setIsSending] = createSignal(false);
 
   onMount(() => {
     updateServerList();
   });
 
-  const handleSendMessage = async () => {
-    const ip = targetIp().trim();
-    const msg = message().trim();
-
-    if (!ip || !msg) {
-      setSendStatus("❌ IP and message are required");
-      return;
-    }
-
-    setIsSending(true);
-    setSendStatus("📤 Sending message...");
-
-    try {
-      const result = await sendMessage(ip, msg);
-
-      if (result.success) {
-        setSendStatus("✅ Message sent successfully!");
-        setMessage(""); // メッセージフィールドをクリア
-      } else {
-        setSendStatus(`❌ Failed: ${result.message}`);
-      }
-    } catch (error) {
-      setSendStatus(`❌ Error: ${error}`);
-    } finally {
-      setIsSending(false);
-      // 3秒後にステータスメッセージをクリア
-      setTimeout(() => setSendStatus(""), 3000);
-    }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key === "Enter" && !isSending()) {
-      handleSendMessage();
-    }
-  };
-
-  const portList = () => {
-    if (!globalStore.ports) {
-      return <p>Loading...</p>;
-    } else if (globalStore.ports.length === 0) {
-      return <p>No ports found.</p>;
-    }
-
-    return (
-      <div
-        style={{
-          display: "flex",
-          "flex-direction": "column",
-          "margin-top": "1rem",
-        }}
-      >
-        {globalStore.ports.map(
-          ({ message, ip, name, port, status, is_self }) => {
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  "flex-direction": "row",
-                  gap: "1rem",
-                  padding: "0.5rem",
-                  "border-radius": "4px",
-                  cursor: status && !is_self ? "pointer" : "default",
-                  "background-color": is_self
-                    ? "#fff9e6"
-                    : status
-                    ? "#f0f8ff"
-                    : "transparent",
-                  border: is_self
-                    ? "1px solid #ffc107"
-                    : status
-                    ? "1px solid #e0e8f0"
-                    : "1px solid transparent",
-                  opacity: is_self ? 0.8 : 1,
-                }}
-                onClick={() => {
-                  if (status && !is_self) {
-                    setTargetIp(ip);
-                  }
-                }}
-                title={
-                  is_self
-                    ? "This is your server"
-                    : status
-                    ? `Click to select ${name} (${ip})`
-                    : ""
-                }
-              >
-                <p>{ip}</p>
-                <p
-                  style={{
-                    "font-weight": "bold",
-                    color: status
-                      ? is_self
-                        ? "#ff8c00"
-                        : "limegreen"
-                      : "gray",
-                  }}
-                >
-                  {status ? name : "-"}
-                </p>
-                {status && (
-                  <p style={{ color: "#666", "font-size": "0.8rem" }}>
-                    {is_self ? "🏠 You" : `👤 ${name}`}
-                  </p>
-                )}
-              </div>
-            );
-          }
-        )}
-      </div>
-    );
-  };
-
   return (
     <div>
       <div style={{ padding: "2rem" }}>
-        <h1 class="header">search ports</h1>
-
-        <button onClick={updateServerList}>retry</button>
-
-        {portList()}
+        <p class="header">SURE-SHOT</p>
 
         <div
           style={{
             display: "flex",
             "flex-direction": "column",
-            gap: "1rem",
-            "margin-top": "2rem",
-            padding: "1rem",
-            border: "1px solid #ccc",
-            "border-radius": "8px",
-            "background-color": "#f9f9f9",
+            width: "200px",
           }}
         >
-          <h2 style={{ margin: "0", "font-size": "1.2rem" }}>Send Message</h2>
-
           <div
             style={{
               display: "flex",
               "flex-direction": "row",
-              gap: "1rem",
+              "align-items": "center",
             }}
           >
-            <input
-              name="ip"
-              placeholder="Target IP (e.g., 192.168.1.100)"
-              value={targetIp()}
-              onInput={(e) => setTargetIp(e.currentTarget.value)}
-              style={{ width: "200px" }}
-            />
-            <input
-              name="message"
-              placeholder="Type your message..."
-              value={message()}
-              onInput={(e) => setMessage(e.currentTarget.value)}
-              onKeyPress={handleKeyPress}
-              style={{ flex: 1 }}
-              disabled={isSending()}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={isSending() || !targetIp().trim() || !message().trim()}
+            <p
               style={{
-                padding: "0.5rem 1rem",
-                "background-color": isSending() ? "#ccc" : "#007bff",
-                color: "white",
-                border: "none",
-                "border-radius": "4px",
-                cursor: isSending() ? "not-allowed" : "pointer",
+                "flex-grow": 1,
+                "font-size": "12px",
+                "font-weight": "bold",
               }}
             >
-              {isSending() ? "Sending..." : "Send"}
-            </button>
+              SERVERS
+            </p>
+            <button onClick={updateServerList}>RELOAD</button>
           </div>
 
-          {sendStatus() && (
-            <div
-              style={{
-                padding: "0.5rem",
-                "border-radius": "4px",
-                "background-color": sendStatus().includes("✅")
-                  ? "#d4edda"
-                  : sendStatus().includes("📤")
-                  ? "#f8f9fa"
-                  : "#f8d7da",
-                color: sendStatus().includes("✅")
-                  ? "#155724"
-                  : sendStatus().includes("📤")
-                  ? "#6c757d"
-                  : "#721c24",
-                "font-size": "0.9rem",
-              }}
-            >
-              {sendStatus()}
-            </div>
-          )}
-
-          <div style={{ "font-size": "0.8rem", color: "#666" }}>
-            💡 Tip: Click on a server above to auto-fill the IP address
-          </div>
+          <ServerList
+            targetIp={targetIp()}
+            onClick={(server) => {
+              if (server === undefined) {
+                setTargetIp("");
+              } else if (server.status && !server.is_self) {
+                setTargetIp(server.ip);
+              }
+            }}
+          />
         </div>
+
+        <MessageInput
+          targetIp={targetIp()}
+          onIpChange={(ip) => setTargetIp(ip)}
+        />
       </div>
     </div>
   );
