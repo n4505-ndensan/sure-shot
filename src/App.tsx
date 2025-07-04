@@ -66,7 +66,7 @@ const App: Component = () => {
           "margin-top": "1rem",
         }}
       >
-        {globalStore.ports.map(({ message, ip, name, port, status }) => {
+        {globalStore.ports.map(({ message, ip, name, port, status, is_self }) => {
           return (
             <div
               style={{
@@ -75,29 +75,44 @@ const App: Component = () => {
                 gap: "1rem",
                 padding: "0.5rem",
                 "border-radius": "4px",
-                cursor: status ? "pointer" : "default",
-                "background-color": status ? "#f0f8ff" : "transparent",
-                border: status ? "1px solid #e0e8f0" : "1px solid transparent",
+                cursor: (status && !is_self) ? "pointer" : "default",
+                "background-color": is_self 
+                  ? "#fff9e6" 
+                  : status 
+                    ? "#f0f8ff" 
+                    : "transparent",
+                border: is_self 
+                  ? "1px solid #ffc107" 
+                  : status 
+                    ? "1px solid #e0e8f0" 
+                    : "1px solid transparent",
+                opacity: is_self ? 0.8 : 1,
               }}
               onClick={() => {
-                if (status) {
+                if (status && !is_self) {
                   setTargetIp(ip);
                 }
               }}
-              title={status ? `Click to select ${name} (${ip})` : ""}
+              title={
+                is_self 
+                  ? "This is your server" 
+                  : status 
+                    ? `Click to select ${name} (${ip})` 
+                    : ""
+              }
             >
               <p>{ip}</p>
               <p
                 style={{
                   "font-weight": "bold",
-                  color: status ? "limegreen" : "gray",
+                  color: status ? (is_self ? "#ff8c00" : "limegreen") : "gray",
                 }}
               >
                 {status ? name : "-"}
               </p>
               {status && (
                 <p style={{ color: "#666", "font-size": "0.8rem" }}>
-                  👤 {name}
+                  {is_self ? "🏠 You" : `👤 ${name}`}
                 </p>
               )}
             </div>
@@ -176,8 +191,14 @@ const App: Component = () => {
                 "border-radius": "4px",
                 "background-color": sendStatus().includes("✅")
                   ? "#d4edda"
-                  : "#f8d7da",
-                color: sendStatus().includes("✅") ? "#155724" : "#721c24",
+                  : sendStatus().includes("📤")
+                    ? "#f8f9fa"
+                    : "#f8d7da",
+                color: sendStatus().includes("✅")
+                  ? "#155724"
+                  : sendStatus().includes("📤")
+                    ? "#6c757d"
+                    : "#721c24",
                 "font-size": "0.9rem",
               }}
             >

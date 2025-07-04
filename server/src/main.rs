@@ -70,13 +70,14 @@ async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
 }
 
 // 各IPの/pingエンドポイントをチェックする関数
-async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
+async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<ServerInfo> {
     use futures::future::join_all;
     use std::time::Duration;
 
     let mut tasks = Vec::new();
 
     for ip in ips {
+        let is_local = ip == local_ip;
         let task = tokio::spawn(async move {
             let client = reqwest::Client::new();
             let url = format!("http://{}:{}/ping", ip, port);
@@ -94,6 +95,7 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
                                 status: "active".to_string(),
                                 message: pong.message,
                                 name: pong.name,
+                                is_self: is_local,
                             }),
                             Err(_) => Some(ServerInfo {
                                 ip: ip.to_string(),
@@ -101,6 +103,7 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
                                 status: "unknown".to_string(),
                                 message: "Invalid response".to_string(),
                                 name: "unknown".to_string(),
+                                is_self: is_local,
                             }),
                         }
                     } else {
@@ -110,6 +113,7 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
                             status: "error".to_string(),
                             message: format!("HTTP {}", response.status()),
                             name: "unknown".to_string(),
+                            is_self: is_local,
                         })
                     }
                 }
@@ -119,6 +123,7 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
                     status: "unreachable".to_string(),
                     message: "Connection failed".to_string(),
                     name: "unknown".to_string(),
+                    is_self: is_local,
                 }),
             }
         });
@@ -179,6 +184,7 @@ async fn send_message_to_server(
 struct PongResponse {
     message: String,
     name: String,
+    is_self: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -218,6 +224,7 @@ struct ServerInfo {
     status: String,
     message: String,
     name: String,
+    is_self: bool,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -242,6 +249,7 @@ async fn main() {
                 let response = PongResponse {
                     message: "Pong".to_string(),
                     name: username,
+                    is_self: true, // 自分自身からのレスポンス
                 };
                 axum::Json(response)
             }),
@@ -357,7 +365,7 @@ async fn main() {
                     let available_ips = check_available_ips(ip, 8000).await;
 
                     // 各サーバーの/pingエンドポイントをチェック
-                    let server_infos = ping_servers_by_ip(available_ips, 8000).await;
+                    let server_infos = ping_servers_by_ip(available_ips, 8000, ip).await;
 
                     #[derive(serde::Serialize)]
                     struct PingServersResponse {
