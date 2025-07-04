@@ -1,6 +1,6 @@
 import { globalStore, setGlobalStore } from "../store/GlobalStore";
 
-export async function updateServers() {
+export async function updateServerList() {
   console.log("Checking ports...");
   const address = window.location.hostname || "localhost";
 

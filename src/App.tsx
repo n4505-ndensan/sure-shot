@@ -1,12 +1,12 @@
 import "./App.scss";
 
 import { Component, onMount } from "solid-js";
-import { updateServers } from "./inquiry/findAvailablePorts";
+import { updateServerList } from "./inquiry/updateServerList";
 import { globalStore } from "./store/GlobalStore";
 
 const App: Component = () => {
   onMount(() => {
-    updateServers();
+    updateServerList();
   });
 
   const portList = () => {
@@ -24,7 +24,7 @@ const App: Component = () => {
           "margin-top": "1rem",
         }}
       >
-        {globalStore.ports.map(({ message, name, port, status }) => {
+        {globalStore.ports.map(({ message, ip, name, port, status }) => {
           return (
             <div
               style={{
@@ -33,7 +33,9 @@ const App: Component = () => {
                 gap: "1rem",
               }}
             >
-              <p>{port}:</p>
+              <p>
+                {ip}:{port}
+              </p>
               <p
                 style={{
                   "font-weight": "bold",
@@ -54,7 +56,7 @@ const App: Component = () => {
       <div style={{ padding: "2rem" }}>
         <h1 class="header">search ports</h1>
 
-        <button onClick={updateServers}>retry</button>
+        <button onClick={updateServerList}>retry</button>
 
         {portList()}
       </div>
