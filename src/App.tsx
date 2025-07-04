@@ -18,7 +18,7 @@ const App: Component = () => {
   const handleSendMessage = async () => {
     const ip = targetIp().trim();
     const msg = message().trim();
-    
+
     if (!ip || !msg) {
       setSendStatus("❌ IP and message are required");
       return;
@@ -29,7 +29,7 @@ const App: Component = () => {
 
     try {
       const result = await sendMessage(ip, msg);
-      
+
       if (result.success) {
         setSendStatus("✅ Message sent successfully!");
         setMessage(""); // メッセージフィールドをクリア
@@ -122,14 +122,14 @@ const App: Component = () => {
             "flex-direction": "column",
             gap: "1rem",
             "margin-top": "2rem",
-            "padding": "1rem",
-            "border": "1px solid #ccc",
+            padding: "1rem",
+            border: "1px solid #ccc",
             "border-radius": "8px",
             "background-color": "#f9f9f9",
           }}
         >
           <h2 style={{ margin: "0", "font-size": "1.2rem" }}>Send Message</h2>
-          
+
           <div
             style={{
               display: "flex",
@@ -168,13 +168,15 @@ const App: Component = () => {
               {isSending() ? "Sending..." : "Send"}
             </button>
           </div>
-          
+
           {sendStatus() && (
             <div
               style={{
                 padding: "0.5rem",
                 "border-radius": "4px",
-                "background-color": sendStatus().includes("✅") ? "#d4edda" : "#f8d7da",
+                "background-color": sendStatus().includes("✅")
+                  ? "#d4edda"
+                  : "#f8d7da",
                 color: sendStatus().includes("✅") ? "#155724" : "#721c24",
                 "font-size": "0.9rem",
               }}
@@ -182,7 +184,7 @@ const App: Component = () => {
               {sendStatus()}
             </div>
           )}
-          
+
           <div style={{ "font-size": "0.8rem", color: "#666" }}>
             💡 Tip: Click on a server above to auto-fill the IP address
           </div>

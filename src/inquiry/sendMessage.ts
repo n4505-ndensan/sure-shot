@@ -18,8 +18,12 @@ export const sendMessage = async (
   try {
     // 自分のIPアドレスを取得（外部APIサーバーのIPを使用）
     const selfIp = await fetch("http://localhost:8001/ping_servers")
-      .then(res => res.json())
-      .then(data => data.servers.find((server: any) => server.status === "active")?.ip || "localhost");
+      .then((res) => res.json())
+      .then(
+        (data) =>
+          data.servers.find((server: any) => server.status === "active")?.ip ||
+          "localhost"
+      );
 
     const response = await fetch(`http://${selfIp}:8000/send`, {
       method: "POST",
