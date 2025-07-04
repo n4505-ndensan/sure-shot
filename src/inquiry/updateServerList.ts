@@ -4,7 +4,7 @@ export async function updateServerList() {
   console.log("Checking ports...");
   const address = window.location.hostname || "localhost";
 
-  const res = await fetch(`http://${address}:8000/ping_servers`);
+  const res = await fetch(`http://localhost:8001/ping_servers`);
 
   if (!res.ok) {
     console.error("Failed to fetch ports:", res.statusText);
