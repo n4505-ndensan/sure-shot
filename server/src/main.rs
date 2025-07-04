@@ -1,4 +1,8 @@
-use axum::{Router, routing::{get, post}, extract::Json};
+use axum::{
+    Router,
+    extract::Json,
+    routing::{get, post},
+};
 use local_ip_address::list_afinet_netifas;
 use server::whoami::whoami;
 use std::net::{IpAddr, SocketAddr};
@@ -16,8 +20,7 @@ fn find_local_ip() -> Option<IpAddr> {
     None
 }
 
-use serde::{Serialize, Deserialize};
-
+use serde::{Deserialize, Serialize};
 
 // サブネット内のIPアドレスをチェックする関数
 async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
@@ -30,13 +33,13 @@ async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
     if let IpAddr::V4(ipv4) = local_ip {
         let octets = ipv4.octets();
         let base_ip = [octets[0], octets[1], octets[2], 0];
-        
+
         // サブネット内の全IPアドレス（1-254）をチェック
         for host in 1..=254 {
             let target_ip = IpAddr::V4(std::net::Ipv4Addr::new(
-                base_ip[0], base_ip[1], base_ip[2], host
+                base_ip[0], base_ip[1], base_ip[2], host,
             ));
-            
+
             let task = tokio::spawn(async move {
                 let addr = SocketAddr::new(target_ip, port);
                 let result = tokio::time::timeout(
@@ -77,11 +80,9 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
         let task = tokio::spawn(async move {
             let client = reqwest::Client::new();
             let url = format!("http://{}:{}/ping", ip, port);
-            
-            let result = tokio::time::timeout(
-                Duration::from_millis(500),
-                client.get(&url).send()
-            ).await;
+
+            let result =
+                tokio::time::timeout(Duration::from_millis(500), client.get(&url).send()).await;
 
             match result {
                 Ok(Ok(response)) => {
@@ -133,14 +134,20 @@ async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16) -> Vec<ServerInfo> {
         }
     }
 
-        server_infos
+    server_infos
 }
 
 // メッセージ送信機能
-async fn send_message_to_server(target_ip: &str, from_ip: &str, from_name: &str, message: &str, message_type: &str) -> Result<(), String> {
+async fn send_message_to_server(
+    target_ip: &str,
+    from_ip: &str,
+    from_name: &str,
+    message: &str,
+    message_type: &str,
+) -> Result<(), String> {
     let client = reqwest::Client::new();
     let url = format!("http://{}:8000/receive", target_ip);
-    
+
     let payload = ReceivedMessage {
         from: from_ip.to_string(),
         from_name: from_name.to_string(),
@@ -148,14 +155,13 @@ async fn send_message_to_server(target_ip: &str, from_ip: &str, from_name: &str,
         message_type: message_type.to_string(),
         timestamp: chrono::Utc::now().to_rfc3339(),
     };
-    
+
     let result = tokio::time::timeout(
         std::time::Duration::from_millis(5000),
-        client.post(&url)
-            .json(&payload)
-            .send()
-    ).await;
-    
+        client.post(&url).json(&payload).send(),
+    )
+    .await;
+
     match result {
         Ok(Ok(response)) => {
             if response.status().is_success() {
@@ -177,8 +183,8 @@ struct PongResponse {
 
 #[derive(Serialize, Deserialize)]
 struct SendMessageRequest {
-    to: String,        // 送信先のIP or 識別子
-    message: String,   // メッセージ本文
+    to: String,           // 送信先のIP or 識別子
+    message: String,      // メッセージ本文
     message_type: String, // メッセージタイプ（将来的に拡張用）
 }
 
@@ -191,11 +197,11 @@ struct SendMessageResponse {
 
 #[derive(Serialize, Deserialize)]
 struct ReceivedMessage {
-    from: String,      // 送信元のIP
-    from_name: String, // 送信元の名前
-    message: String,   // メッセージ本文
+    from: String,         // 送信元のIP
+    from_name: String,    // 送信元の名前
+    message: String,      // メッセージ本文
     message_type: String, // メッセージタイプ
-    timestamp: String, // 受信時刻
+    timestamp: String,    // 受信時刻
 }
 
 #[derive(Serialize, Deserialize)]
@@ -224,7 +230,8 @@ async fn main() {
 
     let port = 8000;
     let external_addr = SocketAddr::new(ip, port);
-    let internal_addr = SocketAddr::new(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), port + 1);
+    let internal_addr =
+        SocketAddr::new(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), port + 1);
 
     // 外部向けAPIサーバー (192.168.x.x:8000)
     let external_app = Router::new()
@@ -246,15 +253,16 @@ async fn main() {
                 async move {
                     let from_name = whoami();
                     let from_ip = ip.to_string();
-                    
+
                     let result = send_message_to_server(
                         &request.to,
                         &from_ip,
                         &from_name,
                         &request.message,
-                        &request.message_type
-                    ).await;
-                    
+                        &request.message_type,
+                    )
+                    .await;
+
                     let response = match result {
                         Ok(()) => SendMessageResponse {
                             success: true,
@@ -267,7 +275,7 @@ async fn main() {
                             timestamp: chrono::Utc::now().to_rfc3339(),
                         },
                     };
-                    
+
                     axum::Json(response)
                 }
             })
@@ -275,17 +283,21 @@ async fn main() {
         .route("/receive", {
             post(|Json(message): Json<ReceivedMessage>| async move {
                 // 現在は受信したメッセージをログに出力
-                println!("📨 Received message from {} ({}): {}", 
-                    message.from_name, message.from, message.message);
-                println!("   Type: {}, Time: {}", 
-                    message.message_type, message.timestamp);
-                
+                println!(
+                    "📨 Received message from {} ({}): {}",
+                    message.from_name, message.from, message.message
+                );
+                println!(
+                    "   Type: {}, Time: {}",
+                    message.message_type, message.timestamp
+                );
+
                 let response = ReceiveMessageResponse {
                     success: true,
                     message: "Message received successfully".to_string(),
                     received_at: chrono::Utc::now().to_rfc3339(),
                 };
-                
+
                 axum::Json(response)
             })
         })
@@ -330,7 +342,7 @@ async fn main() {
                 async move {
                     // まず利用可能なIPアドレスをチェック
                     let available_ips = check_available_ips(ip, 8000).await;
-                    
+
                     // 各サーバーの/pingエンドポイントをチェック
                     let server_infos = ping_servers_by_ip(available_ips, 8000).await;
 
@@ -350,8 +362,14 @@ async fn main() {
         })
         .layer(CorsLayer::new().allow_origin(axum::http::HeaderValue::from_static("*")));
 
-    println!("External API listening on http://{} (accessible from network)", external_addr);
-    println!("Internal API listening on http://{} (localhost only)", internal_addr);
+    println!(
+        "External API listening on http://{} (accessible from network)",
+        external_addr
+    );
+    println!(
+        "Internal API listening on http://{} (localhost only)",
+        internal_addr
+    );
 
     // 両方のサーバーを並行して起動
     let external_listener = tokio::net::TcpListener::bind(external_addr).await.unwrap();
