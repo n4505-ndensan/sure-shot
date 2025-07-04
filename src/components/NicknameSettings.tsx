@@ -1,5 +1,9 @@
 import { Component, createSignal, onMount } from "solid-js";
-import { GetNicknameResponse, UpdateNicknameRequest, UpdateNicknameResponse } from "../types/generated/api-types";
+import {
+  GetNicknameResponse,
+  UpdateNicknameRequest,
+  UpdateNicknameResponse,
+} from "../types/generated/api-types";
 
 interface Props {
   className?: string;
@@ -100,10 +104,6 @@ const NicknameSettings: Component<Props> = (props) => {
           "background-color": "#f9f9f9",
         }}
       >
-        <h3 style={{ margin: "0", "font-size": "14px", "font-weight": "bold" }}>
-          Nickname Settings
-        </h3>
-
         {!isEditing() ? (
           <div
             style={{
@@ -116,7 +116,7 @@ const NicknameSettings: Component<Props> = (props) => {
               <span style={{ "font-size": "12px", color: "#6c757d" }}>
                 Current nickname:
               </span>
-              <div style={{ "font-size": "14px", "font-weight": "500" }}>
+              <div style={{ "font-size": "12px", "font-weight": "500" }}>
                 {currentNickname() || "Loading..."}
               </div>
             </div>
@@ -136,7 +136,13 @@ const NicknameSettings: Component<Props> = (props) => {
             </button>
           </div>
         ) : (
-          <div style={{ display: "flex", "flex-direction": "column", gap: "0.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              "flex-direction": "column",
+              gap: "0.5rem",
+            }}
+          >
             <input
               type="text"
               value={newNickname()}

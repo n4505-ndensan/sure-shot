@@ -34,9 +34,13 @@ const App: Component = () => {
               gap: "1rem",
             }}
           >
-            <NicknameSettings />
-            
-            <div>
+            <div
+              style={{
+                display: "flex",
+                "flex-direction": "column",
+                height: "100%",
+              }}
+            >
               <div
                 style={{
                   display: "flex",
@@ -67,6 +71,8 @@ const App: Component = () => {
                 }}
               />
             </div>
+
+            <NicknameSettings />
           </div>
 
           <div style={{ "flex-grow": 1, "min-width": "400px" }}>

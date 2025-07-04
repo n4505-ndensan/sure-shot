@@ -26,9 +26,9 @@ fn find_local_ip() -> Option<IpAddr> {
 }
 
 use serde::{Deserialize, Serialize};
-use typeshare::typeshare;
 use std::fs;
 use std::path::Path;
+use typeshare::typeshare;
 
 // メッセージ保持とSSE配信用の状態
 #[derive(Clone)]
@@ -55,7 +55,7 @@ impl Default for ServerConfig {
 impl ServerConfig {
     fn load_or_create() -> Self {
         let config_path = "sure-shot-config.toml";
-        
+
         if Path::new(config_path).exists() {
             match fs::read_to_string(config_path) {
                 Ok(content) => match toml::from_str(&content) {
@@ -65,7 +65,7 @@ impl ServerConfig {
                 Err(e) => eprintln!("Failed to read config file: {}", e),
             }
         }
-        
+
         // 設定ファイルが存在しないか読み込みに失敗した場合、デフォルト設定を作成
         let default_config = Self::default();
         if let Err(e) = default_config.save() {
@@ -73,7 +73,7 @@ impl ServerConfig {
         }
         default_config
     }
-    
+
     fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
         let config_content = toml::to_string_pretty(self)?;
         fs::write("sure-shot-config.toml", config_content)?;
@@ -326,7 +326,7 @@ async fn main() {
     // アプリケーション状態の初期化
     let config = ServerConfig::load_or_create();
     println!("Using nickname: {}", config.nickname);
-    
+
     let (message_broadcaster, _) = broadcast::channel(100);
     let app_state = AppState {
         messages: Arc::new(Mutex::new(Vec::new())),
@@ -342,24 +342,21 @@ async fn main() {
 
     // 外部向けAPIサーバー (192.168.x.x:8000)
     let external_app = Router::new()
-        .route(
-            "/ping",
-            {
-                let state = app_state.clone();
-                get(move || {
-                    let state = state.clone();
-                    async move {
-                        let config = state.config.lock().await;
-                        let response = PongResponse {
-                            message: "Pong".to_string(),
-                            name: config.nickname.clone(),
-                            is_self: true, // 自分自身からのレスポンス
-                        };
-                        axum::Json(response)
-                    }
-                })
-            }
-        )
+        .route("/ping", {
+            let state = app_state.clone();
+            get(move || {
+                let state = state.clone();
+                async move {
+                    let config = state.config.lock().await;
+                    let response = PongResponse {
+                        message: "Pong".to_string(),
+                        name: config.nickname.clone(),
+                        is_self: true, // 自分自身からのレスポンス
+                    };
+                    axum::Json(response)
+                }
+            })
+        })
         .route("/send", {
             let ip = ip.clone();
             let state = app_state.clone();
@@ -370,7 +367,7 @@ async fn main() {
                     let config = state.config.lock().await;
                     let from_name = config.nickname.clone();
                     drop(config); // ロックを早期に解放
-                    
+
                     let from_ip = ip.to_string();
 
                     let result = send_message_to_server(
@@ -520,13 +517,13 @@ async fn main() {
                 async move {
                     let mut config = state.config.lock().await;
                     let old_nickname = config.nickname.clone();
-                    
+
                     // ニックネームを更新
                     config.nickname = request.nickname.clone();
-                    
+
                     // 設定をファイルに保存
                     let save_result = config.save();
-                    
+
                     let response = match save_result {
                         Ok(()) => UpdateNicknameResponse {
                             success: true,
@@ -541,7 +538,7 @@ async fn main() {
                             new_nickname: old_nickname,
                         },
                     };
-                    
+
                     axum::Json(response)
                 }
             })
