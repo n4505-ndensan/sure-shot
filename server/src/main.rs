@@ -1,11 +1,16 @@
 use axum::{
     Router,
     extract::Json,
+    response::Sse,
+    response::sse::{Event, KeepAlive},
     routing::{get, post},
 };
 use local_ip_address::list_afinet_netifas;
 use server::whoami::whoami;
 use std::net::{IpAddr, SocketAddr};
+use std::sync::Arc;
+use tokio::sync::{Mutex, broadcast};
+use tokio_stream::{StreamExt, wrappers::BroadcastStream};
 use tower_http::cors::CorsLayer;
 
 fn find_local_ip() -> Option<IpAddr> {
@@ -22,6 +27,13 @@ fn find_local_ip() -> Option<IpAddr> {
 
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
+
+// メッセージ保持とSSE配信用の状態
+#[derive(Clone)]
+struct AppState {
+    messages: Arc<Mutex<Vec<ReceivedMessage>>>,
+    message_broadcaster: broadcast::Sender<ReceivedMessage>,
+}
 
 // サブネット内のIPアドレスをチェックする関数
 async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
@@ -205,7 +217,7 @@ struct SendMessageResponse {
     timestamp: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[typeshare]
 struct ReceivedMessage {
     from: String,         // 送信元のIP
@@ -242,10 +254,18 @@ async fn main() {
     };
     println!("Found local IP: {}", ip);
 
+    // アプリケーション状態の初期化
+    let (message_broadcaster, _) = broadcast::channel(100);
+    let app_state = AppState {
+        messages: Arc::new(Mutex::new(Vec::new())),
+        message_broadcaster,
+    };
+
     let port = 8000;
     let external_addr = SocketAddr::new(ip, port);
     let internal_addr =
         SocketAddr::new(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), port + 1);
+    let localhost_addr = SocketAddr::new(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), port);
 
     // 外部向けAPIサーバー (192.168.x.x:8000)
     let external_app = Router::new()
@@ -296,24 +316,73 @@ async fn main() {
             })
         })
         .route("/receive", {
-            post(|Json(message): Json<ReceivedMessage>| async move {
-                // 現在は受信したメッセージをログに出力
-                println!(
-                    "📨 Received message from {} ({}): {}",
-                    message.from_name, message.from, message.message
-                );
-                println!(
-                    "   Type: {}, Time: {}",
-                    message.message_type, message.timestamp
-                );
+            let state = app_state.clone();
+            post(move |Json(message): Json<ReceivedMessage>| {
+                let state = state.clone();
+                async move {
+                    // メッセージをログに出力
+                    println!(
+                        "📨 Received message from {} ({}): {}",
+                        message.from_name, message.from, message.message
+                    );
+                    println!(
+                        "   Type: {}, Time: {}",
+                        message.message_type, message.timestamp
+                    );
 
-                let response = ReceiveMessageResponse {
-                    success: true,
-                    message: "Message received successfully".to_string(),
-                    received_at: chrono::Utc::now().to_rfc3339(),
-                };
+                    // メッセージを保存
+                    {
+                        let mut messages = state.messages.lock().await;
+                        messages.push(message.clone());
 
-                axum::Json(response)
+                        // 最新100件のみ保持
+                        if messages.len() > 100 {
+                            messages.remove(0);
+                        }
+                    }
+
+                    // SSE経由でメッセージを配信
+                    let _ = state.message_broadcaster.send(message);
+
+                    let response = ReceiveMessageResponse {
+                        success: true,
+                        message: "Message received successfully".to_string(),
+                        received_at: chrono::Utc::now().to_rfc3339(),
+                    };
+
+                    axum::Json(response)
+                }
+            })
+        })
+        .route("/messages", {
+            let state = app_state.clone();
+            get(move || {
+                let state = state.clone();
+                async move {
+                    let messages = state.messages.lock().await;
+                    axum::Json(messages.clone())
+                }
+            })
+        })
+        .route("/events", {
+            let state = app_state.clone();
+            get({
+                let state = state.clone();
+                || async move {
+                    let receiver = state.message_broadcaster.subscribe();
+                    let stream = BroadcastStream::new(receiver).filter_map(|msg| match msg {
+                        Ok(message) => {
+                            let json = serde_json::to_string(&message)
+                                .unwrap_or_else(|_| "{}".to_string());
+                            Some(Ok::<Event, std::convert::Infallible>(
+                                Event::default().data(json),
+                            ))
+                        }
+                        Err(_) => None,
+                    });
+
+                    Sse::new(stream).keep_alive(KeepAlive::default())
+                }
             })
         })
         .layer(
@@ -398,15 +467,21 @@ async fn main() {
         "Internal API listening on http://{} (localhost only)",
         internal_addr
     );
+    println!(
+        "Localhost API listening on http://{} (localhost only)",
+        localhost_addr
+    );
 
-    // 両方のサーバーを並行して起動
+    // 3つのサーバーを並行して起動
     let external_listener = tokio::net::TcpListener::bind(external_addr).await.unwrap();
     let internal_listener = tokio::net::TcpListener::bind(internal_addr).await.unwrap();
+    let localhost_listener = tokio::net::TcpListener::bind(localhost_addr).await.unwrap();
 
-    let external_serve = axum::serve(external_listener, external_app);
+    let external_serve = axum::serve(external_listener, external_app.clone());
     let internal_serve = axum::serve(internal_listener, internal_app);
+    let localhost_serve = axum::serve(localhost_listener, external_app);
 
-    // 両方のサーバーを同時に実行
+    // 全てのサーバーを同時に実行
     tokio::select! {
         result = external_serve => {
             if let Err(e) = result {
@@ -416,6 +491,11 @@ async fn main() {
         result = internal_serve => {
             if let Err(e) = result {
                 eprintln!("Internal server error: {}", e);
+            }
+        }
+        result = localhost_serve => {
+            if let Err(e) = result {
+                eprintln!("Localhost server error: {}", e);
             }
         }
     }

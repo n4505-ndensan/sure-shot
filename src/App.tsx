@@ -4,6 +4,7 @@ import { Component, onMount, createSignal } from "solid-js";
 import { updateServerList } from "./inquiry/updateServerList";
 import ServerList from "./components/ServerList";
 import MessageInput from "./components/MessageInput";
+import MessageList from "./components/MessageList";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");
@@ -20,39 +21,51 @@ const App: Component = () => {
         <div
           style={{
             display: "flex",
-            "flex-direction": "column",
-            width: "200px",
+            gap: "2rem",
+            "flex-wrap": "wrap",
           }}
         >
           <div
             style={{
               display: "flex",
-              "flex-direction": "row",
-              "align-items": "center",
+              "flex-direction": "column",
+              width: "200px",
             }}
           >
-            <p
+            <div
               style={{
-                "flex-grow": 1,
-                "font-size": "12px",
-                "font-weight": "bold",
+                display: "flex",
+                "flex-direction": "row",
+                "align-items": "center",
               }}
             >
-              SERVERS
-            </p>
-            <button onClick={updateServerList}>RELOAD</button>
+              <p
+                style={{
+                  "flex-grow": 1,
+                  "font-size": "12px",
+                  "font-weight": "bold",
+                }}
+              >
+                SERVERS
+              </p>
+              <button onClick={updateServerList}>RELOAD</button>
+            </div>
+
+            <ServerList
+              targetIp={targetIp()}
+              onClick={(server) => {
+                if (server === undefined) {
+                  setTargetIp("");
+                } else if (server.status && !server.is_self) {
+                  setTargetIp(server.ip);
+                }
+              }}
+            />
           </div>
 
-          <ServerList
-            targetIp={targetIp()}
-            onClick={(server) => {
-              if (server === undefined) {
-                setTargetIp("");
-              } else if (server.status && !server.is_self) {
-                setTargetIp(server.ip);
-              }
-            }}
-          />
+          <div style={{ "flex-grow": 1, "min-width": "400px" }}>
+            <MessageList />
+          </div>
         </div>
 
         <MessageInput
