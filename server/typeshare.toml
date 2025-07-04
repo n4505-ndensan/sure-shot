@@ -1,0 +1,13 @@
+[typeshare]
+# TypeScript型を生成する出力先
+typescript_output_directory = "../src/types/generated"
+
+# 生成されるファイル名
+typescript_file_name = "api-types.ts"
+
+# パッケージ情報（コメントに含まれる）
+package_name = "sure-shot-server"
+package_version = "0.1.0"
+
+# 生成オプション
+decorators = []

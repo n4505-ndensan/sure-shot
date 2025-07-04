@@ -1,14 +1,7 @@
-export interface SendMessageRequest {
-  to: string;
-  message: string;
-  message_type: string;
-}
-
-export interface SendMessageResponse {
-  success: boolean;
-  message: string;
-  timestamp: string;
-}
+import {
+  SendMessageRequest,
+  SendMessageResponse,
+} from "../types/generated/api-types";
 
 export const sendMessage = async (
   targetIp: string,

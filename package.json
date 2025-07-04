@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "generate-types": "cd server && typeshare --lang typescript --output-file ../src/types/generated/api-types.ts .",
+    "dev:with-types": "npm run generate-types && npm run dev"
   },
   "license": "MIT",
   "devDependencies": {

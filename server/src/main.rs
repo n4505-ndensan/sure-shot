@@ -21,6 +21,7 @@ fn find_local_ip() -> Option<IpAddr> {
 }
 
 use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
 // サブネット内のIPアドレスをチェックする関数
 async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
@@ -181,6 +182,7 @@ async fn send_message_to_server(
 }
 
 #[derive(Serialize, Deserialize)]
+#[typeshare]
 struct PongResponse {
     message: String,
     name: String,
@@ -188,6 +190,7 @@ struct PongResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[typeshare]
 struct SendMessageRequest {
     to: String,           // 送信先のIP or 識別子
     message: String,      // メッセージ本文
@@ -195,6 +198,7 @@ struct SendMessageRequest {
 }
 
 #[derive(Serialize, Deserialize)]
+#[typeshare]
 struct SendMessageResponse {
     success: bool,
     message: String,
@@ -202,6 +206,7 @@ struct SendMessageResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[typeshare]
 struct ReceivedMessage {
     from: String,         // 送信元のIP
     from_name: String,    // 送信元の名前
@@ -211,6 +216,7 @@ struct ReceivedMessage {
 }
 
 #[derive(Serialize, Deserialize)]
+#[typeshare]
 struct ReceiveMessageResponse {
     success: bool,
     message: String,
@@ -218,6 +224,7 @@ struct ReceiveMessageResponse {
 }
 
 #[derive(Serialize)]
+#[typeshare]
 struct ServerInfo {
     ip: String,
     port: u16,
@@ -321,7 +328,7 @@ async fn main() {
                     axum::http::header::CONTENT_TYPE,
                     axum::http::header::ACCEPT,
                     axum::http::header::AUTHORIZATION,
-                ])
+                ]),
         );
 
     // 内部管理APIサーバー (localhost:8001)
