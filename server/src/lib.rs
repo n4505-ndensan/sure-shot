@@ -1,6 +1,6 @@
-pub mod whoami;
 pub mod external;
 pub mod internal;
+pub mod whoami;
 
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -151,8 +151,8 @@ pub struct Attachment {
 }
 
 // ユーティリティ関数
-use std::net::IpAddr;
 use local_ip_address::list_afinet_netifas;
+use std::net::IpAddr;
 
 pub fn find_local_ip() -> Option<IpAddr> {
     let ifaces = list_afinet_netifas().ok()?;
@@ -169,8 +169,8 @@ pub fn find_local_ip() -> Option<IpAddr> {
 // サブネット内のIPアドレスをチェックする関数
 pub async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
     use futures::future::join_all;
-    use std::time::Duration;
     use std::net::SocketAddr;
+    use std::time::Duration;
 
     let mut tasks = Vec::new();
 
@@ -228,7 +228,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
             let url = format!("http://{}:{}/ping", ip, port);
 
             let result =
-                tokio::time::timeout(Duration::from_millis(500), client.get(&url).send()).await;
+                tokio::time::timeout(Duration::from_millis(1000), client.get(&url).send()).await;
 
             match result {
                 Ok(Ok(response)) => {

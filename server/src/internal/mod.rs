@@ -1,9 +1,9 @@
-pub mod send;
 pub mod events;
 pub mod nickname;
+pub mod send;
 
-use axum::{Router, routing, Json};
-use crate::{AppState, check_available_ips, ping_servers_by_ip, ServerInfo};
+use crate::{AppState, ServerInfo, check_available_ips, ping_servers_by_ip};
+use axum::{Json, Router, routing};
 use std::net::IpAddr;
 use tower_http::cors::CorsLayer;
 
@@ -49,6 +49,7 @@ pub fn internal_ping_servers(router: routing::Router, ip: IpAddr) -> routing::Ro
                 // まず利用可能なIPアドレスをチェック
                 let available_ips = check_available_ips(ip, 8000).await;
 
+                println!("{}: Available IPs: {:?}", ip, available_ips);
                 // 各サーバーの/pingエンドポイントをチェック
                 let server_infos = ping_servers_by_ip(available_ips, 8000, ip).await;
 
@@ -83,7 +84,7 @@ pub fn internal_get_messages(router: routing::Router, app_state: AppState) -> ro
 
 pub fn create_internal_router(app_state: AppState, ip: IpAddr) -> Router {
     let router = Router::new();
-    
+
     // 各ルートハンドラーを適用
     let router = internal_available_ips(router, ip);
     let router = internal_ping_servers(router, ip);
@@ -92,7 +93,7 @@ pub fn create_internal_router(app_state: AppState, ip: IpAddr) -> Router {
     let router = events::internal_events(router, app_state.clone());
     let router = nickname::internal_get_nickname(router, app_state.clone());
     let router = nickname::internal_update_nickname(router, app_state.clone());
-    
+
     // CORS設定を追加
     router.layer(
         CorsLayer::new()
