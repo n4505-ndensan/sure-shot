@@ -1,9 +1,11 @@
 import { Component } from "solid-js";
 import { Attachment } from "../../../types/generated/api-types";
-import { fallBackMimeType, mimeTypes } from "./MimeTypes";
-import { BinaryAttachment } from "../../../api/messages/binaryUpload";
+import { arrayBufferToBase64, getMimeType } from "../../../utils/FileUtils";
+import { generateId } from "../../../utils/IdUtils";
+import { createAttachment } from "./createAttachment";
 
 interface Props {
+  dropZone: any;
   onAttachmentLoadStart?: () => void;
   onAttachmentLoad?: (attachments: Attachment[]) => void;
   onAttachmentLoadEnd?: () => void;
@@ -15,33 +17,6 @@ interface Props {
 export const OptimizedAttachmentButton: Component<Props> = (props) => {
   let fileInput: HTMLInputElement | undefined = undefined;
   const maxSizeForBase64 = props.maxSizeForBase64 || 1024 * 1024; // 1MB
-
-  const getMimeType = (file: File): string => {
-    // ブラウザが検出したMIMEタイプを優先
-    if (file.type) {
-      return file.type;
-    }
-
-    // フォールバック: 拡張子ベースの検出
-    const extension = file.name.split(".").pop()?.toLowerCase();
-    return mimeTypes[extension || ""] || fallBackMimeType;
-  };
-
-  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    let binary = "";
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-  };
-
-  const generateId = (): string => {
-    return `attachment_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
-  };
 
   const shouldUseBase64 = (file: File): boolean => {
     // 小さなファイルや特定のファイル形式はBase64を使用
@@ -60,10 +35,20 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
     <>
       <input
         ref={fileInput}
+        {...props.dropZone.getInputProps()}
         type="file"
         multiple={props.multiple ?? true}
         accept={props.acceptedTypes ?? "*/*"}
         style={{ display: "none" }}
+        onDrop={(e) => {
+          console.log("huh");
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+        }}
+        onBeforeInput={(e) => {
+          console.log("onBeforeInput triggered");
+        }}
         onChange={async (e) => {
           const files = e.currentTarget.files;
           if (files) {
@@ -71,27 +56,13 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
 
             try {
               const attachments: Attachment[] = [];
-              const binaryAttachments: File[] = [];
 
               for (const file of Array.from(files)) {
                 const mimeType = getMimeType(file);
                 const useBase64 = shouldUseBase64(file);
 
                 if (useBase64) {
-                  // Base64エンコード
-                  const arrayBuffer = await file.arrayBuffer();
-                  const base64Data = arrayBufferToBase64(arrayBuffer);
-
-                  const attachment: Attachment = {
-                    id: generateId(),
-                    filename: file.name,
-                    mime_type: mimeType,
-                    size: file.size,
-                    data: base64Data,
-                    thumbnail: undefined,
-                  };
-
-                  attachments.push(attachment);
+                  attachments.push(await createAttachment(file));
                 } else {
                   // 大きなファイルの場合は別の処理を提案
                   console.warn(
@@ -137,6 +108,7 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
           "image-rendering": "pixelated",
         }}
         onClick={() => {
+          console.log("eh");
           fileInput?.click();
         }}
       />

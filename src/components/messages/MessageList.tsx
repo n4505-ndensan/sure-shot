@@ -210,7 +210,7 @@ const MessageList: Component<Props> = (props) => {
                   >
                     <For each={message.attachments}>
                       {(attachment) => (
-                        <div style={{ position: "relative" }}>
+                        <div style={{ position: "relative", width: "100%" }}>
                           <Show
                             when={attachment.mime_type.startsWith("image/")}
                           >
@@ -218,7 +218,7 @@ const MessageList: Component<Props> = (props) => {
                               src={`data:${attachment.mime_type};base64,${attachment.data}`}
                               alt={attachment.filename}
                               style={{
-                                "max-width": "200px",
+                                "min-width": "200px",
                                 "max-height": "200px",
                                 "border-radius": "4px",
                                 "object-fit": "cover",
@@ -234,31 +234,34 @@ const MessageList: Component<Props> = (props) => {
                                 border: "1px solid #ccc",
                                 "border-radius": "4px",
                                 "background-color": "#f8f9fa",
-                                "max-width": "200px",
+                                width: "100%",
+                                gap: "8px",
+                                "box-sizing": "border-box",
                               }}
                             >
-                              <div
-                                style={{
-                                  "font-size": "10px",
-                                  color: "#6c757d",
-                                }}
-                              >
-                                {attachment.mime_type}
-                              </div>
-                              <div
+                              <a
                                 style={{
                                   "font-size": "12px",
                                   "font-weight": "bold",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  // if (message.is_self) return;
+                                  const link = document.createElement("a");
+                                  link.href = `data:${attachment.mime_type};base64,${attachment.data}`;
+                                  link.download = attachment.filename;
+                                  link.click();
                                 }}
                               >
                                 {attachment.filename}
-                              </div>
+                              </a>
                               <div
                                 style={{
                                   "font-size": "10px",
                                   color: "#6c757d",
                                 }}
                               >
+                                {attachment.mime_type} |{" "}
                                 {(attachment.size / 1024).toFixed(1)} KB
                               </div>
                             </div>

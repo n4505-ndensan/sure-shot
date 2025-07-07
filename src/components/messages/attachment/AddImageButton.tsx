@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { arrayBufferToBase64 } from "../../../utils/ImageUtils";
+import { arrayBufferToBase64 } from "../../../utils/FileUtils";
 
 interface Props {
   onImageLoadStart?: () => void;

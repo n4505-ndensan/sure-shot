@@ -1,9 +1,16 @@
-import { Component, createSignal, createEffect } from "solid-js";
+import { Component, createSignal, createEffect, Show } from "solid-js";
 import { sendMessage } from "../../api/messages/send";
-import { AttachmentButton } from "./attachment/AttachmentButton";
 import AttachmentList from "./attachment/AttachmentList";
 import { Attachment } from "../../types/generated/api-types";
 import OptimizedAttachmentButton from "./attachment/OptimizedAttachmentButton";
+import {
+  createDropzone,
+  DropEvent,
+  FileRejection,
+} from "@soorria/solid-dropzone";
+import { generateId } from "../../utils/IdUtils";
+import { arrayBufferToBase64, getMimeType } from "../../utils/FileUtils";
+import { createAttachment } from "./attachment/createAttachment";
 
 interface Props {
   targetIp?: string;
@@ -16,6 +23,18 @@ const MessageInput: Component<Props> = (props) => {
   const [attachments, setAttachments] = createSignal<Attachment[]>([]);
   const [sendStatus, setSendStatus] = createSignal("");
   const [isSending, setIsSending] = createSignal(false);
+
+  const dropZone = createDropzone({
+    noClick: true,
+
+    onDrop: async (files: File[]) => {
+      const newAttachments: Attachment[] = [];
+      for (const file of Array.from(files)) {
+        newAttachments.push(await createAttachment(file));
+      }
+      setAttachments([...attachments(), ...newAttachments]);
+    },
+  });
 
   // propsからtargetIpが渡されたら、内部状態を更新
   createEffect(() => {
@@ -64,7 +83,9 @@ const MessageInput: Component<Props> = (props) => {
 
   return (
     <div
+      {...dropZone.getRootProps()}
       style={{
+        position: "relative",
         display: "flex",
         "flex-direction": "column",
         gap: "0.75rem",
@@ -75,6 +96,18 @@ const MessageInput: Component<Props> = (props) => {
         "background-color": "#f9f9f9",
       }}
     >
+      <Show when={dropZone.isDragActive}>
+        <div
+          class={"drop_zone"}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            top: 0,
+            left: 0,
+          }}
+        ></div>
+      </Show>
       <h2 style={{ margin: "0", "font-size": "12px" }}>Send Message</h2>
 
       <div
@@ -103,9 +136,22 @@ const MessageInput: Component<Props> = (props) => {
           onKeyPress={handleKeyPress}
           style={{ flex: 1 }}
           disabled={isSending()}
+          onPaste={async (e) => {
+            const { clipboardData } = e;
+
+            const pastedAttachments: Attachment[] = [];
+            for (const file of Array.from(clipboardData.files)) {
+              if (file) {
+                pastedAttachments.push(await createAttachment(file));
+              }
+            }
+
+            setAttachments([...attachments(), ...pastedAttachments]);
+          }}
         />
 
         <OptimizedAttachmentButton
+          dropZone={dropZone}
           onAttachmentLoadStart={() =>
             setSendStatus("📤 Loading attachments...")
           }
@@ -165,11 +211,6 @@ const MessageInput: Component<Props> = (props) => {
           );
         }}
       />
-
-      <div style={{ "font-size": "12px", color: "#666" }}>
-        💡 Tip: Click on a server above to auto-fill the IP address, or drag &
-        drop files to attach
-      </div>
     </div>
   );
 };

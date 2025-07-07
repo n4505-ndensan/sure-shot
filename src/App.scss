@@ -39,6 +39,10 @@ p, a {
   font-size: 12px;
 }
 
+a:hover {
+  text-decoration: underline;
+}
+
 input {
   font-size: 12px;
 }
@@ -53,4 +57,11 @@ button {
 
 button:hover {
   background-color: #f0f0f0;
+}
+
+.drop_zone {
+  opacity: 0.5;
+  z-index: 1000;
+  background-image: linear-gradient(45deg, #000000 16.67%, #fff 16.67%, #fff 50%, #000000 50%, #000000 66.67%, #fff 66.67%, #fff 100%);
+  background-size: 16.97px 16.97px;
 }
