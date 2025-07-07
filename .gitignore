@@ -30,4 +30,4 @@ Thumbs.db
 repomix-output.xml
 
 server/target
-server/sure-shot-config.toml
+sure-shot-config.toml

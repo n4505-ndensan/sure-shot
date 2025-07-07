@@ -7,6 +7,8 @@ interface Props {
 }
 
 const MessageInput: Component<Props> = (props) => {
+  let fileInput: HTMLInputElement | undefined = undefined;
+
   const [targetIp, setTargetIp] = createSignal("");
   const [message, setMessage] = createSignal("");
   const [sendStatus, setSendStatus] = createSignal("");
@@ -28,11 +30,38 @@ const MessageInput: Component<Props> = (props) => {
       return;
     }
 
+    function arrayBufferToBase64(buffer) {
+      var binary = "";
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
     setIsSending(true);
     setSendStatus("📤 Sending message...");
 
     try {
-      const result = await sendMessage(ip, msg);
+      if (fileInput?.files.length > 0) {
+        const fileType = fileInput.files[0].type;
+        console.log("File type:", fileType);
+        const firstFileBuffer = await fileInput?.files[0]?.arrayBuffer();
+        const base64 = arrayBufferToBase64(firstFileBuffer);
+
+        console.log(base64);
+
+        const data64url = `data:${fileType};base64,${base64}`;
+
+        const result = await sendMessage(ip, data64url, "image");
+        if (result.success) {
+          console.log("Image sent successfully");
+        } else {
+          console.error("Image sent failed:", result.message);
+        }
+      }
+      const result = await sendMessage(ip, msg, "text");
 
       if (result.success) {
         setSendStatus("✅ Message sent successfully!");
@@ -133,6 +162,7 @@ const MessageInput: Component<Props> = (props) => {
           {sendStatus()}
         </div>
       )}
+      <input ref={fileInput} type="file" id="file_input" multiple />
 
       <div style={{ "font-size": "12px", color: "#666" }}>
         💡 Tip: Click on a server above to auto-fill the IP address

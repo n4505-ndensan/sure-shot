@@ -19,9 +19,9 @@
 }
 
 body {
-  max-width: 800px;
+  max-width: 900px;
+  height: 100%;
 }
-
 
 * {
   font-family: 'PixelMPlus', sans-serif;
@@ -30,7 +30,7 @@ body {
 .header {
   font-size: 24px;
   font-weight: bold;
-  margin: 24px 0;
+  margin-bottom: 48px;
 }
 
 p, a {

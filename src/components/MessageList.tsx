@@ -1,4 +1,10 @@
-import { Component, createSignal, createEffect, onCleanup } from "solid-js";
+import {
+  Component,
+  createSignal,
+  createEffect,
+  onCleanup,
+  Show,
+} from "solid-js";
 import { For } from "solid-js";
 import { ReceivedMessage } from "../types/generated/api-types";
 import { getMessages } from "../api/messages/get";
@@ -9,6 +15,7 @@ interface Props {
 }
 
 const MessageList: Component<Props> = (props) => {
+  let scrollList: HTMLDivElement | undefined;
   const [messages, setMessages] = createSignal<ReceivedMessage[]>([]);
   const {
     initialize: initializeSSE,
@@ -43,6 +50,16 @@ const MessageList: Component<Props> = (props) => {
   createEffect(() => {
     loadPastMessages();
     initializeSSE();
+  });
+
+  createEffect(() => {
+    messages();
+    // スクロール位置を更新
+    if (scrollList) {
+      setTimeout(() => {
+        scrollList.scrollTop = scrollList.scrollHeight;
+      }, 100);
+    }
   });
 
   // クリーンアップ
@@ -103,8 +120,9 @@ const MessageList: Component<Props> = (props) => {
       )}
 
       <div
+        ref={scrollList}
         style={{
-          height: "300px",
+          height: "500px",
           "overflow-y": "auto",
           border: "1px solid #ddd",
           "border-radius": "4px",
@@ -172,7 +190,20 @@ const MessageList: Component<Props> = (props) => {
                   "font-weight": message.is_self ? "500" : "normal",
                 }}
               >
-                {message.message}
+                <Show when={message.message_type === "image"}>
+                  <img
+                    src={message.message}
+                    alt="Image message"
+                    style={{
+                      "max-width": "100%",
+                      "max-height": "200px",
+                      "border-radius": "4px",
+                    }}
+                  />
+                </Show>
+                <Show when={message.message_type === "text"}>
+                  {message.message}
+                </Show>
               </div>
             </div>
           )}
