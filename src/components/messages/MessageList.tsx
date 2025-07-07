@@ -9,6 +9,7 @@ import { For } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
 import { getMessages } from "../../api/messages/get";
 import { useEventsSource } from "../../api/events/useEventsSource";
+import { link } from "fs";
 
 interface Props {
   className?: string;
@@ -17,14 +18,11 @@ interface Props {
 const MessageList: Component<Props> = (props) => {
   let scrollList: HTMLDivElement | undefined;
   const [messages, setMessages] = createSignal<ReceivedMessage[]>([]);
-  const {
-    initialize: initializeSSE,
-    eventSource,
-    isConnected,
-    error,
-  } = useEventsSource((message: ReceivedMessage) => {
-    setMessages((prev) => [...prev, message]);
-  });
+  const { eventSource, isConnected, error } = useEventsSource(
+    (message: ReceivedMessage) => {
+      setMessages((prev) => [...prev, message]);
+    }
+  );
 
   // 過去のメッセージを取得
   const loadPastMessages = async () => {
@@ -49,7 +47,6 @@ const MessageList: Component<Props> = (props) => {
   // 初期化
   createEffect(() => {
     loadPastMessages();
-    initializeSSE();
   });
 
   createEffect(() => {
@@ -76,7 +73,7 @@ const MessageList: Component<Props> = (props) => {
           display: "flex",
           "justify-content": "space-between",
           "align-items": "center",
-          "margin-bottom": "1rem",
+          margin: "1rem",
         }}
       >
         <p style={{ margin: "0", "font-size": "12px", "font-weight": "bold" }}>
@@ -124,7 +121,7 @@ const MessageList: Component<Props> = (props) => {
         style={{
           height: "400px",
           "overflow-y": "auto",
-          border: "1px solid #ddd",
+          "border-top": "1px solid #ddd",
           "border-radius": "4px",
           padding: "0.5rem",
           "background-color": "#f9f9f9",
@@ -141,8 +138,8 @@ const MessageList: Component<Props> = (props) => {
                 "border-left": message.is_self
                   ? "3px solid #2196f3"
                   : "3px solid #4caf50",
-                "margin-left": message.is_self ? "30%" : "0",
-                "margin-right": message.is_self ? "0" : "30%",
+                "margin-left": message.is_self ? "40%" : "0",
+                "margin-right": message.is_self ? "0" : "40%",
               }}
             >
               <div
@@ -210,7 +207,16 @@ const MessageList: Component<Props> = (props) => {
                   >
                     <For each={message.attachments}>
                       {(attachment) => (
-                        <div style={{ position: "relative", width: "100%" }}>
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            display: "flex",
+                            gap: "1px",
+                            "margin-bottom": "3px",
+                            "flex-direction": "column",
+                          }}
+                        >
                           <Show
                             when={attachment.mime_type.startsWith("image/")}
                           >
@@ -218,12 +224,46 @@ const MessageList: Component<Props> = (props) => {
                               src={`data:${attachment.mime_type};base64,${attachment.data}`}
                               alt={attachment.filename}
                               style={{
-                                "min-width": "200px",
-                                "max-height": "200px",
+                                width: "fit-content",
+                                height: "200px",
                                 "border-radius": "4px",
-                                "object-fit": "cover",
+                                "object-fit": "contain",
                               }}
                             />
+                            <p
+                              style={{
+                                "margin-right": !message.is_self ? "auto" : "0",
+                                "margin-left": message.is_self ? "auto" : "0",
+                              }}
+                            >
+                              {/* <span
+                                style={{
+                                  "font-size": "9px",
+                                  "text-decoration": "underline",
+                                }}
+                              >
+                                ↓
+                              </span> */}
+                              <a
+                                style={{
+                                  "font-size": "9px",
+                                  width: "auto",
+                                  // "margin-left": "0.25rem",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  // if (message.is_self) return;
+                                  const link = document.createElement("a");
+                                  const href = `data:${attachment.mime_type};base64,${attachment.data}`;
+                                  link.href = href;
+                                  link.download = attachment.filename;
+                                  link.click();
+                                }}
+                              >
+                                {attachment.filename} (
+                                {(attachment.size / 1024).toFixed(1)} KB)
+                              </a>
+                            </p>
                           </Show>
                           <Show
                             when={!attachment.mime_type.startsWith("image/")}

@@ -108,7 +108,6 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
           "image-rendering": "pixelated",
         }}
         onClick={() => {
-          console.log("eh");
           fileInput?.click();
         }}
       />

@@ -4,7 +4,6 @@ import { ReceivedMessage } from "../../types/generated/api-types";
 export function useEventsSource(
   onMessage: (message: ReceivedMessage) => void
 ): {
-  initialize: () => Promise<void>;
   eventSource: () => EventSource | null;
   isConnected: () => boolean;
   error: () => string | null;
@@ -40,14 +39,16 @@ export function useEventsSource(
         setIsConnected(false);
         setConnectionError("Connection lost. Retrying...");
       };
+
+      setEventSource(eventSource);
     } catch (error) {
       console.error("Failed to initialize SSE:", error);
       setConnectionError("Failed to initialize connection");
     }
   };
+    initializeSSE();
 
   return {
-    initialize: initializeSSE,
     eventSource,
     isConnected,
     error: connectionError,

@@ -85,15 +85,12 @@ const MessageInput: Component<Props> = (props) => {
     <div
       {...dropZone.getRootProps()}
       style={{
+        width: "100%",
         position: "relative",
         display: "flex",
-        "flex-direction": "column",
-        gap: "0.75rem",
-        "margin-top": "2rem",
         padding: "1rem",
-        border: "1px solid #ccc",
-        "border-radius": "8px",
-        "background-color": "#f9f9f9",
+        "box-sizing": "border-box",
+        "flex-direction": "column",
       }}
     >
       <Show when={dropZone.isDragActive}>
