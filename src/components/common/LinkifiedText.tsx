@@ -52,9 +52,10 @@ const LinkifiedText: Component<Props> = (props) => {
       return;
     }
 
-    if (confirm(`以下のリンクを開きますか？\n${url}`)) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+    // if (confirm(`以下のリンクを開きますか？\n${url}`)) {
+    //   window.open(url, "_blank", "noopener,noreferrer");
+    // }
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (

@@ -349,9 +349,9 @@ pub async fn send_message_to_all_servers(
         .filter(|info| !info.is_self && info.status == "active")
         .collect();
 
-    if other_servers.is_empty() {
-        return Err("No other active servers found".to_string());
-    }
+    // if other_servers.is_empty() {
+    //     return Err("No other active servers found".to_string());
+    // }
 
     // 各サーバーにメッセージを送信
     let mut successful_sends = Vec::new();

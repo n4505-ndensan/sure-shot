@@ -6,7 +6,7 @@ export default defineBackground(() => {
     // リンク用の右クリックメニューを作成
     browser.contextMenus.create({
       id: "send-link",
-      title: "リンクを共有",
+      title: "Shot This Link!",
       contexts: ["link"],
     });
 
