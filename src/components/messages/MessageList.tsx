@@ -6,9 +6,9 @@ import {
   Show,
 } from "solid-js";
 import { For } from "solid-js";
-import { ReceivedMessage } from "../types/generated/api-types";
-import { getMessages } from "../api/messages/get";
-import { useEventsSource } from "../api/events/useEventsSource";
+import { ReceivedMessage } from "../../types/generated/api-types";
+import { getMessages } from "../../api/messages/get";
+import { useEventsSource } from "../../api/events/useEventsSource";
 
 interface Props {
   className?: string;
@@ -190,7 +190,92 @@ const MessageList: Component<Props> = (props) => {
                   "font-weight": message.is_self ? "500" : "normal",
                 }}
               >
-                <Show when={message.message_type === "image"}>
+                {/* メッセージテキスト */}
+                <Show when={message.message.trim()}>
+                  <div style={{ "margin-bottom": "0.5rem" }}>
+                    {message.message}
+                  </div>
+                </Show>
+
+                {/* 添付ファイル */}
+                <Show
+                  when={message.attachments && message.attachments.length > 0}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      "flex-wrap": "wrap",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <For each={message.attachments}>
+                      {(attachment) => (
+                        <div style={{ position: "relative" }}>
+                          <Show
+                            when={attachment.mime_type.startsWith("image/")}
+                          >
+                            <img
+                              src={`data:${attachment.mime_type};base64,${attachment.data}`}
+                              alt={attachment.filename}
+                              style={{
+                                "max-width": "200px",
+                                "max-height": "200px",
+                                "border-radius": "4px",
+                                "object-fit": "cover",
+                              }}
+                            />
+                          </Show>
+                          <Show
+                            when={!attachment.mime_type.startsWith("image/")}
+                          >
+                            <div
+                              style={{
+                                padding: "0.5rem",
+                                border: "1px solid #ccc",
+                                "border-radius": "4px",
+                                "background-color": "#f8f9fa",
+                                "max-width": "200px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  "font-size": "10px",
+                                  color: "#6c757d",
+                                }}
+                              >
+                                {attachment.mime_type}
+                              </div>
+                              <div
+                                style={{
+                                  "font-size": "12px",
+                                  "font-weight": "bold",
+                                }}
+                              >
+                                {attachment.filename}
+                              </div>
+                              <div
+                                style={{
+                                  "font-size": "10px",
+                                  color: "#6c757d",
+                                }}
+                              >
+                                {(attachment.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                          </Show>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+
+                {/* 従来の画像表示（下位互換性のため） */}
+                <Show
+                  when={
+                    message.message_type === "image" &&
+                    !message.attachments?.length
+                  }
+                >
                   <img
                     src={message.message}
                     alt="Image message"
@@ -200,9 +285,6 @@ const MessageList: Component<Props> = (props) => {
                       "border-radius": "4px",
                     }}
                   />
-                </Show>
-                <Show when={message.message_type === "text"}>
-                  {message.message}
                 </Show>
               </div>
             </div>

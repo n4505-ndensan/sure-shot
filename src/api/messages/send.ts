@@ -1,11 +1,13 @@
 import {
   SendMessageResponse,
+  Attachment,
 } from "../../types/generated/api-types";
 
 export const sendMessage = async (
   targetIp: string,
   message: string,
-  messageType: string = "text"
+  messageType: string = "text",
+  attachments: Attachment[] = []
 ): Promise<SendMessageResponse> => {
   try {
     const response = await fetch("http://localhost:8000/send", {
@@ -17,6 +19,7 @@ export const sendMessage = async (
         to: targetIp,
         message: message,
         message_type: messageType,
+        attachments: attachments,
       }),
     });
 

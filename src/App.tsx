@@ -3,8 +3,8 @@ import "./App.scss";
 import { Component, onMount, createSignal } from "solid-js";
 import { updateServerList } from "./inquiry/updateServerList";
 import ServerList from "./components/server_list/ServerList";
-import MessageInput from "./components/MessageInput";
-import MessageList from "./components/MessageList";
+import MessageInput from "./components/messages/MessageInput";
+import MessageList from "./components/messages/MessageList";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");

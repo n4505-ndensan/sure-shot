@@ -1,5 +1,9 @@
 import { Component, createSignal, createEffect } from "solid-js";
-import { sendMessage } from "../api/messages/send";
+import { sendMessage } from "../../api/messages/send";
+import { AttachmentButton } from "./attachment/AttachmentButton";
+import AttachmentList from "./attachment/AttachmentList";
+import { Attachment } from "../../types/generated/api-types";
+import OptimizedAttachmentButton from "./attachment/OptimizedAttachmentButton";
 
 interface Props {
   targetIp?: string;
@@ -7,10 +11,9 @@ interface Props {
 }
 
 const MessageInput: Component<Props> = (props) => {
-  let fileInput: HTMLInputElement | undefined = undefined;
-
   const [targetIp, setTargetIp] = createSignal("");
   const [message, setMessage] = createSignal("");
+  const [attachments, setAttachments] = createSignal<Attachment[]>([]);
   const [sendStatus, setSendStatus] = createSignal("");
   const [isSending, setIsSending] = createSignal(false);
 
@@ -24,48 +27,23 @@ const MessageInput: Component<Props> = (props) => {
   const handleSendMessage = async () => {
     const ip = targetIp().trim();
     const msg = message().trim();
+    const currentAttachments = attachments();
 
-    if (!msg) {
-      setSendStatus("❌ message is required");
+    if (!msg && currentAttachments.length === 0) {
+      setSendStatus("❌ Message or attachments are required");
       return;
-    }
-
-    function arrayBufferToBase64(buffer) {
-      var binary = "";
-      var bytes = new Uint8Array(buffer);
-      var len = bytes.byteLength;
-      for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
     }
 
     setIsSending(true);
     setSendStatus("📤 Sending message...");
 
     try {
-      if (fileInput?.files.length > 0) {
-        const fileType = fileInput.files[0].type;
-        console.log("File type:", fileType);
-        const firstFileBuffer = await fileInput?.files[0]?.arrayBuffer();
-        const base64 = arrayBufferToBase64(firstFileBuffer);
-
-        console.log(base64);
-
-        const data64url = `data:${fileType};base64,${base64}`;
-
-        const result = await sendMessage(ip, data64url, "image");
-        if (result.success) {
-          console.log("Image sent successfully");
-        } else {
-          console.error("Image sent failed:", result.message);
-        }
-      }
-      const result = await sendMessage(ip, msg, "text");
+      const result = await sendMessage(ip, msg, "text", currentAttachments);
 
       if (result.success) {
         setSendStatus("✅ Message sent successfully!");
         setMessage(""); // メッセージフィールドをクリア
+        setAttachments([]); // 添付ファイルをクリア
       } else {
         setSendStatus(`❌ Failed: ${result.message}`);
       }
@@ -103,10 +81,11 @@ const MessageInput: Component<Props> = (props) => {
         style={{
           display: "flex",
           "flex-direction": "row",
+          "align-items": "center",
           gap: "1rem",
         }}
       >
-        <input
+        {/* <input
           name="ip"
           placeholder="Target IP (e.g., 192.168.1.100)"
           value={targetIp()}
@@ -115,7 +94,7 @@ const MessageInput: Component<Props> = (props) => {
             props.onIpChange?.(e.currentTarget.value);
           }}
           style={{ width: "200px" }}
-        />
+        /> */}
         <input
           name="message"
           placeholder="Type your message..."
@@ -125,9 +104,24 @@ const MessageInput: Component<Props> = (props) => {
           style={{ flex: 1 }}
           disabled={isSending()}
         />
+
+        <OptimizedAttachmentButton
+          onAttachmentLoadStart={() =>
+            setSendStatus("📤 Loading attachments...")
+          }
+          onAttachmentLoad={(newAttachments) =>
+            setAttachments([...attachments(), ...newAttachments])
+          }
+          onAttachmentLoadEnd={() => setSendStatus("")}
+          acceptedTypes="*/*"
+          multiple={true}
+        />
+
         <button
           onClick={handleSendMessage}
-          disabled={isSending() || !message().trim()}
+          disabled={
+            isSending() || (!message().trim() && attachments().length === 0)
+          }
           style={{
             padding: "0.5rem 1rem",
             "background-color": isSending() ? "#ccc" : "#007bff",
@@ -162,10 +156,19 @@ const MessageInput: Component<Props> = (props) => {
           {sendStatus()}
         </div>
       )}
-      <input ref={fileInput} type="file" id="file_input" multiple />
+
+      <AttachmentList
+        attachments={attachments()}
+        onDeleteAttachment={(id) => {
+          setAttachments(
+            attachments().filter((attachment) => attachment.id !== id)
+          );
+        }}
+      />
 
       <div style={{ "font-size": "12px", color: "#666" }}>
-        💡 Tip: Click on a server above to auto-fill the IP address
+        💡 Tip: Click on a server above to auto-fill the IP address, or drag &
+        drop files to attach
       </div>
     </div>
   );

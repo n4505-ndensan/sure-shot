@@ -208,6 +208,7 @@ async fn send_message_to_server(
     from_name: &str,
     message: &str,
     message_type: &str,
+    attachments: &[Attachment],
 ) -> Result<(), String> {
     let client = reqwest::Client::new();
     let url = format!("http://{}:8000/receive", target_ip);
@@ -219,6 +220,7 @@ async fn send_message_to_server(
         message_type: message_type.to_string(),
         timestamp: chrono::Utc::now().to_rfc3339(),
         is_self: false, // 他の人から受信したメッセージとして扱う
+        attachments: attachments.to_vec(),
     };
 
     let result = tokio::time::timeout(
@@ -247,6 +249,7 @@ async fn send_message_to_all_servers(
     from_name: &str,
     message: &str,
     message_type: &str,
+    attachments: &[Attachment],
 ) -> Result<Vec<String>, String> {
     // まず利用可能なIPアドレスをチェック
     let available_ips = check_available_ips(local_ip, 8000).await;
@@ -269,8 +272,15 @@ async fn send_message_to_all_servers(
     let mut failed_sends = Vec::new();
 
     for server in other_servers {
-        let result =
-            send_message_to_server(&server.ip, from_ip, from_name, message, message_type).await;
+        let result = send_message_to_server(
+            &server.ip,
+            from_ip,
+            from_name,
+            message,
+            message_type,
+            attachments,
+        )
+        .await;
 
         match result {
             Ok(()) => successful_sends.push(server.ip.clone()),
@@ -302,9 +312,10 @@ struct PongResponse {
 #[derive(Serialize, Deserialize)]
 #[typeshare]
 struct SendMessageRequest {
-    to: String,           // 送信先のIP or 識別子
-    message: String,      // メッセージ本文
-    message_type: String, // メッセージタイプ（将来的に拡張用）
+    to: String,                   // 送信先のIP or 識別子
+    message: String,              // メッセージ本文
+    message_type: String,         // メッセージタイプ（将来的に拡張用）
+    attachments: Vec<Attachment>, // 添付ファイル
 }
 
 #[derive(Serialize, Deserialize)]
@@ -318,12 +329,13 @@ struct SendMessageResponse {
 #[derive(Serialize, Deserialize, Clone)]
 #[typeshare]
 struct ReceivedMessage {
-    from: String,         // 送信元のIP
-    from_name: String,    // 送信元の名前
-    message: String,      // メッセージ本文
-    message_type: String, // メッセージタイプ
-    timestamp: String,    // 受信時刻
-    is_self: bool,        // 自分のメッセージかどうか
+    from: String,                 // 送信元のIP
+    from_name: String,            // 送信元の名前
+    message: String,              // メッセージ本文
+    message_type: String,         // メッセージタイプ
+    timestamp: String,            // 受信時刻
+    is_self: bool,                // 自分のメッセージかどうか
+    attachments: Vec<Attachment>, // 添付ファイル
 }
 
 #[derive(Serialize, Deserialize)]
@@ -364,6 +376,18 @@ struct ServerInfo {
     message: String,
     name: String,
     is_self: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[typeshare]
+struct Attachment {
+    id: String,        // 添付ファイルの一意ID
+    filename: String,  // ファイル名
+    mime_type: String, // MIMEタイプ (image/png, application/pdf など)
+    #[typeshare(serialized_as = "number")]
+    size: u64, // ファイルサイズ (バイト)
+    data: String,      // Base64エンコードされたファイルデータ
+    thumbnail: Option<String>, // サムネイル画像のBase64 (画像の場合)
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -429,6 +453,7 @@ async fn main() {
                             &from_name,
                             &request.message,
                             &request.message_type,
+                            &request.attachments,
                         )
                         .await
                         .map(|successful_ips| {
@@ -445,6 +470,7 @@ async fn main() {
                             &from_name,
                             &request.message,
                             &request.message_type,
+                            &request.attachments,
                         )
                         .await
                         .map(|_| {
@@ -461,6 +487,7 @@ async fn main() {
                             message_type: request.message_type.clone(),
                             timestamp: chrono::Utc::now().to_rfc3339(),
                             is_self: true, // 自分が送信したメッセージ
+                            attachments: request.attachments.clone(),
                         };
 
                         // 自分のメッセージリストに追加
