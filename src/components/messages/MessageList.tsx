@@ -9,7 +9,6 @@ import { For } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
 import { getMessages } from "../../api/messages/get";
 import { useEventsSource } from "../../api/events/useEventsSource";
-import { link } from "fs";
 
 interface Props {
   className?: string;

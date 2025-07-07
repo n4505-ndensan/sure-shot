@@ -47,7 +47,7 @@ struct ServerConfig {
 impl Default for ServerConfig {
     fn default() -> Self {
         Self {
-            nickname: whoami(), // デフォルトは端末のユーザー名
+            nickname: whoami().unwrap_or_else(|_| "Unknown".to_string()), // デフォルトは端末のユーザー名
         }
     }
 }

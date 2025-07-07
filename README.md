@@ -2,6 +2,21 @@
 
 A **Local-First** Messaging Application.
 
+## Setup
+
+1. **Configure environment variables (optional)**:
+   ```bash
+   # Copy the environment example file
+   cp .env.example .env.local
+   
+   # Edit .env.local to set your preferred server URLs
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   # Install frontend dependencies
+   pnpm install
+   ```
 
 ## Usage
 
@@ -11,12 +26,9 @@ cd ./server
 cargo install
 cargo run
 
-# Start the frontend
+# Start the frontend (in a new terminal)
 cd ..
-# Using pnpm
 pnpm dev
-# Or using npm
-npm run dev
 ```
 Then, open http://localhost:3000 to get started!
 

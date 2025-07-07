@@ -1,21 +1,24 @@
 use std::process::{Command, Output};
 
-pub fn whoami() -> String {
+pub fn whoami() -> Result<String, Box<dyn std::error::Error>> {
     let output: Output = Command::new("whoami")
         .output()
-        .expect("failed to execute process");
+        .map_err(|e| format!("Failed to execute whoami command: {}", e))?;
 
-    if cfg!(windows) {
-        let info: String = String::from_utf8(output.stdout).unwrap();
+    if cfg!(target_os = "windows") {
+        let info: String = String::from_utf8(output.stdout)
+            .map_err(|e| format!("Failed to parse whoami output: {}", e))?;
         let username: &str = info.split("\\").collect::<Vec<&str>>()[1];
-        return String::from(username);
-    } else if cfg!(linux) {
-        let username: String = String::from_utf8(output.stdout).unwrap();
-        return username;
-    } else if cfg!(macos) {
-        let username: String = String::from_utf8(output.stdout).unwrap();
-        return username;
+        return Ok(String::from(username));
+    } else if cfg!(target_os = "linux") {
+        let username: String = String::from_utf8(output.stdout)
+            .map_err(|e| format!("Failed to parse whoami output: {}", e))?;
+        return Ok(username.trim().to_string());
+    } else if cfg!(target_os = "macos") {
+        let username: String = String::from_utf8(output.stdout)
+            .map_err(|e| format!("Failed to parse whoami output: {}", e))?;
+        return Ok(username.trim().to_string());
     } else {
-        panic!("Error");
+        return Err("Unsupported operating system".into());
     }
 }
