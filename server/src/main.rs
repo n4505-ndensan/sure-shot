@@ -250,41 +250,39 @@ async fn send_message_to_all_servers(
 ) -> Result<Vec<String>, String> {
     // まず利用可能なIPアドレスをチェック
     let available_ips = check_available_ips(local_ip, 8000).await;
-    
+
     // 各サーバーの/pingエンドポイントをチェックして、アクティブなサーバーのみ取得
     let server_infos = ping_servers_by_ip(available_ips, 8000, local_ip).await;
-    
+
     // 自分以外のアクティブなサーバーを抽出
     let other_servers: Vec<_> = server_infos
         .iter()
         .filter(|info| !info.is_self && info.status == "active")
         .collect();
-    
+
     if other_servers.is_empty() {
         return Err("No other active servers found".to_string());
     }
-    
+
     // 各サーバーにメッセージを送信
     let mut successful_sends = Vec::new();
     let mut failed_sends = Vec::new();
-    
+
     for server in other_servers {
-        let result = send_message_to_server(
-            &server.ip,
-            from_ip,
-            from_name,
-            message,
-            message_type,
-        ).await;
-        
+        let result =
+            send_message_to_server(&server.ip, from_ip, from_name, message, message_type).await;
+
         match result {
             Ok(()) => successful_sends.push(server.ip.clone()),
             Err(err) => failed_sends.push(format!("{}: {}", server.ip, err)),
         }
     }
-    
+
     if successful_sends.is_empty() {
-        Err(format!("Failed to send to all servers: {}", failed_sends.join(", ")))
+        Err(format!(
+            "Failed to send to all servers: {}",
+            failed_sends.join(", ")
+        ))
     } else if failed_sends.is_empty() {
         Ok(successful_sends)
     } else {
@@ -434,8 +432,11 @@ async fn main() {
                         )
                         .await
                         .map(|successful_ips| {
-                            println!("📤 Broadcast message sent to {} servers: {:?}", 
-                                successful_ips.len(), successful_ips);
+                            println!(
+                                "📤 Broadcast message sent to {} servers: {:?}",
+                                successful_ips.len(),
+                                successful_ips
+                            );
                         })
                     } else {
                         send_message_to_server(

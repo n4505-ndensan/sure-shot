@@ -46,7 +46,6 @@ export function useEventsSource(
     }
   };
 
-  initializeSSE();
   return {
     initialize: initializeSSE,
     eventSource,

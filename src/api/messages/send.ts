@@ -1,5 +1,4 @@
 import {
-  SendMessageRequest,
   SendMessageResponse,
 } from "../../types/generated/api-types";
 

@@ -87,7 +87,7 @@ const ServerList = (props: Props) => {
                   }}
                 >
                   <Show
-                    when={editNickName()}
+                    when={editNickName() && is_self}
                     fallback={
                       <div
                         style={{
