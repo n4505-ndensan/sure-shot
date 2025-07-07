@@ -1,6 +1,8 @@
 import { Component, createSignal, createEffect, onCleanup } from "solid-js";
 import { For } from "solid-js";
 import { ReceivedMessage } from "../types/generated/api-types";
+import { getMessages } from "../api/messages/get";
+import { useEventsSource } from "../api/events/useEventsSource";
 
 interface Props {
   className?: string;
@@ -8,54 +10,22 @@ interface Props {
 
 const MessageList: Component<Props> = (props) => {
   const [messages, setMessages] = createSignal<ReceivedMessage[]>([]);
-  const [isConnected, setIsConnected] = createSignal(false);
-  const [connectionError, setConnectionError] = createSignal<string | null>(
-    null
-  );
-
-  let eventSource: EventSource | null = null;
-
-  // SSE接続の初期化
-  const initializeSSE = async () => {
-    try {
-      eventSource = new EventSource("http://localhost:8000/events");
-
-      eventSource.onopen = () => {
-        console.log("SSE connection opened");
-        setIsConnected(true);
-        setConnectionError(null);
-      };
-
-      eventSource.onmessage = (event) => {
-        try {
-          const message: ReceivedMessage = JSON.parse(event.data);
-          setMessages((prev) => [...prev, message]);
-        } catch (error) {
-          console.error("Failed to parse SSE message:", error);
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
-        setIsConnected(false);
-        setConnectionError("Connection lost. Retrying...");
-      };
-    } catch (error) {
-      console.error("Failed to initialize SSE:", error);
-      setConnectionError("Failed to initialize connection");
-    }
-  };
+  const {
+    initialize: initializeSSE,
+    eventSource,
+    isConnected,
+    error,
+  } = useEventsSource((message: ReceivedMessage) => {
+    setMessages((prev) => [...prev, message]);
+  });
 
   // 過去のメッセージを取得
   const loadPastMessages = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/messages");
-      if (response.ok) {
-        const pastMessages: ReceivedMessage[] = await response.json();
-        setMessages(pastMessages);
-      }
-    } catch (error) {
-      console.error("Failed to load past messages:", error);
+    const messages = await getMessages();
+    if (messages) {
+      setMessages(messages);
+    } else {
+      console.error("Failed to load past messages");
     }
   };
 
@@ -77,8 +47,8 @@ const MessageList: Component<Props> = (props) => {
 
   // クリーンアップ
   onCleanup(() => {
-    if (eventSource) {
-      eventSource.close();
+    if (eventSource()) {
+      eventSource().close();
     }
   });
 
@@ -117,7 +87,7 @@ const MessageList: Component<Props> = (props) => {
         </div>
       </div>
 
-      {connectionError() && (
+      {error() && (
         <div
           style={{
             padding: "0.5rem",
@@ -128,7 +98,7 @@ const MessageList: Component<Props> = (props) => {
             "font-size": "12px",
           }}
         >
-          {connectionError()}
+          {error()}
         </div>
       )}
 

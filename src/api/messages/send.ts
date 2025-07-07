@@ -1,7 +1,7 @@
 import {
   SendMessageRequest,
   SendMessageResponse,
-} from "../types/generated/api-types";
+} from "../../types/generated/api-types";
 
 export const sendMessage = async (
   targetIp: string,

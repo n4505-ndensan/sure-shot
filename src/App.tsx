@@ -2,10 +2,9 @@ import "./App.scss";
 
 import { Component, onMount, createSignal } from "solid-js";
 import { updateServerList } from "./inquiry/updateServerList";
-import ServerList from "./components/ServerList";
+import ServerList from "./components/server_list/ServerList";
 import MessageInput from "./components/MessageInput";
 import MessageList from "./components/MessageList";
-import NicknameSettings from "./components/NicknameSettings";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");
@@ -71,8 +70,6 @@ const App: Component = () => {
                 }}
               />
             </div>
-
-            <NicknameSettings />
           </div>
 
           <div style={{ "flex-grow": 1, "min-width": "400px" }}>

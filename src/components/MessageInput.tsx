@@ -1,5 +1,5 @@
 import { Component, createSignal, createEffect } from "solid-js";
-import { sendMessage } from "../inquiry/sendMessage";
+import { sendMessage } from "../api/messages/send";
 
 interface Props {
   targetIp?: string;
@@ -23,8 +23,8 @@ const MessageInput: Component<Props> = (props) => {
     const ip = targetIp().trim();
     const msg = message().trim();
 
-    if (!ip || !msg) {
-      setSendStatus("❌ IP and message are required");
+    if (!msg) {
+      setSendStatus("❌ message is required");
       return;
     }
 
@@ -60,7 +60,7 @@ const MessageInput: Component<Props> = (props) => {
       style={{
         display: "flex",
         "flex-direction": "column",
-        gap: "1rem",
+        gap: "0.75rem",
         "margin-top": "2rem",
         padding: "1rem",
         border: "1px solid #ccc",
@@ -98,7 +98,7 @@ const MessageInput: Component<Props> = (props) => {
         />
         <button
           onClick={handleSendMessage}
-          disabled={isSending() || !targetIp().trim() || !message().trim()}
+          disabled={isSending() || !message().trim()}
           style={{
             padding: "0.5rem 1rem",
             "background-color": isSending() ? "#ccc" : "#007bff",
