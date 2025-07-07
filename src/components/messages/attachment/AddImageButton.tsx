@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const AddImageButton: Component<Props> = (props) => {
-  let fileInput: HTMLInputElement | undefined = undefined;
+  let fileInput: HTMLInputElement | undefined;
 
   return (
     <>
@@ -43,12 +43,12 @@ export const AddImageButton: Component<Props> = (props) => {
         }}
       />
       <img
-        src={"/add_image.png"}
-        width={16}
-        height={16}
+        src={"/folder.png"}
+        width={12}
+        height={12}
         style={{
-          width: "16px",
-          height: "16px",
+          width: "12px",
+          height: "12px",
           cursor: "pointer",
           "pointer-events": "all",
           "image-rendering": "pixelated",

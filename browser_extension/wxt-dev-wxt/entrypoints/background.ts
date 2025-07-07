@@ -10,7 +10,13 @@ export default defineBackground(() => {
       contexts: ["link"],
     });
 
-    console.log("Context menu created for links");
+    browser.contextMenus.create({
+      id: "send-page",
+      title: "Shot This Page!",
+      contexts: ["page"],
+    });
+
+    console.log("Context menu created");
   });
 
   // 右クリックメニューのクリック処理
@@ -33,8 +39,22 @@ export default defineBackground(() => {
       } else {
         console.error("❌ No link URL found in context menu info");
       }
-    } else {
-      console.log("Unknown menu item ID:", info.menuItemId);
+    }
+
+    if (info.menuItemId === "send-page") {
+      const pageUrl = info.pageUrl;
+      if (pageUrl) {
+        console.log("🔗 Sending page:", pageUrl);
+        const result = await sendMessageToLocalAPI(pageUrl);
+
+        if (result.success) {
+          console.log("✅ Page sent successfully!", result);
+        } else {
+          console.error("❌ Failed to send page:", result.message);
+        }
+      } else {
+        console.error("❌ No page URL found in context menu info");
+      }
     }
   });
 });
