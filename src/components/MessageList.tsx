@@ -122,7 +122,7 @@ const MessageList: Component<Props> = (props) => {
       <div
         ref={scrollList}
         style={{
-          height: "500px",
+          height: "400px",
           "overflow-y": "auto",
           border: "1px solid #ddd",
           "border-radius": "4px",
