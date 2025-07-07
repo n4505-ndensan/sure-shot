@@ -49,9 +49,17 @@ pub fn internal_ping_servers(router: routing::Router, ip: IpAddr) -> routing::Ro
                 // まず利用可能なIPアドレスをチェック
                 let available_ips = check_available_ips(ip, 8000).await;
 
-                println!("{}: Available IPs: {:?}", ip, available_ips);
+                println!(
+                    "{}: Available IPs: {:?} (total: {})",
+                    ip,
+                    available_ips,
+                    available_ips.len()
+                );
+
                 // 各サーバーの/pingエンドポイントをチェック
                 let server_infos = ping_servers_by_ip(available_ips, 8000, ip).await;
+
+                println!("{}: Server infos: {:?}", ip, server_infos);
 
                 #[derive(serde::Serialize)]
                 struct PingServersResponse {

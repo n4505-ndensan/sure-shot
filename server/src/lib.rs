@@ -127,7 +127,7 @@ pub struct GetNicknameResponse {
     pub nickname: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[typeshare]
 pub struct ServerInfo {
     pub ip: String,
@@ -188,7 +188,7 @@ pub async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
             let task = tokio::spawn(async move {
                 let addr = SocketAddr::new(target_ip, port);
                 let result = tokio::time::timeout(
-                    Duration::from_millis(100),
+                    Duration::from_millis(300), // 100ms -> 300msに延長
                     tokio::net::TcpStream::connect(addr),
                 )
                 .await;
@@ -214,7 +214,7 @@ pub async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
     available_ips
 }
 
-// 各IPの/pingエンドポイントをチェックする関数
+// 各IPの/pingエンドポイントをチェックする関数（リトライ機能付き）
 pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<ServerInfo> {
     use futures::future::join_all;
     use std::time::Duration;
@@ -227,50 +227,77 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
             let client = reqwest::Client::new();
             let url = format!("http://{}:{}/ping", ip, port);
 
-            let result =
-                tokio::time::timeout(Duration::from_millis(1000), client.get(&url).send()).await;
+            // リトライ機能を実装
+            let max_retries = 2;
+            let mut last_error = None;
 
-            match result {
-                Ok(Ok(response)) => {
-                    if response.status().is_success() {
-                        match response.json::<PongResponse>().await {
-                            Ok(pong) => Some(ServerInfo {
+            for attempt in 1..=max_retries {
+                let result = tokio::time::timeout(
+                    Duration::from_millis(3000), // 1000ms -> 3000msに延長
+                    client.get(&url).send(),
+                )
+                .await;
+
+                match result {
+                    Ok(Ok(response)) => {
+                        if response.status().is_success() {
+                            match response.json::<PongResponse>().await {
+                                Ok(pong) => {
+                                    return Some(ServerInfo {
+                                        ip: ip.to_string(),
+                                        port,
+                                        status: "active".to_string(),
+                                        message: pong.message,
+                                        name: pong.name,
+                                        is_self: is_local,
+                                    });
+                                }
+                                Err(_) => {
+                                    return Some(ServerInfo {
+                                        ip: ip.to_string(),
+                                        port,
+                                        status: "unknown".to_string(),
+                                        message: "Invalid response".to_string(),
+                                        name: "unknown".to_string(),
+                                        is_self: is_local,
+                                    });
+                                }
+                            }
+                        } else {
+                            return Some(ServerInfo {
                                 ip: ip.to_string(),
                                 port,
-                                status: "active".to_string(),
-                                message: pong.message,
-                                name: pong.name,
-                                is_self: is_local,
-                            }),
-                            Err(_) => Some(ServerInfo {
-                                ip: ip.to_string(),
-                                port,
-                                status: "unknown".to_string(),
-                                message: "Invalid response".to_string(),
+                                status: "error".to_string(),
+                                message: format!("HTTP {}", response.status()),
                                 name: "unknown".to_string(),
                                 is_self: is_local,
-                            }),
+                            });
                         }
-                    } else {
-                        Some(ServerInfo {
-                            ip: ip.to_string(),
-                            port,
-                            status: "error".to_string(),
-                            message: format!("HTTP {}", response.status()),
-                            name: "unknown".to_string(),
-                            is_self: is_local,
-                        })
+                    }
+                    Ok(Err(e)) => {
+                        last_error = Some(format!("Request error: {}", e));
+                        if attempt < max_retries {
+                            tokio::time::sleep(Duration::from_millis(200 * attempt)).await;
+                        }
+                    }
+                    Err(_) => {
+                        last_error = Some("Timeout".to_string());
+                        if attempt < max_retries {
+                            tokio::time::sleep(Duration::from_millis(200 * attempt)).await;
+                        }
                     }
                 }
-                _ => Some(ServerInfo {
-                    ip: ip.to_string(),
-                    port,
-                    status: "unreachable".to_string(),
-                    message: "Connection failed".to_string(),
-                    name: "unknown".to_string(),
-                    is_self: is_local,
-                }),
             }
+
+            // 全てのリトライが失敗した場合
+            Some(ServerInfo {
+                ip: ip.to_string(),
+                port,
+                status: "unreachable".to_string(),
+                message: last_error.unwrap_or_else(|| "Connection failed".to_string()),
+                name: "unknown".to_string(),
+                is_self: is_local,
+            })
         });
         tasks.push(task);
     }

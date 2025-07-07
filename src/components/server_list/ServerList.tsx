@@ -22,7 +22,11 @@ const ServerList = (props: Props) => {
   });
 
   onMount(() => {
-    updateServerList();
+    updateServerList(false);
+
+    setInterval(() => {
+      updateServerList(true);
+    }, 10000);
   });
 
   return (
@@ -41,8 +45,8 @@ const ServerList = (props: Props) => {
           <p>No servers found.</p>
         </Show>
 
-        <Show when={globalStore.servers.length > 0}>
-          {globalStore.servers.map((server) => {
+        <Show when={globalStore.servers && globalStore.servers.length > 0}>
+          {globalStore.servers?.map((server) => {
             const { ip, name, port, status, is_self } = server;
             const selected = targetIp() === ip;
             return (
