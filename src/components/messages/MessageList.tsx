@@ -61,7 +61,7 @@ const MessageList: Component<Props> = (props) => {
   // クリーンアップ
   onCleanup(() => {
     if (eventSource()) {
-      eventSource().close();
+      eventSource()?.close();
     }
   });
 

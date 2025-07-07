@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const AttachmentButton: Component<Props> = (props) => {
-  let fileInput: HTMLInputElement | undefined = undefined;
+  let fileInput: HTMLInputElement | undefined;
 
   const getMimeType = (filename: string): string => {
     const extension = filename.split(".").pop()?.toLowerCase();

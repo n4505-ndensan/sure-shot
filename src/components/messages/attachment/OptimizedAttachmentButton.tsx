@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const OptimizedAttachmentButton: Component<Props> = (props) => {
-  let fileInput: HTMLInputElement | undefined = undefined;
+  let fileInput: HTMLInputElement | undefined;
   const maxSizeForBase64 = props.maxSizeForBase64 || 1024 * 1024; // 1MB
 
   const shouldUseBase64 = (file: File): boolean => {

@@ -135,6 +135,7 @@ const MessageInput: Component<Props> = (props) => {
           disabled={isSending()}
           onPaste={async (e) => {
             const { clipboardData } = e;
+            if (!clipboardData) return;
 
             const pastedAttachments: Attachment[] = [];
             for (const file of Array.from(clipboardData.files)) {
