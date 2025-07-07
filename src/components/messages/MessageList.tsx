@@ -9,6 +9,7 @@ import { For } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
 import { getMessages } from "../../api/messages/get";
 import { useEventsSource } from "../../api/events/useEventsSource";
+import LinkifiedText from "../common/LinkifiedText";
 
 interface Props {
   className?: string;
@@ -189,7 +190,7 @@ const MessageList: Component<Props> = (props) => {
                 {/* メッセージテキスト */}
                 <Show when={message.message.trim()}>
                   <div style={{ "margin-bottom": "0.5rem" }}>
-                    {message.message}
+                    <LinkifiedText text={message.message} />
                   </div>
                 </Show>
 
