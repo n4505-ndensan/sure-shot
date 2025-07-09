@@ -1,5 +1,4 @@
 pub mod nickname;
-pub mod send;
 
 use crate::{AppState, ServerInfo, check_available_ips, ping_servers_by_ip};
 use axum::{Json, Router, routing};
@@ -96,7 +95,6 @@ pub fn create_internal_router(app_state: AppState, ip: IpAddr) -> Router {
     let router = internal_available_ips(router, ip);
     let router = internal_ping_servers(router, ip);
     let router = internal_get_messages(router, app_state.clone());
-    let router = send::internal_send_message(router, app_state.clone(), ip);
     let router = nickname::internal_get_nickname(router, app_state.clone());
     let router = nickname::internal_update_nickname(router, app_state.clone());
 

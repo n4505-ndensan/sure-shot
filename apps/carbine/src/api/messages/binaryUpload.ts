@@ -4,6 +4,7 @@ import {
   Attachment,
   SendMessageResponse,
 } from "../../types/generated/api-types";
+import { getCurrentHost } from "../host/findHost";
 
 export interface BinaryAttachment {
   id: string;
@@ -57,7 +58,14 @@ export const sendMessageWithBinaryAttachments = async (
   }
 
   // 2. メッセージと添付ファイル情報を送信
-  const response = await fetch("http://localhost:8000/send", {
+  // 現在のホストを取得
+  const currentHost = await getCurrentHost();
+  if (!currentHost) {
+    throw new Error("No host found. Please select a host first.");
+  }
+
+  const sendUrl = `http://${currentHost.ip}:${currentHost.port}/send`;
+  const response = await fetch(sendUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
