@@ -16,6 +16,15 @@ import {
 
 const App: Component = () => {
   onMount(async () => {
+    const localIp = await getLocalIp();
+    if (globalStore.localIp !== localIp) {
+      setGlobalStore({ localIp });
+    }
+    const deviceName = await getDeviceName();
+    if (globalStore.deviceName !== deviceName) {
+      setGlobalStore({ deviceName });
+    }
+    
     // Do you have permission to send a notification?
     let permissionGranted = await isPermissionGranted();
 
@@ -33,19 +42,10 @@ const App: Component = () => {
       visibility: Visibility.Private,
       lights: true,
       lightColor: "#ff0000",
-      
+
       vibration: true,
       sound: "notification_sound",
     });
-
-    const localIp = await getLocalIp();
-    if (globalStore.localIp !== localIp) {
-      setGlobalStore({ localIp });
-    }
-    const deviceName = await getDeviceName();
-    if (globalStore.deviceName !== deviceName) {
-      setGlobalStore({ deviceName });
-    }
   });
 
   return (

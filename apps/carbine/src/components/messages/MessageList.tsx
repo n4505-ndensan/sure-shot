@@ -24,11 +24,11 @@ const MessageList: Component<Props> = (props) => {
   const { eventSource, isConnected, error } = useEventsSource(
     (message: ReceivedMessage) => {
       setMessages((prev) => [...(prev || []), message]);
-      if (message.from === globalStore.localIp) {
+      if (message.from !== globalStore.localIp) {
         sendNotification({
           channelId: "messages",
           silent: false,
-          icon: "icon.png",
+          icon: "~/../public/icon.png",
           title: message.from_name || "New Message",
           body: message.message || "You have a new message",
           group: "messages",
