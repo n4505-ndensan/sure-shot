@@ -11,6 +11,10 @@
   },
 
   "app": {
+    "trayIcon": {
+      "iconPath": "icons\\64x64.png",
+      "iconAsTemplate": true
+    },
     "windows": [
       {
         "title": "sure-shot",
@@ -30,6 +34,8 @@
     "android": {
       "minSdkVersion": 24
     },
+
+    "resources": { "assets/**/*": "assets/" },
 
     "icon": [
       "icons/32x32.png",

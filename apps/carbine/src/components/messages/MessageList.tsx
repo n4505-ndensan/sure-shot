@@ -28,7 +28,6 @@ const MessageList: Component<Props> = (props) => {
         sendNotification({
           channelId: "messages",
           silent: false,
-          icon: "~/../public/icon.png",
           title: message.from_name || "New Message",
           body: message.message || "You have a new message",
           group: "messages",
