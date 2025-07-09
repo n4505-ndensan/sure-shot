@@ -3,6 +3,7 @@ import {
   Attachment,
 } from "../../types/generated/api-types";
 import { getCurrentHost } from "../host/findHost";
+import { getLocalIp } from "../host/getLocalIp";
 
 export const sendMessage = async (
   targetIp: string,
@@ -17,6 +18,9 @@ export const sendMessage = async (
       throw new Error("No host found. Please select a host first.");
     }
 
+    // ローカルIPを取得
+    const localIp = await getLocalIp();
+
     const sendUrl = `http://${currentHost.ip}:${currentHost.port}/send`;
     const response = await fetch(sendUrl, {
       method: "POST",
@@ -28,6 +32,7 @@ export const sendMessage = async (
         message: message,
         message_type: messageType,
         attachments: attachments,
+        from_ip: localIp,
       }),
     });
 

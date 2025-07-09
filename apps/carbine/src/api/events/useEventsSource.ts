@@ -55,7 +55,7 @@ export function useEventsSource(
       setConnectionError("Failed to initialize connection");
     }
   };
-    initializeSSE();
+  initializeSSE();
 
   return {
     eventSource,

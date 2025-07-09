@@ -238,6 +238,14 @@ async fn find_host() -> Result<Vec<ServerInfo>, String> {
     Ok(server_infos)
 }
 
+#[tauri::command]
+async fn get_local_ip() -> Result<String, String> {
+    match find_local_ip() {
+        Some(ip) => Ok(ip.to_string()),
+        None => Err("Could not find local IP address".to_string()),
+    }
+}
+
 // Auto-discovery and storage of host
 async fn auto_discover_host() -> Result<(), String> {
     let Some(local_ip) = find_local_ip() else {
@@ -289,7 +297,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             find_host,
             get_current_host,
-            refresh_host
+            refresh_host,
+            get_local_ip
             ])
         .setup(|_app| {
             // Initialize host on startup

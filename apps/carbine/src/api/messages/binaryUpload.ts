@@ -5,6 +5,7 @@ import {
   SendMessageResponse,
 } from "../../types/generated/api-types";
 import { getCurrentHost } from "../host/findHost";
+import { getLocalIp } from "../host/getLocalIp";
 
 export interface BinaryAttachment {
   id: string;
@@ -64,6 +65,9 @@ export const sendMessageWithBinaryAttachments = async (
     throw new Error("No host found. Please select a host first.");
   }
 
+  // ローカルIPを取得
+  const localIp = await getLocalIp();
+
   const sendUrl = `http://${currentHost.ip}:${currentHost.port}/send`;
   const response = await fetch(sendUrl, {
     method: "POST",
@@ -76,6 +80,7 @@ export const sendMessageWithBinaryAttachments = async (
       message_type: messageType,
       attachments: smallAttachments,
       binary_attachments: binaryAttachments,
+      from_ip: localIp,
     }),
   });
 

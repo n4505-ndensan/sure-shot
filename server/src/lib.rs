@@ -76,6 +76,7 @@ pub struct SendMessageRequest {
     pub message: String,
     pub message_type: String,
     pub attachments: Vec<Attachment>,
+    pub from_ip: String, // クライアントのIPアドレス
 }
 
 #[derive(Serialize, Deserialize)]

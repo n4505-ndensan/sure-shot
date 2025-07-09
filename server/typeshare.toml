@@ -1,6 +1,6 @@
 [typeshare]
 # TypeScript型を生成する出力先
-typescript_output_directory = "../src/types/generated"
+typescript_output_directory = "../apps/carbine/src/types/generated"
 
 # 生成されるファイル名
 typescript_file_name = "api-types.ts"

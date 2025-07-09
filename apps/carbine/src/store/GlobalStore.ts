@@ -2,13 +2,11 @@ import { createStore } from "solid-js/store";
 import { ServerInfo } from "../types/generated/api-types";
 
 type GlobalStore = {
-  servers: ServerInfo[] | undefined;
-  selectedTargetIp: string;
+  localIp?: string; // 自分のIPアドレス
 };
 
 const [globalStore, setGlobalStore] = createStore<GlobalStore>({
-  servers: [],
-  selectedTargetIp: "",
+  localIp: undefined,
 });
 
 export { globalStore, setGlobalStore };

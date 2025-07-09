@@ -1,16 +1,16 @@
 import { Component, onMount, createSignal } from "solid-js";
-import { updateServerList } from "./inquiry/updateServerList";
 import MessageInput from "./components/messages/MessageInput";
 import MessageList from "./components/messages/MessageList";
 import { HostStatus } from "./components/host/HostStatus";
 
 import "./App.scss";
+import { getLocalIp } from "./api/host/getLocalIp";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");
 
   onMount(() => {
-    updateServerList();
+    getLocalIp();
   });
 
   return (

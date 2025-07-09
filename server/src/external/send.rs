@@ -1,8 +1,15 @@
-use axum::{routing, Json};
-use crate::{AppState, SendMessageRequest, SendMessageResponse, ReceivedMessage, send_message_to_server, send_message_to_all_servers};
+use crate::{
+    AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse,
+    send_message_to_all_servers, send_message_to_server,
+};
+use axum::{Json, routing};
 use std::net::IpAddr;
 
-pub fn external_send_message(router: routing::Router, app_state: AppState, ip: IpAddr) -> routing::Router {
+pub fn external_send_message(
+    router: routing::Router,
+    app_state: AppState,
+    ip: IpAddr,
+) -> routing::Router {
     router.route("/send", {
         let ip = ip.clone();
         let state = app_state.clone();
@@ -11,16 +18,16 @@ pub fn external_send_message(router: routing::Router, app_state: AppState, ip: I
             let state = state.clone();
             async move {
                 let config = state.config.lock().await;
-                let from_name = config.nickname.clone();
+                let from_name = "unknown".to_string(); // 一旦固定値
                 drop(config); // ロックを早期に解放
 
-                let from_ip = ip.to_string();
+                let from_ip = request.from_ip.clone(); // クライアントのIPを使用
 
                 // 送信先IPが空の場合は全サーバーに送信
                 let result = if request.to.trim().is_empty() {
                     send_message_to_all_servers(
-                        ip,
-                        &from_ip,
+                        ip, // ホストサーバーのIP（送信処理用）
+                        &from_ip, // クライアントのIP（メッセージのfrom_ip）
                         &from_name,
                         &request.message,
                         &request.message_type,
@@ -37,7 +44,7 @@ pub fn external_send_message(router: routing::Router, app_state: AppState, ip: I
                 } else {
                     send_message_to_server(
                         &request.to,
-                        &from_ip,
+                        &from_ip, // クライアントのIP（メッセージのfrom_ip）
                         &from_name,
                         &request.message,
                         &request.message_type,
@@ -52,12 +59,12 @@ pub fn external_send_message(router: routing::Router, app_state: AppState, ip: I
                 // 送信成功時は自分のメッセージリストにも追加
                 if result.is_ok() {
                     let sent_message = ReceivedMessage {
-                        from: from_ip.clone(),
+                        from: from_ip.clone(), // クライアントのIP
                         from_name: from_name.clone(),
                         message: request.message.clone(),
                         message_type: request.message_type.clone(),
                         timestamp: chrono::Utc::now().to_rfc3339(),
-                        is_self: true, // 自分が送信したメッセージ
+                        is_self: false, // 外部からの送信なのでfalse
                         attachments: request.attachments.clone(),
                     };
 
