@@ -24,17 +24,23 @@ const MessageList: Component<Props> = (props) => {
   const { eventSource, isConnected, error } = useEventsSource(
     (message: ReceivedMessage) => {
       setMessages((prev) => [...(prev || []), message]);
+      if (message.from === globalStore.localIp) {
+        sendNotification({
+          channelId: "messages",
+          silent: false,
+          icon: "icon.png",
+          title: message.from_name || "New Message",
+          body: message.message || "You have a new message",
+          group: "messages",
 
-      sendNotification({
-        title: message.from_name || "New Message",
-        body: message.message || "You have a new message",
-        // attachments: [
-        //   {
-        //     id: "image-1",
-        //     url: "asset:///notification-image.jpg",
-        //   },
-        // ],
-      });
+          // attachments: [
+          //   {
+          //     id: "image-1",
+          //     url: "asset:///notification-image.jpg",
+          //   },
+          // ],
+        });
+      }
     }
   );
 

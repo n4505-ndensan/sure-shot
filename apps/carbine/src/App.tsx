@@ -6,11 +6,15 @@ import { HostStatus } from "./components/host/HostStatus";
 import "./App.scss";
 import { getDeviceName, getLocalIp } from "@sureshot/api";
 import { globalStore, setGlobalStore } from "./store/GlobalStore";
-import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
+import {
+  createChannel,
+  Importance,
+  isPermissionGranted,
+  requestPermission,
+  Visibility,
+} from "@tauri-apps/plugin-notification";
 
 const App: Component = () => {
-  const [targetIp, setTargetIp] = createSignal("");
-
   onMount(async () => {
     // Do you have permission to send a notification?
     let permissionGranted = await isPermissionGranted();
@@ -21,10 +25,18 @@ const App: Component = () => {
       permissionGranted = permission === "granted";
     }
 
-    // Once permission has been granted we can send the notification
-    if (permissionGranted) {
-      sendNotification({ title: "Tauri", body: "Tauri is awesome!" });
-    }
+    await createChannel({
+      id: "messages",
+      name: "Messages",
+      description: "Notifications for new messages",
+      importance: Importance.High,
+      visibility: Visibility.Private,
+      lights: true,
+      lightColor: "#ff0000",
+      
+      vibration: true,
+      sound: "notification_sound",
+    });
 
     const localIp = await getLocalIp();
     if (globalStore.localIp !== localIp) {
@@ -49,7 +61,9 @@ const App: Component = () => {
             gap: "1rem",
             display: "flex",
             "flex-direction": "row",
+            width: "100%",
             "align-items": "center",
+            "justify-content": "space-between",
             "flex-wrap": "wrap",
           }}
         >
@@ -79,10 +93,7 @@ const App: Component = () => {
           }}
         />
 
-        <MessageInput
-          targetIp={targetIp()}
-          onIpChange={(ip) => setTargetIp(ip)}
-        />
+        <MessageInput />
       </main>
     </div>
   );

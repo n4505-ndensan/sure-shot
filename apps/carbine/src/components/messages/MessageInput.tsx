@@ -1,19 +1,13 @@
-import { Component, createSignal, createEffect, Show } from "solid-js";
+import { Component, createSignal, Show } from "solid-js";
 import AttachmentList from "./attachment/AttachmentList";
-import { Attachment, getLocalIp } from "@sureshot/api";
+import { Attachment } from "@sureshot/api";
 import OptimizedAttachmentButton from "./attachment/OptimizedAttachmentButton";
 import { createDropzone } from "@soorria/solid-dropzone";
 import { createAttachment } from "./attachment/createAttachment";
 import { sendMessage } from "@sureshot/api/src";
 import { globalStore } from "~/store/GlobalStore";
 
-interface Props {
-  targetIp?: string;
-  onIpChange?: (ip: string) => void;
-}
-
-const MessageInput: Component<Props> = (props) => {
-  const [targetIp, setTargetIp] = createSignal("");
+const MessageInput: Component = () => {
   const [message, setMessage] = createSignal("");
   const [attachments, setAttachments] = createSignal<Attachment[]>([]);
   const [sendStatus, setSendStatus] = createSignal("");
@@ -31,15 +25,7 @@ const MessageInput: Component<Props> = (props) => {
     },
   });
 
-  // propsからtargetIpが渡されたら、内部状態を更新
-  createEffect(() => {
-    if (props.targetIp !== undefined) {
-      setTargetIp(props.targetIp);
-    }
-  });
-
   const handleSendMessage = async () => {
-    const ip = targetIp().trim();
     const msg = message().trim();
     const currentAttachments = attachments();
 
