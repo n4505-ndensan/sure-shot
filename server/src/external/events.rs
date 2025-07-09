@@ -2,7 +2,7 @@ use axum::{routing, response::Sse, response::sse::{Event, KeepAlive}};
 use crate::AppState;
 use tokio_stream::{StreamExt, wrappers::BroadcastStream};
 
-pub fn internal_events(router: routing::Router, app_state: AppState) -> routing::Router {
+pub fn external_events(router: routing::Router, app_state: AppState) -> routing::Router {
     router.route("/events", {
         let state = app_state.clone();
         routing::get({

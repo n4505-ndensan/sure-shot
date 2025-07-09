@@ -56,7 +56,7 @@ export const HostStatus: Component = () => {
     >
       <p style={{ "font-weight": "bold" }}>Host</p>
 
-      {loading() && <div>Loading...</div>}
+      {loading() && <p>Loading...</p>}
 
       {error() && (
         <div style={{ color: "red", "margin-bottom": "1rem" }}>

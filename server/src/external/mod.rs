@@ -1,5 +1,6 @@
 pub mod ping;
 pub mod receive;
+pub mod events;
 
 use axum::Router;
 use crate::AppState;
@@ -12,6 +13,7 @@ pub fn create_external_router(app_state: AppState, ip: IpAddr) -> Router {
     // 各ルートハンドラーを適用
     let router = ping::external_ping(router, app_state.clone());
     let router = receive::external_receive_message(router, app_state.clone(), ip);
+    let router = events::external_events(router, app_state.clone());
     
     // CORS設定を追加
     router.layer(

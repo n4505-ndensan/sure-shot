@@ -1,4 +1,3 @@
-pub mod events;
 pub mod nickname;
 pub mod send;
 
@@ -98,7 +97,6 @@ pub fn create_internal_router(app_state: AppState, ip: IpAddr) -> Router {
     let router = internal_ping_servers(router, ip);
     let router = internal_get_messages(router, app_state.clone());
     let router = send::internal_send_message(router, app_state.clone(), ip);
-    let router = events::internal_events(router, app_state.clone());
     let router = nickname::internal_get_nickname(router, app_state.clone());
     let router = nickname::internal_update_nickname(router, app_state.clone());
 

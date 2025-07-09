@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
+import { getCurrentHost } from "../host/findHost";
 
 export function useEventsSource(
   onMessage: (message: ReceivedMessage) => void
@@ -17,10 +18,18 @@ export function useEventsSource(
   // SSE接続の初期化
   const initializeSSE = async () => {
     try {
-      let eventSource = new EventSource("http://localhost:8000/events");
+      // 現在のホストを取得
+      const currentHost = await getCurrentHost();
+      if (!currentHost) {
+        setConnectionError("No host found. Please select a host first.");
+        return;
+      }
+
+      const eventsUrl = `http://${currentHost.ip}:${currentHost.port}/events`;
+      let eventSource = new EventSource(eventsUrl);
 
       eventSource.onopen = () => {
-        console.log("SSE connection opened");
+        console.log("SSE connection opened to:", eventsUrl);
         setIsConnected(true);
         setConnectionError(null);
       };
