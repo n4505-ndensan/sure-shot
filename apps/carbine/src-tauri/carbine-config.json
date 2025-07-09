@@ -1,0 +1,8 @@
+{
+  "ip": "192.168.5.3",
+  "port": 8000,
+  "status": "active",
+  "message": "Pong",
+  "name": "n4505-thinkpad",
+  "is_self": true
+}

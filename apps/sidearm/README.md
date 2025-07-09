@@ -1,3 +1,3 @@
-# WXT + SolidJS
+# sidearm
 
-This template should help get you started developing with SolidJS in WXT.
+sidearm is the browser extension for sure-shot.

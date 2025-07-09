@@ -23,7 +23,7 @@ const MessageList: Component<Props> = (props) => {
       setMessages((prev) => [...prev, message]);
     }
   );
-
+  
   // 過去のメッセージを取得
   const loadPastMessages = async () => {
     const messages = await getMessages();
