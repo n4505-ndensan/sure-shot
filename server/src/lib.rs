@@ -1,5 +1,4 @@
 pub mod external;
-pub mod internal;
 pub mod whoami;
 
 use serde::{Deserialize, Serialize};
@@ -72,11 +71,11 @@ pub struct PongResponse {
 #[derive(Serialize, Deserialize)]
 #[typeshare]
 pub struct SendMessageRequest {
-    pub to: String,
     pub message: String,
     pub message_type: String,
     pub attachments: Vec<Attachment>,
-    pub from_ip: String, // クライアントのIPアドレス
+    pub from_name: String,
+    pub from_ip: String,
 }
 
 #[derive(Serialize, Deserialize)]

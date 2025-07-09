@@ -4,6 +4,7 @@ import {
 } from "../../types/generated/api-types";
 import { getCurrentHost } from "../host/findHost";
 import { getLocalIp } from "../host/getLocalIp";
+import { hostname } from "@tauri-apps/plugin-os";
 
 export const sendMessage = async (
   targetIp: string,
@@ -32,6 +33,7 @@ export const sendMessage = async (
         message: message,
         message_type: messageType,
         attachments: attachments,
+        from_name: (await hostname()) || "Unknown",
         from_ip: localIp,
       }),
     });

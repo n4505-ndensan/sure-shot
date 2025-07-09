@@ -1,8 +1,11 @@
 {
-	"dependencies": {
-		"solid-js": "^1.9.7"
-	},
-	"devDependencies": {
-		"typescript": "^5.8.3"
-	}
+  "scripts": {
+    "generate-type": "cd ./server && typeshare --lang typescript --output-file ../apps/carbine/src/types/generated/api-types.ts src/"
+  },
+  "dependencies": {
+    "solid-js": "^1.9.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
 }

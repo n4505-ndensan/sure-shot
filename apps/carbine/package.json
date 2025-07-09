@@ -16,6 +16,7 @@
     "@sureshot/ui": "workspace:^",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-os": "~2.3.0",
     "@types/tcp-port-used": "^1.0.4",
     "ip": "^2.0.1",
     "solid-js": "^1.9.5",

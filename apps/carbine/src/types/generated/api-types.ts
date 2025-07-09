@@ -38,10 +38,10 @@ export interface ReceivedMessage {
 }
 
 export interface SendMessageRequest {
-	to: string;
 	message: string;
 	message_type: string;
 	attachments: Attachment[];
+	from_name: string;
 	from_ip: string;
 }
 

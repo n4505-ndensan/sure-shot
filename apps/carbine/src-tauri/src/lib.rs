@@ -1,8 +1,8 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
 use std::sync::OnceLock;
+use std::sync::{Arc, Mutex};
 
 // Global state for storing discovered host
 static HOST_STATE: OnceLock<Arc<Mutex<Option<ServerInfo>>>> = OnceLock::new();
@@ -263,12 +263,12 @@ async fn auto_discover_host() -> Result<(), String> {
             let host_state = get_host_state();
             let mut host = host_state.lock().unwrap();
             *host = Some(server.clone());
-            
+
             // Save to config file
             if let Err(e) = save_host_config(&server) {
                 eprintln!("Failed to save host config: {}", e);
             }
-            
+
             return Ok(());
         }
     }
@@ -293,13 +293,14 @@ pub async fn initialize_host() -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             find_host,
             get_current_host,
             refresh_host,
             get_local_ip
-            ])
+        ])
         .setup(|_app| {
             // Initialize host on startup
             tauri::async_runtime::spawn(async {

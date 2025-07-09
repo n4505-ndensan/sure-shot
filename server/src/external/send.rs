@@ -18,43 +18,28 @@ pub fn external_send_message(
             let state = state.clone();
             async move {
                 let config = state.config.lock().await;
-                let from_name = "unknown".to_string(); // 一旦固定値
                 drop(config); // ロックを早期に解放
 
-                let from_ip = request.from_ip.clone(); // クライアントのIPを使用
+                let from_name = request.from_name.clone();
+                let from_ip = request.from_ip.clone();
 
                 // 送信先IPが空の場合は全サーバーに送信
-                let result = if request.to.trim().is_empty() {
-                    send_message_to_all_servers(
-                        ip, // ホストサーバーのIP（送信処理用）
-                        &from_ip, // クライアントのIP（メッセージのfrom_ip）
-                        &from_name,
-                        &request.message,
-                        &request.message_type,
-                        &request.attachments,
-                    )
-                    .await
-                    .map(|successful_ips| {
-                        println!(
-                            "📤 Broadcast message sent to {} servers: {:?}",
-                            successful_ips.len(),
-                            successful_ips
-                        );
-                    })
-                } else {
-                    send_message_to_server(
-                        &request.to,
-                        &from_ip, // クライアントのIP（メッセージのfrom_ip）
-                        &from_name,
-                        &request.message,
-                        &request.message_type,
-                        &request.attachments,
-                    )
-                    .await
-                    .map(|_| {
-                        println!("📤 Message sent to {}", request.to);
-                    })
-                };
+                let result = send_message_to_all_servers(
+                    ip,       // ホストサーバーのIP（送信処理用）
+                    &from_ip, // クライアントのIP（メッセージのfrom_ip）
+                    &from_name,
+                    &request.message,
+                    &request.message_type,
+                    &request.attachments,
+                )
+                .await
+                .map(|successful_ips| {
+                    println!(
+                        "📤 Broadcast message sent to {} servers: {:?}",
+                        successful_ips.len(),
+                        successful_ips
+                    );
+                });
 
                 // 送信成功時は自分のメッセージリストにも追加
                 if result.is_ok() {
@@ -86,11 +71,7 @@ pub fn external_send_message(
                 let response = match result {
                     Ok(()) => SendMessageResponse {
                         success: true,
-                        message: if request.to.trim().is_empty() {
-                            "Message broadcast to all servers successfully".to_string()
-                        } else {
-                            "Message sent successfully".to_string()
-                        },
+                        message: "Message sent successfully".to_string(),
                         timestamp: chrono::Utc::now().to_rfc3339(),
                     },
                     Err(err) => SendMessageResponse {
