@@ -401,12 +401,7 @@ pub async fn send_message_to_all_servers(
         }
     }
 
-    if successful_sends.is_empty() {
-        Err(format!(
-            "Failed to send to all servers: {}",
-            failed_sends.join(", ")
-        ))
-    } else if failed_sends.is_empty() {
+    if failed_sends.is_empty() {
         Ok(successful_sends)
     } else {
         // 部分的な成功
