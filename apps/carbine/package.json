@@ -13,9 +13,10 @@
   "license": "MIT",
   "dependencies": {
     "@soorria/solid-dropzone": "^1.0.1",
-    "@sureshot/ui": "workspace:^",
     "@sureshot/api": "workspace:^",
+    "@sureshot/ui": "workspace:^",
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "~2.3.0",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-os": "~2.3.0",
     "@types/tcp-port-used": "^1.0.4",

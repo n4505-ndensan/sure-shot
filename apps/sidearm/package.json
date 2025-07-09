@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "solid-js": "^1.9.6",
-    "@sureshot/ui": "workspace:*"
+    "@sureshot/api": "workspace:*",
+    "@sureshot/ui": "workspace:*",
+    "@tauri-apps/api": "^2"
   },
   "devDependencies": {
     "@wxt-dev/auto-icons": "^1.0.2",

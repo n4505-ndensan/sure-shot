@@ -1,6 +1,6 @@
 // Device Information APIs
-export { getDeviceName } from "./api/getDeviceName";
-export { getLocalIp } from "./api/getLocalIp";
+export { getDeviceName } from "../../../apps/carbine/src/utils/getDeviceName";
+export { getLocalIp } from "../../../apps/carbine/src/utils/getLocalIp";
 
 // Host Management APIs
 export { getCurrentHost, refreshHost, findHosts } from "./api/host/hostApi";

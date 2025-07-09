@@ -2,25 +2,27 @@ import {
   SendMessageResponse,
   Attachment,
 } from "../../types/generated/api-types";
-import { getLocalIp } from "../getLocalIp";
-import { getCurrentHost } from "../host/hostApi";
+import { getCurrentHost, ServerInfo } from "../host/hostApi";
 
 export const sendMessage = async (
-  name: string,
+  fromName: string,
+  fromIp: string,
   message: string,
   messageType: string = "text",
-  attachments: Attachment[] = []
+  attachments: Attachment[] = [],
+  currentHost?: {
+    ip: string;
+    port: number;
+  } | null
 ): Promise<SendMessageResponse> => {
   try {
     // 現在のホストを取得
-    const currentHost = await getCurrentHost();
     if (!currentHost) {
-      throw new Error("No host found. Please select a host first.");
+      currentHost = await getCurrentHost();
+      if (!currentHost) {
+        throw new Error("No current host found. Please set up a host first.");
+      }
     }
-
-    // ローカルIPを取得
-    const localIp = await getLocalIp();
-
     const sendUrl = `http://${currentHost.ip}:${currentHost.port}/send`;
     const response = await fetch(sendUrl, {
       method: "POST",
@@ -31,8 +33,8 @@ export const sendMessage = async (
         message: message,
         message_type: messageType,
         attachments: attachments,
-        from_name: name,
-        from_ip: localIp,
+        from_name: fromName,
+        from_ip: fromIp,
       }),
     });
 

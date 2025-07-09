@@ -1,3 +1,5 @@
+import { getDeviceName, sendMessage } from "@sureshot/api";
+
 export default defineBackground(() => {
   console.log("Hello background!", { id: browser.runtime.id });
 
@@ -29,7 +31,7 @@ export default defineBackground(() => {
       const linkUrl = info.linkUrl;
       if (linkUrl) {
         console.log("🔗 Sending link:", linkUrl);
-        const result = await sendMessageToLocalAPI(linkUrl);
+        const result = await sendURL(linkUrl);
 
         if (result.success) {
           console.log("✅ Link sent successfully!", result);
@@ -45,7 +47,7 @@ export default defineBackground(() => {
       const pageUrl = info.pageUrl;
       if (pageUrl) {
         console.log("🔗 Sending page:", pageUrl);
-        const result = await sendMessageToLocalAPI(pageUrl);
+        const result = await sendURL(pageUrl);
 
         if (result.success) {
           console.log("✅ Page sent successfully!", result);
@@ -60,36 +62,19 @@ export default defineBackground(() => {
 });
 
 // メッセージ送信用の関数
-async function sendMessageToLocalAPI(linkUrl: string, message: string = "") {
-  console.log("🚀 Starting API call to localhost:8000/send");
-
-  const payload = {
-    to: "", // 空にしてブロードキャスト送信
-    message: message || `リンクを共有: ${linkUrl}`,
-    message_type: "text",
-    attachments: [],
-  };
-
-  console.log("📤 Sending payload:", payload);
-
+async function sendURL(url: string, message: string = "") {
   try {
-    const response = await fetch("http://localhost:8000/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    console.log("📡 Response status:", response.status);
-    console.log("📡 Response ok:", response.ok);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log("✅ Message sent successfully:", result);
+    const result = await sendMessage(
+      "SIDE_ARM",
+      "sidearm",
+      message || `リンクを共有: ${url}`,
+      "text",
+      [],
+      {
+        ip: "192.168.5.3",
+        port: 8000,
+      }
+    );
     return result;
   } catch (error) {
     console.error("❌ Failed to send message:", error);

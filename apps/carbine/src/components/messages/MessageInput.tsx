@@ -1,6 +1,6 @@
 import { Component, createSignal, createEffect, Show } from "solid-js";
 import AttachmentList from "./attachment/AttachmentList";
-import { Attachment } from "@sureshot/api";
+import { Attachment, getLocalIp } from "@sureshot/api";
 import OptimizedAttachmentButton from "./attachment/OptimizedAttachmentButton";
 import { createDropzone } from "@soorria/solid-dropzone";
 import { createAttachment } from "./attachment/createAttachment";
@@ -54,6 +54,7 @@ const MessageInput: Component<Props> = (props) => {
     try {
       const result = await sendMessage(
         globalStore.deviceName || "Unknown",
+        globalStore.localIp || "unknown",
         msg,
         "text",
         currentAttachments

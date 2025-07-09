@@ -10,6 +10,7 @@ import { ReceivedMessage } from "@sureshot/api";
 import LinkifiedText from "../common/LinkifiedText";
 import { globalStore } from "~/store/GlobalStore";
 import { getMessages, useEventsSource } from "@sureshot/api/src";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 
 interface Props {
   className?: string;
@@ -23,6 +24,17 @@ const MessageList: Component<Props> = (props) => {
   const { eventSource, isConnected, error } = useEventsSource(
     (message: ReceivedMessage) => {
       setMessages((prev) => [...(prev || []), message]);
+
+      sendNotification({
+        title: message.from_name || "New Message",
+        body: message.message || "You have a new message",
+        // attachments: [
+        //   {
+        //     id: "image-1",
+        //     url: "asset:///notification-image.jpg",
+        //   },
+        // ],
+      });
     }
   );
 

@@ -4,7 +4,7 @@ import {
   Attachment,
   SendMessageResponse,
 } from "../../types/generated/api-types";
-import { getLocalIp } from "../getLocalIp";
+import { getLocalIp } from "../../../../../apps/carbine/src/utils/getLocalIp";
 import { getCurrentHost } from "../host/hostApi";
 
 export interface BinaryAttachment {
