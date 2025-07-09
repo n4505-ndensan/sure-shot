@@ -2,12 +2,11 @@ import {
   SendMessageResponse,
   Attachment,
 } from "../../types/generated/api-types";
-import { getCurrentHost } from "../host/findHost";
-import { getLocalIp } from "../host/getLocalIp";
-import { hostname } from "@tauri-apps/plugin-os";
+import { getLocalIp } from "../getLocalIp";
+import { getCurrentHost } from "../host/hostApi";
 
 export const sendMessage = async (
-  targetIp: string,
+  name: string,
   message: string,
   messageType: string = "text",
   attachments: Attachment[] = []
@@ -29,11 +28,10 @@ export const sendMessage = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        to: targetIp,
         message: message,
         message_type: messageType,
         attachments: attachments,
-        from_name: (await hostname()) || "Unknown",
+        from_name: name,
         from_ip: localIp,
       }),
     });

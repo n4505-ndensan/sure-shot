@@ -4,8 +4,8 @@ import {
   Attachment,
   SendMessageResponse,
 } from "../../types/generated/api-types";
-import { getCurrentHost } from "../host/findHost";
-import { getLocalIp } from "../host/getLocalIp";
+import { getLocalIp } from "../getLocalIp";
+import { getCurrentHost } from "../host/hostApi";
 
 export interface BinaryAttachment {
   id: string;

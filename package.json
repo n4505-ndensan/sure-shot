@@ -1,11 +1,16 @@
 {
   "scripts": {
-    "generate-type": "cd ./server && typeshare --lang typescript --output-file ../apps/carbine/src/types/generated/api-types.ts src/"
+    "generate-type": "cd ./server && typeshare --lang typescript --output-file ../packages/api/src/types/generated/api-types.ts src/"
   },
   "dependencies": {
-    "solid-js": "^1.9.7"
+    "solid-js": "^1.9.7",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-os": "~2.3.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@tauri-apps/cli": "^2",
+    "concurrently": "^7.6.0"
   }
 }

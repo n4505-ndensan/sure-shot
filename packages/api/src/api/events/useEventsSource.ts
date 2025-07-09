@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
-import { getCurrentHost } from "../host/findHost";
+import { getCurrentHost } from "../host/hostApi";
 
 export function useEventsSource(
   onMessage: (message: ReceivedMessage) => void

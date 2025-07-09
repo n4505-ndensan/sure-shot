@@ -11,6 +11,6 @@ A **Local-First** Messaging Application.
 
 ## Apps
 
-* **carvine** ... client
+* **carbine** ... client
 * **magazine** ... server
 * **sidearm** ... browser extension

@@ -4,13 +4,21 @@ import MessageList from "./components/messages/MessageList";
 import { HostStatus } from "./components/host/HostStatus";
 
 import "./App.scss";
-import { getLocalIp } from "./api/host/getLocalIp";
+import { getDeviceName, getLocalIp } from "@sureshot/api";
+import { globalStore, setGlobalStore } from "./store/GlobalStore";
 
 const App: Component = () => {
   const [targetIp, setTargetIp] = createSignal("");
 
-  onMount(() => {
-    getLocalIp();
+  onMount(async () => {
+    const localIp = await getLocalIp();
+    if (globalStore.localIp !== localIp) {
+      setGlobalStore({ localIp });
+    }
+    const deviceName = await getDeviceName();
+    if (globalStore.deviceName !== deviceName) {
+      setGlobalStore({ deviceName });
+    }
   });
 
   return (

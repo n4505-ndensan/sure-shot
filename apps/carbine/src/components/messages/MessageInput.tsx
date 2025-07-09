@@ -1,16 +1,11 @@
 import { Component, createSignal, createEffect, Show } from "solid-js";
-import { sendMessage } from "../../api/messages/send";
 import AttachmentList from "./attachment/AttachmentList";
-import { Attachment } from "../../types/generated/api-types";
+import { Attachment } from "@sureshot/api";
 import OptimizedAttachmentButton from "./attachment/OptimizedAttachmentButton";
-import {
-  createDropzone,
-  DropEvent,
-  FileRejection,
-} from "@soorria/solid-dropzone";
-import { generateId } from "../../utils/IdUtils";
-import { arrayBufferToBase64, getMimeType } from "../../utils/FileUtils";
+import { createDropzone } from "@soorria/solid-dropzone";
 import { createAttachment } from "./attachment/createAttachment";
+import { sendMessage } from "@sureshot/api/src";
+import { globalStore } from "~/store/GlobalStore";
 
 interface Props {
   targetIp?: string;
@@ -57,7 +52,12 @@ const MessageInput: Component<Props> = (props) => {
     setSendStatus("📤 Sending message...");
 
     try {
-      const result = await sendMessage(ip, msg, "text", currentAttachments);
+      const result = await sendMessage(
+        globalStore.deviceName || "Unknown",
+        msg,
+        "text",
+        currentAttachments
+      );
 
       if (result.success) {
         setSendStatus("✅ Message sent successfully!");

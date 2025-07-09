@@ -1,0 +1,27 @@
+{
+  "name": "@sureshot/api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.3",
+  "type": "module",
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "solid-js": "^1.9.6",
+    "@sureshot/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "sass": "^1.58.0",
+    "typescript": "^5.0.0"
+  }
+}

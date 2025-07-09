@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { Attachment } from "../../../types/generated/api-types";
+import { Attachment } from "@sureshot/api";
 import { fallBackMimeType, mimeTypes } from "./MimeTypes";
 
 interface Props {

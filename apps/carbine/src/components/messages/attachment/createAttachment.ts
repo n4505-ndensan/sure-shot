@@ -1,4 +1,4 @@
-import { Attachment } from "../../../types/generated/api-types";
+import { Attachment } from "@sureshot/api";
 import { arrayBufferToBase64, getMimeType } from "../../../utils/FileUtils";
 import { generateId } from "../../../utils/IdUtils";
 

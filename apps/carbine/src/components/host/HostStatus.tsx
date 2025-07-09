@@ -3,7 +3,7 @@ import {
   getCurrentHost,
   refreshHost,
   type ServerInfo,
-} from "../../api/host/hostApi";
+} from "@sureshot/api";
 
 export const HostStatus: Component = () => {
   const [host, setHost] = createSignal<ServerInfo | null>(null);

@@ -1,5 +1,5 @@
+import { findHosts, ServerInfo } from "@sureshot/api";
 import { createSignal, Component } from "solid-js";
-import { findHost, ServerInfo } from "../../api/host/findHost";
 
 export const ServerFinder: Component = () => {
   const [servers, setServers] = createSignal<ServerInfo[]>([]);
@@ -11,7 +11,7 @@ export const ServerFinder: Component = () => {
     setError(null);
 
     try {
-      const foundServers = await findHost();
+      const foundServers = await findHosts();
       setServers(foundServers);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to find servers");

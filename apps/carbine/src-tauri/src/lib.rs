@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 use std::sync::OnceLock;
 use std::sync::{Arc, Mutex};
+ use whoami::devicename;
 
 // Global state for storing discovered host
 static HOST_STATE: OnceLock<Arc<Mutex<Option<ServerInfo>>>> = OnceLock::new();
@@ -214,6 +215,13 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
     server_infos
 }
 
+
+#[tauri::command]
+async fn get_device_name() -> Result<String, ()> {
+    let device_name = devicename();
+    Ok(device_name.clone())
+}
+
 #[tauri::command]
 async fn get_current_host() -> Result<Option<ServerInfo>, String> {
     let host_state = get_host_state();
@@ -299,7 +307,8 @@ pub fn run() {
             find_host,
             get_current_host,
             refresh_host,
-            get_local_ip
+            get_local_ip,
+            get_device_name,
         ])
         .setup(|_app| {
             // Initialize host on startup

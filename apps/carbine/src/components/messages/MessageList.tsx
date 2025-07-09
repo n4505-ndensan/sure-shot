@@ -6,11 +6,10 @@ import {
   Show,
 } from "solid-js";
 import { For } from "solid-js";
-import { ReceivedMessage } from "../../types/generated/api-types";
-import { getMessages } from "../../api/messages/get";
-import { useEventsSource } from "../../api/events/useEventsSource";
+import { ReceivedMessage } from "@sureshot/api";
 import LinkifiedText from "../common/LinkifiedText";
 import { globalStore } from "~/store/GlobalStore";
+import { getMessages, useEventsSource } from "@sureshot/api/src";
 
 interface Props {
   className?: string;
@@ -18,10 +17,12 @@ interface Props {
 
 const MessageList: Component<Props> = (props) => {
   let scrollList: HTMLDivElement | undefined;
-  const [messages, setMessages] = createSignal<ReceivedMessage[]>([]);
+  const [messages, setMessages] = createSignal<ReceivedMessage[] | undefined>(
+    undefined
+  );
   const { eventSource, isConnected, error } = useEventsSource(
     (message: ReceivedMessage) => {
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => [...(prev || []), message]);
     }
   );
 
@@ -78,7 +79,7 @@ const MessageList: Component<Props> = (props) => {
         }}
       >
         <p style={{ margin: "0", "font-size": "12px", "font-weight": "bold" }}>
-          Messages ({messages().length})
+          Messages ({messages()?.length || "-"})
         </p>
         <div
           style={{
@@ -135,7 +136,7 @@ const MessageList: Component<Props> = (props) => {
                 style={{
                   padding: "0.5rem",
                   margin: "0.25rem 0",
-                  "background-color":  isSelf ? "#e3f2fd" : "white",
+                  "background-color": isSelf ? "#e3f2fd" : "white",
                   "border-radius": "4px",
                   "border-left": isSelf
                     ? "3px solid #2196f3"
@@ -167,6 +168,7 @@ const MessageList: Component<Props> = (props) => {
                       }}
                     >
                       {isSelf ? "You" : message.from_name}
+                      {/* {message.from_name} */}
                     </strong>
                     <div
                       style={{
@@ -234,9 +236,7 @@ const MessageList: Component<Props> = (props) => {
                               />
                               <p
                                 style={{
-                                  "margin-right": !isSelf
-                                    ? "auto"
-                                    : "0",
+                                  "margin-right": !isSelf ? "auto" : "0",
                                   "margin-left": isSelf ? "auto" : "0",
                                 }}
                               >
@@ -339,7 +339,7 @@ const MessageList: Component<Props> = (props) => {
           }}
         </For>
 
-        {messages().length === 0 && (
+        {messages() && messages()?.length === 0 && (
           <div
             style={{
               "text-align": "center",
