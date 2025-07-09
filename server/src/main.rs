@@ -53,7 +53,7 @@ async fn main() {
 
     let external_serve = axum::serve(external_listener, external_app);
     let internal_serve = axum::serve(internal_listener, internal_app);
-
+    
     // 全てのサーバーを同時に実行
     tokio::select! {
         result = external_serve => {

@@ -16,25 +16,6 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  apps/browser-extension:
-    dependencies:
-      solid-js:
-        specifier: ^1.9.6
-        version: 1.9.7
-    devDependencies:
-      '@wxt-dev/auto-icons':
-        specifier: ^1.0.2
-        version: 1.0.2(wxt@0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0))
-      '@wxt-dev/module-solid':
-        specifier: ^1.1.3
-        version: 1.1.3(solid-js@1.9.7)(vite@6.3.5(@types/node@24.0.10)(jiti@2.4.2)(sass@1.81.0))(wxt@0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0))
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-      wxt:
-        specifier: ^0.20.6
-        version: 0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0)
-
   apps/carbine:
     dependencies:
       '@soorria/solid-dropzone':
@@ -117,6 +98,34 @@ importers:
       vite-plugin-solid:
         specifier: ^2.11.0
         version: 2.11.6(solid-js@1.9.7)(vite@6.3.5(@types/node@24.0.10)(jiti@2.4.2)(sass@1.81.0))
+
+  apps/sidearm:
+    dependencies:
+      '@sureshot/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      solid-js:
+        specifier: ^1.9.6
+        version: 1.9.7
+    devDependencies:
+      '@wxt-dev/auto-icons':
+        specifier: ^1.0.2
+        version: 1.0.2(wxt@0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0))
+      '@wxt-dev/module-solid':
+        specifier: ^1.1.3
+        version: 1.1.3(solid-js@1.9.7)(vite@6.3.5(@types/node@24.0.10)(jiti@2.4.2)(sass@1.81.0))(wxt@0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0))
+      sass:
+        specifier: ^1.66.1
+        version: 1.81.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@24.0.10)(jiti@2.4.2)(sass@1.81.0))
+      wxt:
+        specifier: ^0.20.6
+        version: 0.20.7(@types/node@24.0.10)(jiti@2.4.2)(rollup@4.44.2)(sass@1.81.0)
 
   packages/ui:
     dependencies:
