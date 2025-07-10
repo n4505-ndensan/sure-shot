@@ -11,12 +11,9 @@
   },
 
   "app": {
-    "trayIcon": {
-      "iconPath": "icons\\64x64.png",
-      "iconAsTemplate": true
-    },
     "windows": [
       {
+        "label": "main",
         "title": "sure-shot",
         "width": 800,
         "height": 650,

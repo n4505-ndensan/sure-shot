@@ -2,6 +2,7 @@ pub mod external;
 pub mod whoami;
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::sync::{Mutex, broadcast};
 use typeshare::typeshare;
@@ -18,44 +19,140 @@ pub struct AppState {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerConfig {
     pub nickname: String,
+    pub password_hash: String,
+    pub authorized_devices: HashSet<String>, // IPアドレス or デバイスID
+    pub salt: String,
 }
 
 impl Default for ServerConfig {
     fn default() -> Self {
+        use sha2::{Digest, Sha256};
+        use uuid::Uuid;
+
+        let salt = Uuid::new_v4().to_string();
+        let default_password = "admin"; // デフォルトパスワード
+        let mut hasher = Sha256::new();
+        hasher.update(default_password.as_bytes());
+        hasher.update(salt.as_bytes());
+        let password_hash = hex::encode(hasher.finalize());
+
         Self {
             nickname: whoami::whoami().unwrap_or_else(|_| "Unknown".to_string()),
+            password_hash,
+            authorized_devices: HashSet::new(),
+            salt,
         }
     }
 }
 
 impl ServerConfig {
-    pub fn load_or_create() -> Self {
-        let config_path = "sure-shot-config.toml";
-        use std::fs;
-        use std::path::Path;
+    pub fn get_config_path() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+        let mut path = dirs::data_dir().ok_or("Could not find data directory")?;
+        path.push("sure-shot");
+        std::fs::create_dir_all(&path)?;
+        path.push("config.toml");
+        Ok(path)
+    }
 
-        if Path::new(config_path).exists() {
-            match fs::read_to_string(config_path) {
-                Ok(content) => match toml::from_str(&content) {
-                    Ok(config) => return config,
-                    Err(e) => eprintln!("Failed to parse config file: {}", e),
-                },
-                Err(e) => eprintln!("Failed to read config file: {}", e),
-            }
+    pub fn load_or_create() -> Result<Self, Box<dyn std::error::Error>> {
+        let config_path = Self::get_config_path()?;
+
+        if config_path.exists() {
+            let content = std::fs::read_to_string(&config_path)?;
+            let config: Self = toml::from_str(&content)?;
+            return Ok(config);
         }
 
-        // 設定ファイルが存在しないか読み込みに失敗した場合、デフォルト設定を作成
-        let default_config = Self::default();
-        if let Err(e) = default_config.save() {
-            eprintln!("Failed to save default config: {}", e);
+        // 設定ファイルが存在しない場合は新規作成
+        Err("Config file not found. Please run initial setup.".into())
+    }
+
+    pub fn create_with_setup() -> Result<Self, Box<dyn std::error::Error>> {
+        println!("=== Sure-Shot Server 初期設定 ===");
+
+        // サーバー名の設定
+        print!(
+            "サーバー名を入力してください (デフォルト: {}): ",
+            whoami::whoami().unwrap_or_else(|_| "Unknown".to_string())
+        );
+        use std::io::{self, Write};
+        io::stdout().flush()?;
+
+        let mut nickname = String::new();
+        io::stdin().read_line(&mut nickname)?;
+        nickname = nickname.trim().to_string();
+
+        if nickname.is_empty() {
+            nickname = whoami::whoami().unwrap_or_else(|_| "Unknown".to_string());
         }
-        default_config
+
+        // パスワードの設定
+        println!("管理者パスワードを設定してください:");
+        let password = rpassword::read_password()?;
+
+        if password.is_empty() {
+            return Err("パスワードは空にできません".into());
+        }
+
+        // パスワード確認
+        println!("パスワードを再度入力してください:");
+        let password_confirm = rpassword::read_password()?;
+
+        if password != password_confirm {
+            return Err("パスワードが一致しません".into());
+        }
+
+        // パスワードをハッシュ化
+        use sha2::{Digest, Sha256};
+        use uuid::Uuid;
+
+        let salt = Uuid::new_v4().to_string();
+        let mut hasher = Sha256::new();
+        hasher.update(password.as_bytes());
+        hasher.update(salt.as_bytes());
+        let password_hash = hex::encode(hasher.finalize());
+
+        let config = Self {
+            nickname,
+            password_hash,
+            authorized_devices: HashSet::new(),
+            salt,
+        };
+
+        config.save()?;
+        println!("設定が正常に保存されました。");
+
+        Ok(config)
     }
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let config_path = Self::get_config_path()?;
         let config_content = toml::to_string_pretty(self)?;
-        std::fs::write("sure-shot-config.toml", config_content)?;
+        std::fs::write(config_path, config_content)?;
         Ok(())
+    }
+
+    pub fn verify_password(&self, password: &str) -> bool {
+        use sha2::{Digest, Sha256};
+
+        let mut hasher = Sha256::new();
+        hasher.update(password.as_bytes());
+        hasher.update(self.salt.as_bytes());
+        let password_hash = hex::encode(hasher.finalize());
+
+        password_hash == self.password_hash
+    }
+
+    pub fn is_device_authorized(&self, device_id: &str) -> bool {
+        self.authorized_devices.contains(device_id)
+    }
+
+    pub fn authorize_device(&mut self, device_id: String) {
+        self.authorized_devices.insert(device_id);
+    }
+
+    pub fn revoke_device(&mut self, device_id: &str) {
+        self.authorized_devices.remove(device_id);
     }
 }
 
@@ -125,6 +222,28 @@ pub struct UpdateNicknameResponse {
 #[typeshare]
 pub struct GetNicknameResponse {
     pub nickname: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+pub struct AuthRequest {
+    pub password: String,
+    pub device_id: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+pub struct AuthResponse {
+    pub success: bool,
+    pub message: String,
+    pub token: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[typeshare]
+pub struct AuthorizeDeviceRequest {
+    pub device_id: String,
+    pub password: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -312,45 +431,4 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
     }
 
     server_infos
-}
-
-// メッセージ送信機能
-pub async fn send_message_to_server(
-    target_ip: &str,
-    from_ip: &str,
-    from_name: &str,
-    message: &str,
-    message_type: &str,
-    attachments: &[Attachment],
-) -> Result<(), String> {
-    let client = reqwest::Client::new();
-    let url = format!("http://{}:8000/receive", target_ip);
-
-    let payload = ReceivedMessage {
-        from: from_ip.to_string(),
-        from_name: from_name.to_string(),
-        message: message.to_string(),
-        message_type: message_type.to_string(),
-        timestamp: chrono::Utc::now().to_rfc3339(),
-        is_self: false,
-        attachments: attachments.to_vec(),
-    };
-
-    let result = tokio::time::timeout(
-        std::time::Duration::from_millis(5000),
-        client.post(&url).json(&payload).send(),
-    )
-    .await;
-
-    match result {
-        Ok(Ok(response)) => {
-            if response.status().is_success() {
-                Ok(())
-            } else {
-                Err(format!("HTTP error: {}", response.status()))
-            }
-        }
-        Ok(Err(e)) => Err(format!("Request error: {}", e)),
-        Err(_) => Err("Request timeout".to_string()),
-    }
 }

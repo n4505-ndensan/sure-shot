@@ -33,6 +33,9 @@ importers:
 
   apps/carbine:
     dependencies:
+      '@skipperndt/plugin-machine-uid':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@soorria/solid-dropzone':
         specifier: ^1.0.1
         version: 1.0.1(solid-js@1.9.7)
@@ -54,9 +57,6 @@ importers:
       '@tauri-apps/plugin-os':
         specifier: ~2.3.0
         version: 2.3.0
-      '@types/tcp-port-used':
-        specifier: ^1.0.4
-        version: 1.0.4
       ip:
         specifier: ^2.0.1
         version: 2.0.1
@@ -153,6 +153,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@skipperndt/plugin-machine-uid':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@sureshot/ui':
         specifier: workspace:*
         version: link:../ui
@@ -833,6 +836,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@skipperndt/plugin-machine-uid@0.1.0':
+    resolution: {integrity: sha512-+jM6w4hTSqkY4NE6qC1fb7M9JLiBu2itcn5MGD1Q796jIkHRYlY9HwZ47LrvKIVL+c7Nf8/X1jRxaDtxigOsVQ==}
+
   '@soorria/solid-dropzone@1.0.1':
     resolution: {integrity: sha512-xQ6qkn3IK3IgAz7yyx+AgfmnCnRHkBTqQGjTcS64FDN7YnnvpZB//0rZjJKl5xwG9bGcJ3oyJAHnv2NK/KNSZA==}
     peerDependencies:
@@ -953,9 +959,6 @@ packages:
 
   '@types/node@24.0.10':
     resolution: {integrity: sha512-ENHwaH+JIRTDIEEbDK6QSQntAYGtbvdDXnMXnZaZ6k13Du1dPMmprkEHIL7ok2Wl2aZevetwTAb5S+7yIF+enA==}
-
-  '@types/tcp-port-used@1.0.4':
-    resolution: {integrity: sha512-0vQ4fz9TTM4bCdllYWEJ2JHBUXR9xqPtc70dJ7BMRDVfvZyYdrgey3nP5RRcVj+qAgnHJM8r9fvgrfnPMxdnhA==}
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -3223,6 +3226,10 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.44.2':
     optional: true
 
+  '@skipperndt/plugin-machine-uid@0.1.0':
+    dependencies:
+      '@tauri-apps/api': 2.6.0
+
   '@soorria/solid-dropzone@1.0.1(solid-js@1.9.7)':
     dependencies:
       file-selector: 0.6.0
@@ -3329,8 +3336,6 @@ snapshots:
   '@types/node@24.0.10':
     dependencies:
       undici-types: 7.8.0
-
-  '@types/tcp-port-used@1.0.4': {}
 
   '@types/yauzl@2.10.3':
     dependencies:

@@ -1,4 +1,4 @@
-import { getDeviceName, sendMessage } from "@sureshot/api";
+import { sendMessage } from "@sureshot/api";
 
 export default defineBackground(() => {
   console.log("Hello background!", { id: browser.runtime.id });
@@ -69,11 +69,7 @@ async function sendURL(url: string, message: string = "") {
       "sidearm",
       message || `リンクを共有: ${url}`,
       "text",
-      [],
-      {
-        ip: "192.168.5.3",
-        port: 8000,
-      }
+      []
     );
     return result;
   } catch (error) {

@@ -7,9 +7,7 @@ function App() {
 
   return (
     <>
-      <a
-        href="https://localhost:3000"
-        target="_blank"
+      <div
         style={{
           display: "flex",
           "flex-direction": "row",
@@ -17,7 +15,9 @@ function App() {
           gap: "8px",
         }}
       >
-        <img src={shotLogo} alt="sure-shot logo" width={16} height={16} />
+        <a href="https://localhost:3000" target="_blank">
+          <img src={shotLogo} alt="sure-shot logo" width={16} height={16} />
+        </a>
         <p
           style={{
             "font-size": "12px",
@@ -29,18 +29,10 @@ function App() {
         >
           sure-shot
         </p>
-      </a>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count()}
-        </button>
-        <p>
-          Edit <code>popup/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p class="read-the-docs">
-        Click on the WXT and Solid logos to learn more
-      </p>
+      <div class="card">
+        <p>...</p>
+      </div>
     </>
   );
 }

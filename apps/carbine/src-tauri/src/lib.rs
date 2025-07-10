@@ -303,6 +303,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_machine_uid::init())
         .invoke_handler(tauri::generate_handler![
             find_host,
             get_current_host,

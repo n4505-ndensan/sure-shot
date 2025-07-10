@@ -1,9 +1,6 @@
 import { Component, createSignal, onMount } from "solid-js";
-import {
-  getCurrentHost,
-  refreshHost,
-  type ServerInfo,
-} from "@sureshot/api";
+import { type ServerInfo } from "@sureshot/api";
+import { getHostOrConnect } from "~/api/hostApi";
 
 export const HostStatus: Component = () => {
   const [host, setHost] = createSignal<ServerInfo | null>(null);
@@ -15,24 +12,12 @@ export const HostStatus: Component = () => {
     setError(null);
 
     try {
-      const currentHost = await getCurrentHost();
+      const currentHost = await getHostOrConnect();
       setHost(currentHost);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load host");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await refreshHost();
-      await loadHost();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to refresh host");
+      setError(
+        err instanceof Error ? err.message : "Failed to connect to host"
+      );
     } finally {
       setLoading(false);
     }
@@ -61,8 +46,8 @@ export const HostStatus: Component = () => {
       {error() && (
         <div style={{ color: "red", "margin-bottom": "1rem" }}>
           <div>Error: {error()}</div>
-          <button onClick={handleRefresh} disabled={loading()}>
-            {loading() ? "Refreshing..." : "Retry"}
+          <button onClick={loadHost} disabled={loading()}>
+            {loading() ? "Connecting..." : "Retry"}
           </button>
         </div>
       )}
@@ -70,7 +55,7 @@ export const HostStatus: Component = () => {
       {host() && !loading() && !error() && (
         <>
           <p style={{ "flex-grow": 1 }}>{host()!.name}</p>
-          <button onClick={handleRefresh} disabled={loading()}>
+          <button onClick={loadHost} disabled={loading()}>
             Refresh
           </button>
         </>
@@ -79,7 +64,7 @@ export const HostStatus: Component = () => {
       {!host() && !loading() && !error() && (
         <div>
           <div style={{ color: "orange" }}>No host found</div>
-          <button onClick={handleRefresh} disabled={loading()}>
+          <button onClick={loadHost} disabled={loading()}>
             {loading() ? "Searching..." : "Search for Host"}
           </button>
         </div>

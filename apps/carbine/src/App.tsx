@@ -1,20 +1,22 @@
-import { Component, onMount, createSignal } from "solid-js";
+import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import MessageInput from "./components/messages/MessageInput";
 import MessageList from "./components/messages/MessageList";
 import { HostStatus } from "./components/host/HostStatus";
 
 import "./App.scss";
-import { getDeviceName, getLocalIp } from "@sureshot/api";
 import { globalStore, setGlobalStore } from "./store/GlobalStore";
 import {
-  createChannel,
-  Importance,
   isPermissionGranted,
   requestPermission,
-  Visibility,
 } from "@tauri-apps/plugin-notification";
+import { getLocalIp } from "./api/getLocalIp";
+import { getDeviceName } from "./utils/getDeviceName";
+import LoginForm from "./components/LoginForm";
+import { AuthStatus, getAuthStatus } from "@sureshot/api/src";
 
 const App: Component = () => {
+  const [status, setStatus] = createSignal<AuthStatus | undefined>();
+
   onMount(async () => {
     const localIp = await getLocalIp();
     if (globalStore.localIp !== localIp) {
@@ -24,7 +26,7 @@ const App: Component = () => {
     if (globalStore.deviceName !== deviceName) {
       setGlobalStore({ deviceName });
     }
-    
+
     // Do you have permission to send a notification?
     let permissionGranted = await isPermissionGranted();
 
@@ -34,18 +36,25 @@ const App: Component = () => {
       permissionGranted = permission === "granted";
     }
 
-    await createChannel({
-      id: "messages",
-      name: "Messages",
-      description: "Notifications for new messages",
-      importance: Importance.High,
-      visibility: Visibility.Private,
-      lights: true,
-      lightColor: "#ff0000",
+    // await createChannel({
+    //   id: "messages",
+    //   name: "Messages",
+    //   description: "Notifications for new messages",
+    //   importance: Importance.High,
+    //   visibility: Visibility.Private,
+    //   lights: true,
+    //   lightColor: "#ff0000",
 
-      vibration: true,
-      sound: "notification_sound",
-    });
+    //   vibration: true,
+    //   sound: "notification_sound",
+    // });
+  });
+
+  createEffect(async () => {
+    globalStore.authStatus;
+    const authStatus = await getAuthStatus();
+    setStatus(authStatus);
+    0;
   });
 
   return (
@@ -67,7 +76,22 @@ const App: Component = () => {
             "flex-wrap": "wrap",
           }}
         >
-          <p class="header">SURE-SHOT</p>
+          <div
+            style={{
+              gap: "1rem",
+              display: "flex",
+              "flex-direction": "row",
+              "align-items": "center",
+            }}
+          >
+            <p class="header">SURE-SHOT</p>
+
+            <p>
+              {status()?.authenticated
+                ? `logged in as ${status()?.name}`
+                : "logged out"}
+            </p>
+          </div>
 
           {/* Host Status Section */}
           <HostStatus />
@@ -76,24 +100,29 @@ const App: Component = () => {
 
       <main
         style={{
-          display: "flex",
+          height: "100%",
           "flex-direction": "column",
           border: "1px solid #ddd",
           "background-color": "#f9f9f9",
           "border-radius": "4px",
         }}
       >
-        <MessageList />
+        <Show
+          when={globalStore.authStatus === "authenticated"}
+          fallback={<LoginForm />}
+        >
+          <MessageList />
 
-        <div
-          style={{
-            width: "100%",
-            height: "1px",
-            "background-color": "#ddd",
-          }}
-        />
+          <div
+            style={{
+              width: "100%",
+              height: "1px",
+              "background-color": "#ddd",
+            }}
+          />
 
-        <MessageInput />
+          <MessageInput />
+        </Show>
       </main>
     </div>
   );

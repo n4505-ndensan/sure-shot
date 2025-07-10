@@ -35,7 +35,6 @@ const MessageInput: Component = () => {
     }
 
     setIsSending(true);
-    setSendStatus("📤 Sending message...");
 
     try {
       const result = await sendMessage(
@@ -47,7 +46,6 @@ const MessageInput: Component = () => {
       );
 
       if (result.success) {
-        setSendStatus("✅ Message sent successfully!");
         setMessage(""); // メッセージフィールドをクリア
         setAttachments([]); // 添付ファイルをクリア
       } else {

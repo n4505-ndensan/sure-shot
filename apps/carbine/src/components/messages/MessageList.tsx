@@ -4,9 +4,10 @@ import {
   createEffect,
   onCleanup,
   Show,
+  onMount,
 } from "solid-js";
 import { For } from "solid-js";
-import { ReceivedMessage } from "@sureshot/api";
+import { ApiToken, ReceivedMessage } from "@sureshot/api";
 import LinkifiedText from "../common/LinkifiedText";
 import { globalStore } from "~/store/GlobalStore";
 import { getMessages, useEventsSource } from "@sureshot/api/src";
@@ -18,10 +19,11 @@ interface Props {
 
 const MessageList: Component<Props> = (props) => {
   let scrollList: HTMLDivElement | undefined;
+  const [token, setToken] = createSignal<ApiToken | undefined>(undefined);
   const [messages, setMessages] = createSignal<ReceivedMessage[] | undefined>(
     undefined
   );
-  const { eventSource, isConnected, error } = useEventsSource(
+  const { eventSource, error, isConnected } = useEventsSource(
     (message: ReceivedMessage) => {
       setMessages((prev) => [...(prev || []), message]);
       if (message.from !== globalStore.localIp) {
@@ -42,7 +44,6 @@ const MessageList: Component<Props> = (props) => {
       }
     }
   );
-
   // 過去のメッセージを取得
   const loadPastMessages = async () => {
     const messages = await getMessages();

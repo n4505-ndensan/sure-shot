@@ -1,4 +1,4 @@
-use crate::{AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse};
+use crate::{ AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse};
 use axum::{Json, routing};
 use std::net::IpAddr;
 
@@ -17,6 +17,11 @@ pub fn external_send_message(
 
                 let from_name = request.from_name.clone();
                 let from_ip = request.from_ip.clone();
+
+                println!(
+                    "send requested from {} ({}): {}",
+                    from_name, from_ip, request.message
+                );
 
                 let sent_message = ReceivedMessage {
                     from: from_ip.clone(), // クライアントのIP

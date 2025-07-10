@@ -1,7 +1,7 @@
 use server::{
     AppState, ReceivedMessage, ServerConfig, external::create_external_router, find_local_ip,
 };
-use std::net::{SocketAddr};
+use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::{Mutex, broadcast};
 
@@ -13,9 +13,23 @@ async fn main() {
     };
     println!("Found local IP: {}", ip);
 
-    // 設定をロード
-    let config = ServerConfig::load_or_create();
+    // 設定をロードまたは作成
+    let config = match ServerConfig::load_or_create() {
+        Ok(config) => config,
+        Err(_) => {
+            println!("設定ファイルが見つかりません。初期設定を開始します。");
+            match ServerConfig::create_with_setup() {
+                Ok(config) => config,
+                Err(e) => {
+                    eprintln!("設定の作成に失敗しました: {}", e);
+                    return;
+                }
+            }
+        }
+    };
+
     println!("Server nickname: {}", config.nickname);
+    println!("Authorized devices: {}", config.authorized_devices.len());
 
     // アプリケーション状態を初期化
     let messages = Arc::new(Mutex::new(Vec::<ReceivedMessage>::new()));

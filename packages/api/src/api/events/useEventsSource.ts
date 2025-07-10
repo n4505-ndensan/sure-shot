@@ -1,37 +1,36 @@
 import { createSignal } from "solid-js";
 import { ReceivedMessage } from "../../types/generated/api-types";
-import { getCurrentHost } from "../host/hostApi";
+import { AuthManager } from "../../auth/AuthManager";
 
 export function useEventsSource(
   onMessage: (message: ReceivedMessage) => void
 ): {
   eventSource: () => EventSource | null;
   isConnected: () => boolean;
-  error: () => string | null;
+  error: () => string | undefined;
 } {
   const [eventSource, setEventSource] = createSignal<EventSource | null>(null);
   const [isConnected, setIsConnected] = createSignal(false);
-  const [connectionError, setConnectionError] = createSignal<string | null>(
-    null
-  );
+  const [connectionError, setConnectionError] = createSignal<
+    string | undefined
+  >(undefined);
 
   // SSE接続の初期化
   const initializeSSE = async () => {
     try {
-      // 現在のホストを取得
-      const currentHost = await getCurrentHost();
-      if (!currentHost) {
-        setConnectionError("No host found. Please select a host first.");
-        return;
+      const authManager = AuthManager.getInstance();
+
+      if (!authManager.isAuthenticated()) {
+        throw new Error("Not authenticated");
       }
 
-      const eventsUrl = `http://${currentHost.ip}:${currentHost.port}/events`;
+      const eventsUrl = `${authManager.getBaseUrl()}/events`;
       let eventSource = new EventSource(eventsUrl);
 
       eventSource.onopen = () => {
         console.log("SSE connection opened to:", eventsUrl);
         setIsConnected(true);
-        setConnectionError(null);
+        setConnectionError(undefined);
       };
 
       eventSource.onmessage = (event) => {

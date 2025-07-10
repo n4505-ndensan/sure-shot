@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod events;
 pub mod messages;
 pub mod ping;
@@ -13,6 +14,7 @@ pub fn create_external_router(app_state: AppState, ip: IpAddr) -> Router {
 
     // 各ルートハンドラーを適用
     let router = ping::external_ping(router, app_state.clone());
+    let router = auth::external_auth(router, app_state.clone());
     let router = events::external_events(router, app_state.clone());
     let router = messages::external_get_messages(router, app_state.clone());
     let router = send::external_send_message(router, app_state.clone(), ip);
