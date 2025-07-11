@@ -44,8 +44,16 @@ export const HostStatus: Component = () => {
       {loading() && <p>Loading...</p>}
 
       {error() && (
-        <div style={{ color: "red", "margin-bottom": "1rem" }}>
-          <div>Error: {error()}</div>
+        <div
+          style={{
+            display: "flex",
+            "flex-direction": "row",
+            color: "red",
+            "align-items": "center",
+            gap: "1rem",
+          }}
+        >
+          <p style={{ "text-overflow": "ellipsis" }}>Error: {error()}</p>
           <button onClick={loadHost} disabled={loading()}>
             {loading() ? "Connecting..." : "Retry"}
           </button>

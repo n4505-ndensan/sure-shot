@@ -4,8 +4,31 @@ pub mod whoami;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::Arc;
-use tokio::sync::{Mutex, broadcast};
+use tokio::sync::{Mutex, broadcast, mpsc};
 use typeshare::typeshare;
+
+#[derive(Debug, Clone)]
+pub enum ServerMessage {
+    Log(String),
+    StatusUpdate(ServerStatus),
+}
+
+#[derive(Debug, Clone)]
+pub struct ServerStatus {
+    pub state: ServerState,
+    pub nickname: Option<String>,
+    pub ip: Option<String>,
+    pub port: Option<u16>,
+}
+
+#[derive(Debug, Clone)]
+pub enum ServerState {
+    Starting,
+    Running,
+    Stopped,
+    Aborted,
+    Error(String),
+}
 
 // メッセージ保持とSSE配信用の状態
 #[derive(Clone)]
@@ -13,6 +36,7 @@ pub struct AppState {
     pub messages: Arc<Mutex<Vec<ReceivedMessage>>>,
     pub message_broadcaster: broadcast::Sender<ReceivedMessage>,
     pub config: Arc<Mutex<ServerConfig>>,
+    pub log_sender: Option<mpsc::UnboundedSender<ServerMessage>>,
 }
 
 // サーバー設定

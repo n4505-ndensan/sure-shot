@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "android:build": "tauri android build",
+    "android:build-signed": "pnpm run android:build && powershell -ExecutionPolicy Bypass -File scripts/sign-apk.ps1",
+    "android:sign": "powershell -ExecutionPolicy Bypass -File scripts/sign-apk.ps1"
   },
   "license": "MIT",
   "dependencies": {

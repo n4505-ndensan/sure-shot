@@ -4,44 +4,60 @@ import { HostConnectionInfo } from "../../types/Types";
 export async function login(
   hostInfo: HostConnectionInfo,
   deviceId: string,
-  password: string
+  password: string,
+  debugFn?: (message: string) => void
 ): Promise<AuthStatus | undefined> {
+  const log = debugFn || console.log;
+
+  log(
+    `login function called with: hostInfo=${JSON.stringify(
+      hostInfo
+    )}, deviceId=${deviceId}, passwordLength=${password?.length}`
+  );
+
   try {
     const authManager = AuthManager.getInstance();
+    const url = `http://${hostInfo.host.ip}:${hostInfo.host.port}/auth/login`;
+    log(`Making fetch request to: ${url}`);
 
-    const response = await fetch(
-      `http://${hostInfo.host.ip}:${hostInfo.host.port}/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          device_id: deviceId,
-          password,
-        }),
-      }
+    const requestBody = {
+      device_id: deviceId,
+      password,
+    };
+    log(`Request body: ${JSON.stringify(requestBody)}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    log(
+      `Fetch response received: status=${response.status}, statusText=${response.statusText}, ok=${response.ok}`
     );
 
     // HTTPステータスコードベースでエラーハンドリング
     if (response.status === 401) {
-      console.error("Authentication failed: Invalid password");
+      log("Authentication failed: Invalid password");
       return undefined;
     }
 
     if (response.status === 403) {
-      console.error("Authentication failed: Device not authorized");
+      log("Authentication failed: Device not authorized");
       return undefined;
     }
 
     if (!response.ok) {
-      console.error("Authentication failed with status:", response.status);
+      log(`Authentication failed with status: ${response.status}`);
       return undefined;
     }
 
     const json = await response.json();
+    log(`Response JSON: ${JSON.stringify(json)}`);
 
     // 認証成功、トークンを保存
     authManager.setToken(json.token);
-    console.log(json.token);
+    log(`Token saved: ${json.token}`);
     const authStatus: AuthStatus = {
       authenticated: true,
       host: hostInfo.host,
@@ -52,7 +68,8 @@ export async function login(
     authManager.setAuthStatus(authStatus);
     return authStatus;
   } catch (error) {
-    console.error("Login failed:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    log(`Login failed: ${errorMsg}`);
     return undefined;
   }
 }

@@ -1,2 +1,14 @@
 node_modules
 dist
+
+# Android keystore files
+*.jks
+*.keystore
+keystore.properties
+
+# Signed APKs
+*-signed.apk
+
+# Environment files with sensitive data
+.env.local
+.env.production
