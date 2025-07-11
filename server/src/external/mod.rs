@@ -4,6 +4,9 @@ pub mod messages;
 pub mod ping;
 pub mod send;
 
+// auth.rsから認証関数を再エクスポート
+pub use auth::verify_token;
+
 use crate::AppState;
 use axum::Router;
 use tower_http::cors::CorsLayer;

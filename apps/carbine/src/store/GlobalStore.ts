@@ -1,16 +1,17 @@
-import { ApiToken } from "@sureshot/api/src";
+
+import { AuthStatus } from "@sureshot/api/src/auth/AuthManager";
 import { createStore } from "solid-js/store";
 
 type GlobalStore = {
   localIp?: string; // 自分のIPアドレス
   deviceName?: string; // 自分のデバイス名
-  authStatus: "init" | "authenticated" | "error"; // 認証状態
+  authStatus?: AuthStatus; // 認証状態
 };
 
 const [globalStore, setGlobalStore] = createStore<GlobalStore>({
   localIp: undefined,
   deviceName: undefined,
-  authStatus: "init",
+  authStatus: undefined,
 });
 
 export { globalStore, setGlobalStore };

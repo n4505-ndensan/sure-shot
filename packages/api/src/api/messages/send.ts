@@ -13,11 +13,6 @@ export const sendMessage = async (
 ): Promise<SendMessageResponse> => {
   try {
     const authManager = AuthManager.getInstance();
-
-    if (!authManager.isAuthenticated()) {
-      throw new Error("Not authenticated");
-    }
-
     const sendUrl = `${authManager.getBaseUrl()}/send`;
     const response = await fetch(sendUrl, {
       method: "POST",

@@ -68,7 +68,7 @@ impl ServerConfig {
     }
 
     pub fn create_with_setup() -> Result<Self, Box<dyn std::error::Error>> {
-        println!("=== Sure-Shot Server 初期設定 ===");
+        // println!("=== Sure-Shot Server 初期設定 ===");
 
         // サーバー名の設定
         print!(
@@ -87,7 +87,7 @@ impl ServerConfig {
         }
 
         // パスワードの設定
-        println!("管理者パスワードを設定してください:");
+        // println!("管理者パスワードを設定してください:");
         let password = rpassword::read_password()?;
 
         if password.is_empty() {
@@ -95,7 +95,7 @@ impl ServerConfig {
         }
 
         // パスワード確認
-        println!("パスワードを再度入力してください:");
+        // println!("パスワードを再度入力してください:");
         let password_confirm = rpassword::read_password()?;
 
         if password != password_confirm {
@@ -120,7 +120,7 @@ impl ServerConfig {
         };
 
         config.save()?;
-        println!("設定が正常に保存されました。");
+        // println!("設定が正常に保存されました。");
 
         Ok(config)
     }

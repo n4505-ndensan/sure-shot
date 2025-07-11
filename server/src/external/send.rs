@@ -1,65 +1,119 @@
-use crate::{ AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse};
-use axum::{Json, routing};
+use super::verify_token;
+use crate::{AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse};
+use axum::{
+    Json,
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
+    routing,
+};
 
-pub fn external_send_message(
-    router: routing::Router,
-    app_state: AppState,
-) -> routing::Router {
+pub fn external_send_message(router: routing::Router, app_state: AppState) -> routing::Router {
     router.route("/send", {
         let state = app_state.clone();
-        routing::post(move |Json(request): Json<SendMessageRequest>| {
-            let state = state.clone();
-            async move {
-                let config = state.config.lock().await;
-                drop(config); // ロックを早期に解放
+        routing::post(
+            move |headers: HeaderMap, Json(request): Json<SendMessageRequest>| {
+                let state = state.clone();
+                async move {
+                    // println!(
+                    //     "Received send request: {} from {} ({})",
+                    //     request.message, request.from_name, request.from_ip
+                    // );
 
-                let from_name = request.from_name.clone();
-                let from_ip = request.from_ip.clone();
+                    // Authorizationヘッダーからトークンを取得
+                    let token = headers
+                        .get("authorization")
+                        .and_then(|header| header.to_str().ok())
+                        .and_then(|auth_str| {
+                            if auth_str.starts_with("Bearer ") {
+                                Some(&auth_str[7..])
+                            } else {
+                                None
+                            }
+                        });
 
-                println!(
-                    "send requested from {} ({}): {}",
-                    from_name, from_ip, request.message
-                );
+                    match token {
+                        Some(token) => {
+                            // トークンの検証
+                            match verify_token(token).await {
+                                Some(_device_id) => {
+                                    // 認証成功、メッセージ処理を続行
+                                    // println!(
+                                    //     "Token authorized for send request: {} from {} ({})",
+                                    //     request.message, request.from_name, request.from_ip
+                                    // );
+                                    let config = state.config.lock().await;
+                                    drop(config); // ロックを早期に解放
 
-                let sent_message = ReceivedMessage {
-                    from: from_ip.clone(), // クライアントのIP
-                    from_name: from_name.clone(),
-                    message: request.message.clone(),
-                    message_type: request.message_type.clone(),
-                    timestamp: chrono::Utc::now().to_rfc3339(),
-                    is_self: false, // 外部からの送信なのでfalse
-                    attachments: request.attachments.clone(),
-                };
+                                    let from_name = request.from_name.clone();
+                                    let from_ip = request.from_ip.clone();
 
-                // 自分のメッセージリストに追加
-                {
-                    let mut messages = state.messages.lock().await;
-                    messages.push(sent_message.clone());
+                                    // println!(
+                                    //     "send requested from {} ({}): {}",
+                                    //     from_name, from_ip, request.message
+                                    // );
 
-                    // 最新100件のみ保持
-                    if messages.len() > 100 {
-                        messages.remove(0);
+                                    let sent_message = ReceivedMessage {
+                                        from: from_ip.clone(), // クライアントのIP
+                                        from_name: from_name.clone(),
+                                        message: request.message.clone(),
+                                        message_type: request.message_type.clone(),
+                                        timestamp: chrono::Utc::now().to_rfc3339(),
+                                        is_self: false, // 外部からの送信なのでfalse
+                                        attachments: request.attachments.clone(),
+                                    };
+
+                                    // 自分のメッセージリストに追加
+                                    {
+                                        let mut messages = state.messages.lock().await;
+                                        messages.push(sent_message.clone());
+
+                                        // 最新100件のみ保持
+                                        if messages.len() > 100 {
+                                            messages.remove(0);
+                                        }
+                                    }
+
+                                    // 自分のSSEクライアントにも配信
+                                    let result = state.message_broadcaster.send(sent_message);
+
+                                    let response = match result {
+                                        Ok(_) => SendMessageResponse {
+                                            success: true,
+                                            message: "Message sent successfully".to_string(),
+                                            timestamp: chrono::Utc::now().to_rfc3339(),
+                                        },
+                                        Err(err) => SendMessageResponse {
+                                            success: false,
+                                            message: format!("Failed to send message: {}", err),
+                                            timestamp: chrono::Utc::now().to_rfc3339(),
+                                        },
+                                    };
+
+                                    (StatusCode::OK, Json(response)).into_response()
+                                }
+                                None => {
+                                    // 無効なトークン
+                                    let response = SendMessageResponse {
+                                        success: false,
+                                        message: "Invalid or expired token".to_string(),
+                                        timestamp: chrono::Utc::now().to_rfc3339(),
+                                    };
+                                    (StatusCode::UNAUTHORIZED, Json(response)).into_response()
+                                }
+                            }
+                        }
+                        None => {
+                            // トークンが提供されていない
+                            let response = SendMessageResponse {
+                                success: false,
+                                message: "Token required".to_string(),
+                                timestamp: chrono::Utc::now().to_rfc3339(),
+                            };
+                            (StatusCode::UNAUTHORIZED, Json(response)).into_response()
+                        }
                     }
                 }
-
-                // 自分のSSEクライアントにも配信
-                let result = state.message_broadcaster.send(sent_message);
-
-                let response = match result {
-                    Ok(_) => SendMessageResponse {
-                        success: true,
-                        message: "Message sent successfully".to_string(),
-                        timestamp: chrono::Utc::now().to_rfc3339(),
-                    },
-                    Err(err) => SendMessageResponse {
-                        success: false,
-                        message: format!("Failed to send message: {}", err),
-                        timestamp: chrono::Utc::now().to_rfc3339(),
-                    },
-                };
-
-                Json(response)
-            }
-        })
+            },
+        )
     })
 }

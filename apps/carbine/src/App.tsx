@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import MessageInput from "./components/messages/MessageInput";
 import MessageList from "./components/messages/MessageList";
-import { HostStatus } from "./components/host/HostStatus";
+import { HostStatus } from "./components/status/HostStatus";
 
 import "./App.scss";
 import { globalStore, setGlobalStore } from "./store/GlobalStore";
@@ -12,11 +12,11 @@ import {
 import { getLocalIp } from "./api/getLocalIp";
 import { getDeviceName } from "./utils/getDeviceName";
 import LoginForm from "./components/LoginForm";
-import { AuthStatus, getAuthStatus } from "@sureshot/api/src";
+import { AuthStatus } from "@sureshot/api/src/auth/AuthManager";
+import { getAuthStatus, logout } from "@sureshot/api/src/api/auth/login";
+import { DeviceStatus } from "./components/status/DeviceStatus";
 
 const App: Component = () => {
-  const [status, setStatus] = createSignal<AuthStatus | undefined>();
-
   onMount(async () => {
     const localIp = await getLocalIp();
     if (globalStore.localIp !== localIp) {
@@ -27,6 +27,12 @@ const App: Component = () => {
       setGlobalStore({ deviceName });
     }
 
+    const currentAuthStatus = await getAuthStatus();
+    console.log("Current Auth Status:", currentAuthStatus);
+    if (currentAuthStatus) {
+      setGlobalStore({ authStatus: currentAuthStatus });
+    }
+
     // Do you have permission to send a notification?
     let permissionGranted = await isPermissionGranted();
 
@@ -35,26 +41,6 @@ const App: Component = () => {
       const permission = await requestPermission();
       permissionGranted = permission === "granted";
     }
-
-    // await createChannel({
-    //   id: "messages",
-    //   name: "Messages",
-    //   description: "Notifications for new messages",
-    //   importance: Importance.High,
-    //   visibility: Visibility.Private,
-    //   lights: true,
-    //   lightColor: "#ff0000",
-
-    //   vibration: true,
-    //   sound: "notification_sound",
-    // });
-  });
-
-  createEffect(async () => {
-    globalStore.authStatus;
-    const authStatus = await getAuthStatus();
-    setStatus(authStatus);
-    0;
   });
 
   return (
@@ -72,29 +58,16 @@ const App: Component = () => {
             "flex-direction": "row",
             width: "100%",
             "align-items": "center",
-            "justify-content": "space-between",
             "flex-wrap": "wrap",
           }}
         >
-          <div
-            style={{
-              gap: "1rem",
-              display: "flex",
-              "flex-direction": "row",
-              "align-items": "center",
-            }}
-          >
-            <p class="header">SURE-SHOT</p>
+          <p class="header" style={{ "margin-right": "auto" }}>
+            SURE-SHOT
+          </p>
 
-            <p>
-              {status()?.authenticated
-                ? `logged in as ${status()?.name}`
-                : "logged out"}
-            </p>
-          </div>
-
-          {/* Host Status Section */}
           <HostStatus />
+
+          <DeviceStatus />
         </div>
       </header>
 
@@ -108,7 +81,7 @@ const App: Component = () => {
         }}
       >
         <Show
-          when={globalStore.authStatus === "authenticated"}
+          when={globalStore.authStatus?.authenticated}
           fallback={<LoginForm />}
         >
           <MessageList />

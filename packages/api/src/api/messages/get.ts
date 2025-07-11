@@ -5,10 +5,6 @@ export const getMessages = async (): Promise<ReceivedMessage[] | undefined> => {
   try {
     const authManager = AuthManager.getInstance();
 
-    if (!authManager.isAuthenticated()) {
-      throw new Error("Not authenticated");
-    }
-
     const getUrl = `${authManager.getBaseUrl()}/messages`;
     const response = await fetch(getUrl, {
       headers: authManager.getAuthHeaders(),

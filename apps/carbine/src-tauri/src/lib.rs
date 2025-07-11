@@ -262,7 +262,7 @@ async fn auto_discover_host() -> Result<(), String> {
     let available_ips = check_available_ips(local_ip, 8000).await;
     let server_infos = ping_servers_by_ip(available_ips, 8000, local_ip).await;
 
-    println!("Discovered servers: {:?}", server_infos);
+    // println!("Discovered servers: {:?}", server_infos);
 
     // Find the first active server
     for server in server_infos {
@@ -273,7 +273,7 @@ async fn auto_discover_host() -> Result<(), String> {
 
             // Save to config file
             if let Err(e) = save_host_config(&server) {
-                eprintln!("Failed to save host config: {}", e);
+                // eprintln!("Failed to save host config: {}", e);
             }
 
             return Ok(());
@@ -315,7 +315,7 @@ pub fn run() {
             // Initialize host on startup
             tauri::async_runtime::spawn(async {
                 if let Err(e) = initialize_host().await {
-                    eprintln!("Failed to initialize host: {}", e);
+                    // eprintln!("Failed to initialize host: {}", e);
                 }
             });
             Ok(())

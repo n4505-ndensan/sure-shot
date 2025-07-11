@@ -1,32 +1,27 @@
-import { ApiToken, login } from "@sureshot/api/src";
+import { HostConnectionInfo, login } from "@sureshot/api/src";
 import { getHostOrConnect } from "./hostApi";
-import { getLocalIp } from "./getLocalIp";
 import { setGlobalStore } from "~/store/GlobalStore";
 
 export const tryLogin = async (
   deviceId: string,
   password: string
 ): Promise<boolean> => {
-  const localIp = await getLocalIp();
   const host = await getHostOrConnect();
 
   if (host) {
     // 認証トークンを作成
-    const apiToken: ApiToken = {
-      selfLocalIp: localIp,
-      deviceId: deviceId,
+    const hostInfo: HostConnectionInfo = {
       host: host,
-      password: password,
     };
 
-    const authenticated = await login(apiToken);
+    const authStatus = await login(hostInfo, deviceId, password);
     // ログイン
-    console.log(authenticated);
-    if (authenticated) {
-      setGlobalStore("authStatus", "authenticated");
+    console.log(authStatus);
+    if (authStatus) {
+      setGlobalStore("authStatus", authStatus);
       return true;
     }
   }
-  setGlobalStore("authStatus", "error");
+  setGlobalStore("authStatus", undefined);
   return false;
 };

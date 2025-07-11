@@ -1,18 +1,22 @@
-import { AuthManager } from "../../auth/AuthManager";
-import { ApiToken } from "../../types/ApiToken";
+import { AuthManager, AuthStatus } from "../../auth/AuthManager";
+import { HostConnectionInfo } from "../../types/Types";
 
-export async function login(apiToken: ApiToken): Promise<boolean> {
+export async function login(
+  hostInfo: HostConnectionInfo,
+  deviceId: string,
+  password: string
+): Promise<AuthStatus | undefined> {
   try {
     const authManager = AuthManager.getInstance();
 
     const response = await fetch(
-      `http://${apiToken.host.ip}:${apiToken.host.port}/auth/login`,
+      `http://${hostInfo.host.ip}:${hostInfo.host.port}/auth/login`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          password: apiToken.password,
-          device_id: apiToken.deviceId,
+          device_id: deviceId,
+          password,
         }),
       }
     );
@@ -20,54 +24,45 @@ export async function login(apiToken: ApiToken): Promise<boolean> {
     // HTTPステータスコードベースでエラーハンドリング
     if (response.status === 401) {
       console.error("Authentication failed: Invalid password");
-      return false;
+      return undefined;
     }
 
     if (response.status === 403) {
       console.error("Authentication failed: Device not authorized");
-      return false;
+      return undefined;
     }
 
     if (!response.ok) {
       console.error("Authentication failed with status:", response.status);
-      return false;
+      return undefined;
     }
 
     const json = await response.json();
-    console.log("Authentication successful:", json.message);
 
     // 認証成功、トークンを保存
-    authManager.setToken(apiToken);
-    return true;
+    authManager.setToken(json.token);
+    console.log(json.token);
+    const authStatus: AuthStatus = {
+      authenticated: true,
+      host: hostInfo.host,
+      name: deviceId,
+      password, // パスワードも保存する場合
+    };
+    // ホスト情報も保存
+    authManager.setAuthStatus(authStatus);
+    return authStatus;
   } catch (error) {
     console.error("Login failed:", error);
-    return false;
+    return undefined;
   }
 }
 
 export function logout(): void {
-  AuthManager.getInstance().clearToken();
+  const authManager = AuthManager.getInstance();
+  authManager.clearToken();
+  authManager.clearAuthStatus();
 }
 
-export function isAuthenticated(): boolean {
-  return AuthManager.getInstance().isAuthenticated();
-}
-
-export interface AuthStatus {
-  authenticated: boolean;
-  name?: string;
-}
-
-export function getAuthStatus(): AuthStatus {
-  const manager = AuthManager.getInstance();
-  if (manager.isAuthenticated()) {
-    return {
-      authenticated: true,
-      name: AuthManager.getInstance().getToken()?.deviceId,
-    };
-  } else {
-    return {
-      authenticated: false,
-    };
-  }
+export function getAuthStatus(): AuthStatus | null {
+  return AuthManager.getInstance().getAuthStatus();
 }

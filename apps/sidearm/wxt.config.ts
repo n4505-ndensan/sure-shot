@@ -6,8 +6,8 @@ export default defineConfig({
   modules: ["@wxt-dev/module-solid", "@wxt-dev/auto-icons"],
 
   manifest: {
-    permissions: ["contextMenus", "activeTab"],
-    host_permissions: ["http://localhost:8000/*"],
+    permissions: ["contextMenus", "activeTab", "storage"],
+    host_permissions: ["http://*/*"],
   },
 
   autoIcons: {
