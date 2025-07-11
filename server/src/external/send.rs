@@ -1,11 +1,9 @@
 use crate::{ AppState, ReceivedMessage, SendMessageRequest, SendMessageResponse};
 use axum::{Json, routing};
-use std::net::IpAddr;
 
 pub fn external_send_message(
     router: routing::Router,
     app_state: AppState,
-    ip: IpAddr,
 ) -> routing::Router {
     router.route("/send", {
         let state = app_state.clone();

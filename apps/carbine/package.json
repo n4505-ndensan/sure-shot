@@ -1,7 +1,7 @@
 {
-  "name": "carbine",
+  "name": "sure-shot-carbine",
   "version": "0.1.0",
-  "description": "",
+  "description": "carbine is the client application for Sure Shot, a cross-platform file sharing tool.",
   "type": "module",
   "scripts": {
     "start": "vite",

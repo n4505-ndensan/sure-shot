@@ -6,10 +6,9 @@ pub mod send;
 
 use crate::AppState;
 use axum::Router;
-use std::net::IpAddr;
 use tower_http::cors::CorsLayer;
 
-pub fn create_external_router(app_state: AppState, ip: IpAddr) -> Router {
+pub fn create_external_router(app_state: AppState) -> Router {
     let router = Router::new();
 
     // 各ルートハンドラーを適用
@@ -17,7 +16,7 @@ pub fn create_external_router(app_state: AppState, ip: IpAddr) -> Router {
     let router = auth::external_auth(router, app_state.clone());
     let router = events::external_events(router, app_state.clone());
     let router = messages::external_get_messages(router, app_state.clone());
-    let router = send::external_send_message(router, app_state.clone(), ip);
+    let router = send::external_send_message(router, app_state.clone());
 
     // CORS設定を追加
     router.layer(

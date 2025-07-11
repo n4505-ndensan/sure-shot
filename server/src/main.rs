@@ -47,7 +47,7 @@ async fn main() {
     // let internal_addr = SocketAddr::new(IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)), port);
 
     // ルーターを作成
-    let external_app = create_external_router(app_state.clone(), ip);
+    let external_app = create_external_router(app_state.clone());
 
     println!(
         "External API listening on http://{} (accessible from network)",
