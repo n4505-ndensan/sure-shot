@@ -3,71 +3,70 @@
 */
 
 export interface Attachment {
-	id: string;
-	filename: string;
-	mime_type: string;
-	size: number;
-	data: string;
-	thumbnail?: string;
+  id: string;
+  filename: string;
+  mime_type: string;
+  size: number;
+  data: string;
+  thumbnail?: string;
 }
 
 export interface GetNicknameResponse {
-	nickname: string;
+  nickname: string;
 }
 
 export interface PongResponse {
-	message: string;
-	name: string;
-	is_self: boolean;
+  message: string;
+  name: string;
+  is_self: boolean;
 }
 
 export interface ReceiveMessageResponse {
-	success: boolean;
-	message: string;
-	received_at: string;
+  success: boolean;
+  message: string;
+  received_at: string;
 }
 
 export interface ReceivedMessage {
-	from: string;
-	from_name: string;
-	message: string;
-	message_type: string;
-	timestamp: string;
-	is_self: boolean;
-	attachments: Attachment[];
+  from: string;
+  from_name: string;
+  message: string;
+  message_type: string;
+  timestamp: string;
+  is_self: boolean;
+  attachments: Attachment[];
 }
 
 export interface SendMessageRequest {
-	message: string;
-	message_type: string;
-	attachments: Attachment[];
-	from_name: string;
-	from_ip: string;
+  message: string;
+  message_type: string;
+  attachments: Attachment[];
+  from_name: string;
+  from_ip: string;
 }
 
 export interface SendMessageResponse {
-	success: boolean;
-	message: string;
-	timestamp: string;
+  success: boolean;
+  message: string;
+  timestamp: string;
 }
 
-export interface ServerInfo {
-	ip: string;
-	port: number;
-	status: string;
-	message: string;
-	name: string;
-	is_self: boolean;
+export interface HostInfo {
+  ip: string;
+  port: number;
+  status: string;
+  message: string;
+  name: string;
+  is_self: boolean;
 }
 
 export interface UpdateNicknameRequest {
-	nickname: string;
+  nickname: string;
 }
 
 export interface UpdateNicknameResponse {
-	success: boolean;
-	message: string;
-	old_nickname: string;
-	new_nickname: string;
+  success: boolean;
+  message: string;
+  old_nickname: string;
+  new_nickname: string;
 }
-

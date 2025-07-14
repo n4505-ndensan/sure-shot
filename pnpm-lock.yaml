@@ -159,9 +159,6 @@ importers:
       '@skipperndt/plugin-machine-uid':
         specifier: ^0.1.0
         version: 0.1.0
-      '@sureshot/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@tauri-apps/api':
         specifier: ^2
         version: 2.6.0
@@ -178,6 +175,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@sureshot/api':
+        specifier: workspace:*
+        version: link:../api
       solid-js:
         specifier: ^1.9.6
         version: 1.9.7

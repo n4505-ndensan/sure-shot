@@ -3,15 +3,15 @@ import {
   AuthStatus,
   getAuthStatus,
   login,
-  ServerInfo,
+  HostInfo,
 } from "@sureshot/api/src";
 
 /**
  * ブラウザ拡張機能用のホスト検索
  * ローカルネットワークをスキャンしてサーバーを発見
  */
-export async function findHostsInBrowser(): Promise<ServerInfo[]> {
-  const hosts: ServerInfo[] = [];
+export async function findHostsInBrowser(): Promise<HostInfo[]> {
+  const hosts: HostInfo[] = [];
   const commonPorts = [8000]; // sure-shotで使用される可能性のあるポート
 
   try {
@@ -41,7 +41,7 @@ export async function findHostsInBrowser(): Promise<ServerInfo[]> {
 /**
  * 個別のホストをスキャン
  */
-async function scanHost(ip: string, port: number): Promise<ServerInfo | null> {
+async function scanHost(ip: string, port: number): Promise<HostInfo | null> {
   try {
     console.log(`Scanning host: ${ip}:${port}`);
     const controller = new AbortController();
@@ -58,13 +58,13 @@ async function scanHost(ip: string, port: number): Promise<ServerInfo | null> {
     clearTimeout(timeoutId);
 
     if (response.ok) {
-      const serverInfo = await response.json();
+      const HostInfo = await response.json();
       return {
         ip,
         port,
         status: "online",
         message: "Connected",
-        name: serverInfo.name || "Unknown Server",
+        name: HostInfo.name || "Unknown Server",
         is_self: false,
       };
     }
@@ -148,7 +148,7 @@ async function getLocalIP(): Promise<string | null> {
 /**
  * サーバーにログインする
  */
-export async function loginToServer(host: ServerInfo): Promise<AuthStatus> {
+export async function loginToServer(host: HostInfo): Promise<AuthStatus> {
   try {
     const localIp = await getLocalIP();
     if (!localIp) {

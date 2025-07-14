@@ -18,8 +18,7 @@
   "dependencies": {
     "@skipperndt/plugin-machine-uid": "^0.1.0",
     "@tauri-apps/api": "^2",
-    "solid-js": "^1.9.6",
-    "@sureshot/ui": "workspace:*"
+    "solid-js": "^1.9.6"
   },
   "devDependencies": {
     "sass": "^1.58.0",

@@ -1,6 +1,7 @@
 use crate::server_manager::ServerManager;
 use crate::ui::App;
 use color_eyre::eyre::Result;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
 mod server_manager;
@@ -13,17 +14,28 @@ async fn main() -> Result<()> {
     // サーバーメッセージを送信するためのチャンネル
     let (message_sender, message_receiver) = mpsc::unbounded_channel();
 
-    // サーバーマネージャーを作成し、別タスクで起動
-    let server_manager = ServerManager::new(message_sender);
-    let server_handle = tokio::spawn(async move { server_manager.run_server().await });
+    // サーバーマネージャーを作成し、UIと共有
+    let server_manager = Arc::new(ServerManager::new(message_sender));
 
-    // TUIを起動
+    // 初期状態でサーバーを起動
+    let server_manager_clone = server_manager.clone();
+    tokio::spawn(async move {
+        if let Err(e) = server_manager_clone.start_server().await {
+            eprintln!("Failed to start server: {}", e);
+        }
+    });
+
+    // TUIを起動（server_managerを渡す）
     let terminal = ratatui::init();
-    let tui_result = App::new(message_receiver).run(terminal).await;
+    let tui_result = App::new(message_receiver, server_manager.clone())
+        .run(terminal)
+        .await;
     ratatui::restore();
 
-    // サーバータスクを停止
-    server_handle.abort();
+    // サーバーを停止
+    if let Err(e) = server_manager.stop_server().await {
+        eprintln!("Failed to stop server: {}", e);
+    }
 
     println!("Application finished with TUI result: {:?}", tui_result);
     Ok(())

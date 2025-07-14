@@ -2,7 +2,7 @@
   "scripts": {
     "carbine:dev": "pnpm -F sure-shot-carbine tauri dev",
     "carbine:build": "pnpm -F sure-shot-carbine tauri build",
-    
+
     "sidearm:dev": "pnpm -F sure-shot-sidearm dev",
     "sidearm:build": "pnpm -F sure-shot-sidearm build",
 

@@ -272,7 +272,7 @@ pub struct AuthorizeDeviceRequest {
 
 #[derive(Debug, Serialize)]
 #[typeshare]
-pub struct ServerInfo {
+pub struct HostInfo {
     pub ip: String,
     pub port: u16,
     pub status: String,
@@ -358,7 +358,7 @@ pub async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
 }
 
 // 各IPの/pingエンドポイントをチェックする関数（リトライ機能付き）
-pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<ServerInfo> {
+pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<HostInfo> {
     use futures::future::join_all;
     use std::time::Duration;
 
@@ -386,7 +386,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                         if response.status().is_success() {
                             match response.json::<PongResponse>().await {
                                 Ok(pong) => {
-                                    return Some(ServerInfo {
+                                    return Some(HostInfo {
                                         ip: ip.to_string(),
                                         port,
                                         status: "active".to_string(),
@@ -396,7 +396,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                                     });
                                 }
                                 Err(_) => {
-                                    return Some(ServerInfo {
+                                    return Some(HostInfo {
                                         ip: ip.to_string(),
                                         port,
                                         status: "unknown".to_string(),
@@ -407,7 +407,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                                 }
                             }
                         } else {
-                            return Some(ServerInfo {
+                            return Some(HostInfo {
                                 ip: ip.to_string(),
                                 port,
                                 status: "error".to_string(),
@@ -433,7 +433,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
             }
 
             // 全てのリトライが失敗した場合
-            Some(ServerInfo {
+            Some(HostInfo {
                 ip: ip.to_string(),
                 port,
                 status: "unreachable".to_string(),

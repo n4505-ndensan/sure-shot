@@ -11,7 +11,6 @@ use crate::{AppState, ServerMessage};
 use axum::{
     Router,
     extract::{Request, State},
-    http::{Method, StatusCode},
     middleware::{self, Next},
     response::Response,
 };

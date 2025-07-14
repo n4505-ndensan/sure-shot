@@ -8,8 +8,10 @@ use ratatui::{
     widgets::{Block, Padding, Paragraph, Row, Table, Tabs},
 };
 use std::collections::VecDeque;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
+use crate::server_manager::ServerManager;
 use server::{ServerMessage, ServerState, ServerStatus};
 
 /// The main application which holds the state and logic of the application.
@@ -25,11 +27,16 @@ pub struct App {
     server_status: ServerStatus,
     /// Currently selected tab
     selected_tab: usize,
+    /// Server manager for controlling server
+    server_manager: Arc<ServerManager>,
 }
 
 impl App {
-    /// Const   ruct a new instance of [`App`].
-    pub fn new(message_receiver: mpsc::UnboundedReceiver<ServerMessage>) -> Self {
+    /// Construct a new instance of [`App`].
+    pub fn new(
+        message_receiver: mpsc::UnboundedReceiver<ServerMessage>,
+        server_manager: Arc<ServerManager>,
+    ) -> Self {
         Self {
             running: true,
             logs: VecDeque::new(),
@@ -41,6 +48,7 @@ impl App {
                 port: None,
             },
             selected_tab: 0, // デフォルトでLogsタブを選択
+            server_manager,
         }
     }
 
@@ -134,7 +142,7 @@ impl App {
             .split(inner_area);
 
         // タブ部分（ボーダーなし）
-        let tab_titles = vec!["Logs", "Info"];
+        let tab_titles = vec!["Logs", "Info", "Control"];
         let tabs = Tabs::new(tab_titles)
             .style(Style::default().white())
             .highlight_style(Style::default().yellow().bold())
@@ -147,6 +155,7 @@ impl App {
         match self.selected_tab {
             0 => self.render_logs_content(frame, tab_chunks[1]),
             1 => self.render_info_content(frame, tab_chunks[1]),
+            2 => self.render_control_content(frame, tab_chunks[1]),
             _ => self.render_logs_content(frame, tab_chunks[1]),
         }
     }
@@ -245,6 +254,76 @@ impl App {
         frame.render_widget(table, content_chunks[1]);
     }
 
+    fn render_control_content(&self, frame: &mut Frame, area: ratatui::layout::Rect) {
+        // 上部に水平線を描画
+        let content_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1), // 水平線部分
+                Constraint::Min(0),    // コントロール内容部分
+            ])
+            .split(area);
+
+        // 水平線を描画
+        let separator = Block::default().borders(ratatui::widgets::Borders::TOP);
+        frame.render_widget(separator, content_chunks[0]);
+
+        // コントロールパネルのレイアウト
+        let control_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(3), // サーバー状態表示
+                Constraint::Length(3), // 起動ボタン
+                Constraint::Length(3), // 停止ボタン
+                Constraint::Min(0),    // 残りのスペース
+            ])
+            .margin(2)
+            .split(content_chunks[1]);
+
+        // サーバー状態表示
+        let status_text = match &self.server_status.state {
+            ServerState::Starting => "Server Status: Starting...".green(),
+            ServerState::Running => "Server Status: Running".green().bold(),
+            ServerState::Stopped => "Server Status: Stopped".red(),
+            ServerState::Aborted => "Server Status: Aborted".red(),
+            ServerState::Error(err) => format!("Server Status: Error - {}", err).red(),
+        };
+
+        let status_paragraph = Paragraph::new(status_text)
+            .block(Block::bordered().title("Status"))
+            .centered();
+        frame.render_widget(status_paragraph, control_chunks[0]);
+
+        // 起動ボタン
+        let start_button_style = if matches!(
+            self.server_status.state,
+            ServerState::Stopped | ServerState::Error(_)
+        ) {
+            Style::default().green().bold()
+        } else {
+            Style::default().dark_gray()
+        };
+
+        let start_button = Paragraph::new("Press 'S' to Start Server")
+            .style(start_button_style)
+            .block(Block::bordered().title("Start"))
+            .centered();
+        frame.render_widget(start_button, control_chunks[1]);
+
+        // 停止ボタン
+        let stop_button_style = if matches!(self.server_status.state, ServerState::Running) {
+            Style::default().red().bold()
+        } else {
+            Style::default().dark_gray()
+        };
+
+        let stop_button = Paragraph::new("Press 'X' to Stop Server")
+            .style(stop_button_style)
+            .block(Block::bordered().title("Stop"))
+            .centered();
+        frame.render_widget(stop_button, control_chunks[2]);
+    }
+
     /// Reads the crossterm events and updates the state of [`App`].
     fn handle_crossterm_events(&mut self) -> Result<()> {
         match event::read()? {
@@ -270,8 +349,8 @@ impl App {
                 }
             }
             (_, KeyCode::Right) => {
-                if self.selected_tab < 1 {
-                    // 現在は2つのタブ（0と1）
+                if self.selected_tab < 2 {
+                    // 現在は3つのタブ（0, 1, 2）
                     self.selected_tab += 1;
                 }
             }
@@ -279,6 +358,32 @@ impl App {
             // 数字キーでの直接タブ選択
             (_, KeyCode::Char('1')) => self.selected_tab = 0,
             (_, KeyCode::Char('2')) => self.selected_tab = 1,
+            (_, KeyCode::Char('3')) => self.selected_tab = 2,
+
+            // Controlタブでのサーバー操作
+            (_, KeyCode::Char('s') | KeyCode::Char('S')) if self.selected_tab == 2 => {
+                if matches!(
+                    self.server_status.state,
+                    ServerState::Stopped | ServerState::Error(_)
+                ) {
+                    let server_manager = self.server_manager.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = server_manager.start_server().await {
+                            eprintln!("Failed to start server: {}", e);
+                        }
+                    });
+                }
+            }
+            (_, KeyCode::Char('x') | KeyCode::Char('X')) if self.selected_tab == 2 => {
+                if matches!(self.server_status.state, ServerState::Running) {
+                    let server_manager = self.server_manager.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = server_manager.stop_server().await {
+                            eprintln!("Failed to stop server: {}", e);
+                        }
+                    });
+                }
+            }
 
             // その他のキーは無視
             _ => {}

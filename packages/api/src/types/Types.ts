@@ -1,5 +1,5 @@
-import { ServerInfo } from "./generated/api-types";
+import { HostInfo } from "./generated/api-types";
 
 export type HostConnectionInfo = {
-  host: ServerInfo;
+  host: HostInfo;
 };

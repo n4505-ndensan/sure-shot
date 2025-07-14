@@ -1,19 +1,10 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
-use std::sync::OnceLock;
-use std::sync::{Arc, Mutex};
 use whoami::devicename;
 
-// Global state for storing discovered host
-static HOST_STATE: OnceLock<Arc<Mutex<Option<ServerInfo>>>> = OnceLock::new();
-
-fn get_host_state() -> &'static Arc<Mutex<Option<ServerInfo>>> {
-    HOST_STATE.get_or_init(|| Arc::new(Mutex::new(None)))
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ServerInfo {
+pub struct HostInfo {
     pub ip: String,
     pub port: u16,
     pub status: String,
@@ -27,29 +18,6 @@ pub struct PongResponse {
     pub message: String,
     pub name: String,
     pub is_self: bool,
-}
-
-// Configuration management
-const CONFIG_FILE: &str = "carbine-config.json";
-
-fn save_host_config(host: &ServerInfo) -> Result<(), Box<dyn std::error::Error>> {
-    let config_content = serde_json::to_string_pretty(host)?;
-    std::fs::write(CONFIG_FILE, config_content)?;
-    Ok(())
-}
-
-fn load_host_config() -> Option<ServerInfo> {
-    if std::path::Path::new(CONFIG_FILE).exists() {
-        match std::fs::read_to_string(CONFIG_FILE) {
-            Ok(content) => match serde_json::from_str(&content) {
-                Ok(host) => Some(host),
-                Err(_) => None,
-            },
-            Err(_) => None,
-        }
-    } else {
-        None
-    }
 }
 
 // Find the local IP address
@@ -116,7 +84,7 @@ pub async fn check_available_ips(local_ip: IpAddr, port: u16) -> Vec<IpAddr> {
 }
 
 // Ping servers by IP
-pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<ServerInfo> {
+pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -> Vec<HostInfo> {
     use futures::future::join_all;
     use std::time::Duration;
 
@@ -144,7 +112,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                         if response.status().is_success() {
                             match response.json::<PongResponse>().await {
                                 Ok(pong) => {
-                                    return Some(ServerInfo {
+                                    return Some(HostInfo {
                                         ip: ip.to_string(),
                                         port,
                                         status: "active".to_string(),
@@ -154,7 +122,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                                     });
                                 }
                                 Err(_) => {
-                                    return Some(ServerInfo {
+                                    return Some(HostInfo {
                                         ip: ip.to_string(),
                                         port,
                                         status: "unknown".to_string(),
@@ -165,7 +133,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
                                 }
                             }
                         } else {
-                            return Some(ServerInfo {
+                            return Some(HostInfo {
                                 ip: ip.to_string(),
                                 port,
                                 status: "error".to_string(),
@@ -191,7 +159,7 @@ pub async fn ping_servers_by_ip(ips: Vec<IpAddr>, port: u16, local_ip: IpAddr) -
             }
 
             // 全てのリトライが失敗した場合
-            Some(ServerInfo {
+            Some(HostInfo {
                 ip: ip.to_string(),
                 port,
                 status: "unreachable".to_string(),
@@ -222,19 +190,7 @@ async fn get_device_name() -> Result<String, ()> {
 }
 
 #[tauri::command]
-async fn get_current_host() -> Result<Option<ServerInfo>, String> {
-    let host_state = get_host_state();
-    let host = host_state.lock().unwrap();
-    Ok(host.clone())
-}
-
-#[tauri::command]
-async fn refresh_host() -> Result<(), String> {
-    auto_discover_host().await
-}
-
-#[tauri::command]
-async fn find_host() -> Result<Vec<ServerInfo>, String> {
+async fn find_host() -> Result<Vec<HostInfo>, String> {
     let Some(local_ip) = find_local_ip() else {
         return Err("Could not find local IP address".to_string());
     };
@@ -253,49 +209,6 @@ async fn get_local_ip() -> Result<String, String> {
     }
 }
 
-// Auto-discovery and storage of host
-async fn auto_discover_host() -> Result<(), String> {
-    let Some(local_ip) = find_local_ip() else {
-        return Err("Could not find local IP address".to_string());
-    };
-
-    let available_ips = check_available_ips(local_ip, 8000).await;
-    let server_infos = ping_servers_by_ip(available_ips, 8000, local_ip).await;
-
-    // println!("Discovered servers: {:?}", server_infos);
-
-    // Find the first active server
-    for server in server_infos {
-        if server.status == "active" {
-            let host_state = get_host_state();
-            let mut host = host_state.lock().unwrap();
-            *host = Some(server.clone());
-
-            // Save to config file
-            if let Err(e) = save_host_config(&server) {
-                // eprintln!("Failed to save host config: {}", e);
-            }
-
-            return Ok(());
-        }
-    }
-
-    Err("No active hosts found".to_string())
-}
-
-// Initialize host on startup
-pub async fn initialize_host() -> Result<(), String> {
-    // First, try to load from config file
-    if let Some(saved_host) = load_host_config() {
-        let host_state = get_host_state();
-        let mut host = host_state.lock().unwrap();
-        *host = Some(saved_host);
-        return Ok(());
-    }
-
-    // If no saved config, try to auto-discover
-    auto_discover_host().await
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -306,18 +219,10 @@ pub fn run() {
         .plugin(tauri_plugin_machine_uid::init())
         .invoke_handler(tauri::generate_handler![
             find_host,
-            get_current_host,
-            refresh_host,
             get_local_ip,
             get_device_name,
         ])
         .setup(|_app| {
-            // Initialize host on startup
-            tauri::async_runtime::spawn(async {
-                if let Err(e) = initialize_host().await {
-                    // eprintln!("Failed to initialize host: {}", e);
-                }
-            });
             Ok(())
         })
         .run(tauri::generate_context!())

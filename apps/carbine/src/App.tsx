@@ -1,7 +1,7 @@
-import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
+import { Component, onMount, Show } from "solid-js";
 import MessageInput from "./components/messages/MessageInput";
 import MessageList from "./components/messages/MessageList";
-import { HostStatus } from "./components/status/HostStatus";
+import { ConnectionStatus } from "./components/status/ConnectionStatus";
 
 import "./App.scss";
 import { globalStore, setGlobalStore } from "./store/GlobalStore";
@@ -11,10 +11,8 @@ import {
 } from "@tauri-apps/plugin-notification";
 import { getLocalIp } from "./api/getLocalIp";
 import { getDeviceName } from "./utils/getDeviceName";
-import LoginForm from "./components/LoginForm";
-import { AuthStatus } from "@sureshot/api/src/auth/AuthManager";
+import LoginForm from "./components/login/LoginForm";
 import { getAuthStatus, logout } from "@sureshot/api/src/api/auth/login";
-import { DeviceStatus } from "./components/status/DeviceStatus";
 
 const App: Component = () => {
   onMount(async () => {
@@ -46,6 +44,7 @@ const App: Component = () => {
   return (
     <div
       style={{
+        height: "100%",
         display: "flex",
         "flex-direction": "column",
       }}
@@ -61,13 +60,27 @@ const App: Component = () => {
             "flex-wrap": "wrap",
           }}
         >
-          <p class="header" style={{ "margin-right": "auto" }}>
+          <p class="header" style={{ "margin-right": "0.5rem" }}>
             SURE-SHOT
           </p>
 
-          <HostStatus />
+          <ConnectionStatus />
 
-          <DeviceStatus />
+          {globalStore.authStatus?.authenticated && (
+            <button
+              onClick={() => {
+                logout();
+                setGlobalStore({ authStatus: undefined });
+              }}
+              style={{
+                "border-color": "#ff4444",
+                color: "#ff4444",
+                "margin-left": "auto",
+              }}
+            >
+              Logout
+            </button>
+          )}
         </div>
       </header>
 

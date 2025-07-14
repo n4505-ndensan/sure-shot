@@ -1,9 +1,8 @@
-import { HostConnectionInfo } from "../types/Types";
-import { ServerInfo } from "../types/generated/api-types";
+import { HostInfo } from "../types/generated/api-types";
 
 export interface AuthStatus {
   authenticated: boolean;
-  host: ServerInfo | null;
+  host: HostInfo | null;
   name?: string;
   password?: string;
 }
@@ -64,6 +63,41 @@ export class AuthManager {
     // maybe check token validity from server.
     // await verifyToken(this.token)
     return this.token !== null;
+  }
+
+  // 保存されたホスト情報を使って認証を試行
+  async tryAuthWithSavedHost(): Promise<boolean> {
+    if (!this.authStatus || !this.authStatus.host) {
+      return false;
+    }
+
+    try {
+      // 保存されたホストにpingして生きているか確認
+      const response = await fetch(
+        `http://${this.authStatus.host.ip}:${this.authStatus.host.port}/ping`,
+        {
+          method: "GET",
+          signal: AbortSignal.timeout(3000), // 3秒でタイムアウト
+        }
+      );
+
+      if (response.ok) {
+        // ホストが生きている場合、認証が有効かチェック
+        return this.isAuthenticated();
+      } else {
+        // ホストが応答しない場合は認証データをクリア
+        this.clearAuthStatus();
+        return false;
+      }
+    } catch (error) {
+      // 接続エラーの場合は認証データをクリア
+      console.warn(
+        "Failed to connect to saved host, clearing auth data:",
+        error
+      );
+      this.clearAuthStatus();
+      return false;
+    }
   }
 
   getAuthHeaders(): Record<string, string> {

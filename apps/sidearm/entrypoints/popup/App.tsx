@@ -13,7 +13,7 @@ import {
   clearAuthInfo,
 } from "../../src/utils/storage";
 import "./App.css";
-import { login, ServerInfo } from "@sureshot/api/src";
+import { login, HostInfo } from "@sureshot/api/src";
 
 type AppState =
   | "loading"
@@ -25,8 +25,8 @@ type AppState =
 
 function App() {
   const [state, setState] = createSignal<AppState>("loading");
-  const [hosts, setHosts] = createSignal<ServerInfo[]>([]);
-  const [selectedHost, setSelectedHost] = createSignal<ServerInfo | null>(null);
+  const [hosts, setHosts] = createSignal<HostInfo[]>([]);
+  const [selectedHost, setSelectedHost] = createSignal<HostInfo | null>(null);
   const [username, setUsername] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
@@ -81,7 +81,7 @@ function App() {
     }
   };
 
-  const selectHost = (host: ServerInfo) => {
+  const selectHost = (host: HostInfo) => {
     setSelectedHost(host);
     setState("login");
   };
