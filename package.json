@@ -1,5 +1,13 @@
 {
   "scripts": {
+    "carbine:dev": "pnpm -F sure-shot-carbine tauri dev",
+    "carbine:build": "pnpm -F sure-shot-carbine tauri build",
+    
+    "sidearm:dev": "pnpm -F sure-shot-sidearm dev",
+    "sidearm:build": "pnpm -F sure-shot-sidearm build",
+
+    "server:run": "cd ./server && cargo run",
+
     "generate-type": "cd ./server && typeshare --lang typescript --output-file ../packages/api/src/types/generated/api-types.ts src/"
   },
   "dependencies": {
