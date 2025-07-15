@@ -1,20 +1,20 @@
-import { Component, onMount, Show } from "solid-js";
-import MessageInput from "./components/messages/MessageInput";
-import MessageList from "./components/messages/MessageList";
-import { ConnectionStatus } from "./components/status/ConnectionStatus";
-
-import "./App.scss";
+import { Route, Router, useNavigate } from "@solidjs/router";
+import { getAuthStatus } from "@sureshot/api/src";
 import { globalStore, setGlobalStore } from "./store/GlobalStore";
+import { getDeviceName } from "./utils/getDeviceName";
+import { getLocalIp } from "./api/getLocalIp";
 import {
   isPermissionGranted,
   requestPermission,
 } from "@tauri-apps/plugin-notification";
-import { getLocalIp } from "./api/getLocalIp";
-import { getDeviceName } from "./utils/getDeviceName";
-import LoginForm from "./components/login/LoginForm";
-import { getAuthStatus, logout } from "@sureshot/api/src/api/auth/login";
+import Setup from "./routes/setup";
+import Home from "./routes/home";
+import { onMount } from "solid-js";
 
-const App: Component = () => {
+import "./App.scss";
+
+const App = () => {
+  // check auth status
   onMount(async () => {
     const localIp = await getLocalIp();
     if (globalStore.localIp !== localIp) {
@@ -24,7 +24,6 @@ const App: Component = () => {
     if (globalStore.deviceName !== deviceName) {
       setGlobalStore({ deviceName });
     }
-
     const currentAuthStatus = await getAuthStatus();
     console.log("Current Auth Status:", currentAuthStatus);
     if (currentAuthStatus) {
@@ -42,75 +41,19 @@ const App: Component = () => {
   });
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        "flex-direction": "column",
-      }}
-    >
-      <header>
-        <div
-          style={{
-            gap: "1rem",
-            display: "flex",
-            "flex-direction": "row",
-            width: "100%",
-            "align-items": "center",
-            "flex-wrap": "wrap",
-          }}
-        >
-          <p class="header" style={{ "margin-right": "0.5rem" }}>
-            SURE-SHOT
-          </p>
-
-          <ConnectionStatus />
-
-          {globalStore.authStatus?.authenticated && (
-            <button
-              onClick={() => {
-                logout();
-                setGlobalStore({ authStatus: undefined });
-              }}
-              style={{
-                "border-color": "#ff4444",
-                color: "#ff4444",
-                "margin-left": "auto",
-              }}
-            >
-              Logout
-            </button>
-          )}
-        </div>
-      </header>
-
-      <main
-        style={{
-          height: "100%",
-          "flex-direction": "column",
-          border: "1px solid #ddd",
-          "background-color": "#f9f9f9",
-          "border-radius": "4px",
+    <Router>
+      <Route path="/setup" component={Setup} />
+      <Route path="/home" component={Home} />
+      <Route
+        path="*"
+        component={() => {
+          // 未知のルートは setup にリダイレクト
+          const navigate = useNavigate();
+          navigate("/setup");
+          return null;
         }}
-      >
-        <Show
-          when={globalStore.authStatus?.authenticated}
-          fallback={<LoginForm />}
-        >
-          <MessageList />
-
-          <div
-            style={{
-              width: "100%",
-              height: "1px",
-              "background-color": "#ddd",
-            }}
-          />
-
-          <MessageInput />
-        </Show>
-      </main>
-    </div>
+      />
+    </Router>
   );
 };
 

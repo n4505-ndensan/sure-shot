@@ -40,6 +40,13 @@ export default defineConfig({
     },
   },
 
+  resolve: {
+    alias: {
+      "@styles": "/src/styles",
+      "@styles/": "/src/styles/",
+    },
+  },
+
   // 依存関係の最適化
   // optimizeDeps: {
   //   include: ['@sureshot/ui'],

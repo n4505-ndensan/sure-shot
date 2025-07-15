@@ -36,6 +36,9 @@ importers:
       '@skipperndt/plugin-machine-uid':
         specifier: ^0.1.0
         version: 0.1.0
+      '@solidjs/router':
+        specifier: ^0.15.3
+        version: 0.15.3(solid-js@1.9.7)
       '@soorria/solid-dropzone':
         specifier: ^1.0.1
         version: 1.0.1(solid-js@1.9.7)
@@ -841,6 +844,11 @@ packages:
 
   '@skipperndt/plugin-machine-uid@0.1.0':
     resolution: {integrity: sha512-+jM6w4hTSqkY4NE6qC1fb7M9JLiBu2itcn5MGD1Q796jIkHRYlY9HwZ47LrvKIVL+c7Nf8/X1jRxaDtxigOsVQ==}
+
+  '@solidjs/router@0.15.3':
+    resolution: {integrity: sha512-iEbW8UKok2Oio7o6Y4VTzLj+KFCmQPGEpm1fS3xixwFBdclFVBvaQVeibl1jys4cujfAK5Kn6+uG2uBm3lxOMw==}
+    peerDependencies:
+      solid-js: ^1.8.6
 
   '@soorria/solid-dropzone@1.0.1':
     resolution: {integrity: sha512-xQ6qkn3IK3IgAz7yyx+AgfmnCnRHkBTqQGjTcS64FDN7YnnvpZB//0rZjJKl5xwG9bGcJ3oyJAHnv2NK/KNSZA==}
@@ -3235,6 +3243,10 @@ snapshots:
   '@skipperndt/plugin-machine-uid@0.1.0':
     dependencies:
       '@tauri-apps/api': 2.6.0
+
+  '@solidjs/router@0.15.3(solid-js@1.9.7)':
+    dependencies:
+      solid-js: 1.9.7
 
   '@soorria/solid-dropzone@1.0.1(solid-js@1.9.7)':
     dependencies:

@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@skipperndt/plugin-machine-uid": "^0.1.0",
+    "@solidjs/router": "^0.15.3",
     "@soorria/solid-dropzone": "^1.0.1",
     "@sureshot/api": "workspace:^",
     "@sureshot/ui": "workspace:^",
