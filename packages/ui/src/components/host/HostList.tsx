@@ -23,7 +23,6 @@ const HostList: Component<Props> = (props) => {
         display: "flex",
         "flex-direction": "column",
         gap: "8px",
-        "background-color": "#fafafa",
         "min-width": "150px",
       }}
     >
