@@ -1,8 +1,9 @@
-import { useLocation } from '@solidjs/router';
+import { useLocation, useNavigate } from '@solidjs/router';
 import { AuthManager, getAuthStatus } from '@sureshot/api/src';
 import { AuthStatus } from '@sureshot/api/src/auth/AuthManager';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { platform } from '@tauri-apps/plugin-os';
 import { createSignal, onCleanup } from 'solid-js';
 
 let validateInterval: NodeJS.Timeout | undefined;
@@ -14,44 +15,69 @@ type RedirectMode = 'preserve' | 'last-available' | 'force-relogin';
 
 export const useAuthRedirect = (interval?: RedirectMode) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [lastAuthStatus, setLastAuthStatus] = createSignal<AuthStatus | null>(getAuthStatus());
+  const [isMobile, setIsMobile] = createSignal<boolean>(false);
+
+  // プラットフォーム検出
+  const checkPlatform = async () => {
+    const currentPlatform = await platform();
+    setIsMobile(currentPlatform === 'android' || currentPlatform === 'ios');
+  };
+
+  // 初期化時にプラットフォームを確認
+  checkPlatform();
 
   const redirectByAuthStatus = (authenticated: boolean) => {
     if (authenticated) {
       if (location.pathname === '/home') return;
-      const homeWindow = new WebviewWindow('home', {
-        title: '',
-        url: '/home',
-        width: 800,
-        height: 540,
-        maximizable: true,
-        minimizable: true,
-        closable: true,
-        resizable: true,
-        decorations: false,
-      });
-      homeWindow.show();
-      homeWindow.once('tauri://created', () => {
-        getCurrentWindow().close();
-      });
+      
+      if (isMobile()) {
+        // モバイル環境では同じウィンドウ内でページ遷移
+        navigate('/home');
+      } else {
+        // デスクトップ環境では新しいウィンドウを作成
+        const homeWindow = new WebviewWindow('home', {
+          title: '',
+          url: '/home',
+          width: 800,
+          height: 540,
+          maximizable: true,
+          minimizable: true,
+          closable: true,
+          resizable: true,
+          decorations: false,
+        });
+        homeWindow.show();
+        homeWindow.once('tauri://created', () => {
+          getCurrentWindow().close();
+        });
+      }
     } else {
       if (location.pathname === '/login') return;
-      const setupWindow = new WebviewWindow('login', {
-        title: '',
-        url: '/login',
-        width: 400,
-        height: 350,
-        maximizable: false,
-        minimizable: false,
-        closable: true,
-        resizable: false,
-        decorations: false,
-      });
-      setupWindow.show();
-      setupWindow.once('tauri://created', () => {
-        getCurrentWindow().close();
-      });
+      
+      if (isMobile()) {
+        // モバイル環境では同じウィンドウ内でページ遷移
+        navigate('/login');
+      } else {
+        // デスクトップ環境では新しいウィンドウを作成
+        const setupWindow = new WebviewWindow('login', {
+          title: '',
+          url: '/login',
+          width: 400,
+          height: 350,
+          maximizable: false,
+          minimizable: false,
+          closable: true,
+          resizable: false,
+          decorations: false,
+        }); 
+        setupWindow.show();
+        setupWindow.once('tauri://created', () => {
+          getCurrentWindow().close();
+        });
+      }
     }
   };
 
@@ -59,7 +85,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
     const authManager = AuthManager.getInstance();
     const status = getAuthStatus();
 
-    if (status && status.host && status.name && status.password) {
+    if (status && status.host) {
       if (mode === 'last-available') {
         redirectByAuthStatus(true); // 残っていたらOK
       } else {
@@ -104,5 +130,5 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
     clearValidateInterval();
   });
 
-  return { validateAuth, lastAuthStatus };
+  return { validateAuth, lastAuthStatus, isMobile };
 };

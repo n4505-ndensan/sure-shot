@@ -13,7 +13,7 @@ export const ConnectionStatus: Component = () => {
 
   const handleMenuOutsideClick = (e: MouseEvent) => {
     // outside click
-    if (!menuRef.contains(e.target as HTMLElement) && isMenuShown()) {
+    if (!menuRef?.contains(e.target as HTMLElement) && isMenuShown()) {
       setIsMenuShown(false);
     }
   };
@@ -47,7 +47,7 @@ export const ConnectionStatus: Component = () => {
             'border-radius': '4px',
           }}
         >
-          <Light on={true} color={!lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'orange' : 'red') : 'limegreen'} />
+          <Light on={true} color={!lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'red' : 'orange') : 'limegreen'} />
           <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red' }}>{lastAuthStatus()?.host?.name ?? 'Disconnected'}</p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export const ConnectionStatus: Component = () => {
               <p
                 style={{
                   'text-align': 'end',
-                  color: !lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'orange' : 'red') : 'limegreen',
+                  color: !lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'red' : 'orange') : 'limegreen',
                 }}
               >
                 {!lastAuthStatus()?.isServerReachable ? 'disconnected' : !lastAuthStatus()?.isAuthenticated ? 'not authenticated' : 'connected'}
