@@ -14,8 +14,10 @@
   z-index: 100;
 }
 
-.host_status:hover {
-  background-color: #eeeeee;
+@media (any-hover: hover) {
+  .host_status:hover {
+    background-color: #eeeeee;
+  }
 }
 
 .menu {
@@ -53,6 +55,8 @@
   box-sizing: border-box;
 }
 
-.menu_item:hover {
-  background-color: #eeeeee;
+@media (any-hover: hover) {
+  .menu_item:hover {
+    background-color: #eeeeee;
+  }
 }

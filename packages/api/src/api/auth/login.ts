@@ -6,10 +6,13 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
   const authManager = AuthManager.getInstance();
 
   const failedStatus: AuthStatus = {
-    authenticated: false,
+    isServerReachable: false,
+    isAuthenticated: false,
     host: hostInfo,
-    name: deviceId,
-    password: password,
+    credentials: {
+      name: deviceId,
+      password,
+    },
   };
 
   log(`login function called with: hostInfo=${JSON.stringify(hostInfo)}, deviceId=${deviceId}, passwordLength=${password?.length}`);
@@ -35,19 +38,37 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
     // HTTPステータスコードベースでエラーハンドリング
     if (response.status === 401) {
       log('Authentication failed: Invalid password');
-      authManager.setAuthStatus(failedStatus);
+      authManager.setAuthStatus({
+        ...failedStatus,
+        lastError: {
+          type: "auth",
+          message: "Invalid password",
+        },
+      });
       return failedStatus;
     }
 
     if (response.status === 403) {
       log('Authentication failed: Device not authorized');
-      authManager.setAuthStatus(failedStatus);
+      authManager.setAuthStatus({
+        ...failedStatus,
+        lastError: {
+          type: "auth",
+          message: "Device not authorized",
+        },
+      });
       return failedStatus;
     }
 
     if (!response.ok) {
       log(`Authentication failed with status: ${response.status}`);
-      authManager.setAuthStatus(failedStatus);
+      authManager.setAuthStatus({
+        ...failedStatus,
+        lastError: {
+          type: "auth",
+          message: `Authentication failed with status: ${response.status}`,
+        },
+      });
       return failedStatus;
     }
 
@@ -58,10 +79,13 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
     authManager.setToken(json.token);
     log(`Token saved: ${json.token}`);
     const authStatus: AuthStatus = {
-      authenticated: true,
+      isServerReachable: true,
+      isAuthenticated: true,
       host: hostInfo,
-      name: deviceId,
-      password, // パスワードも保存する場合
+      credentials: {
+        name: deviceId,
+        password,
+      },
     };
     // ホスト情報も保存
     authManager.setAuthStatus(authStatus);

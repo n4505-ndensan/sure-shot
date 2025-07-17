@@ -1,4 +1,4 @@
-import { Accessor, createSignal, onCleanup } from 'solid-js';
+import { Accessor, createSignal, onCleanup, onMount } from 'solid-js';
 import { AuthManager } from '../../auth/AuthManager';
 import { ReceivedMessage } from '../../types/generated/api-types';
 
@@ -16,6 +16,7 @@ export function useEventsSource(props: Props): {
 
   // SSE接続の初期化
   const initializeSSE = async () => {
+    setIsConnected(undefined);
     try {
       if (eventSource) {
         eventSource.close();
@@ -56,8 +57,12 @@ export function useEventsSource(props: Props): {
     }
   };
 
-  // 初期接続
-  initializeSSE();
+  onMount(() => {
+    // 初期接続
+    setTimeout(() => {
+      initializeSSE();
+    }, 1000);
+  });
 
   // 定期的に接続を確認
   let validateIntervalId: number | undefined;

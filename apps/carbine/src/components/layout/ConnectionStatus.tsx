@@ -27,6 +27,22 @@ export const ConnectionStatus: Component = () => {
     window.removeEventListener('click', handleMenuOutsideClick);
   });
 
+  const status = (): {
+    color: string;
+    text: string;
+  } => {
+    if (!lastAuthStatus()) return { color: 'gray', text: 'Unknown' };
+
+    if (lastAuthStatus()?.isServerReachable) {
+      if (lastAuthStatus()?.isAuthenticated) {
+        return { color: 'limegreen', text: 'Authenticated' };
+      } else {
+        return { color: 'orange', text: 'Not Authenticated' };
+      }
+    }
+    return { color: 'red', text: 'Disconnected' };
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <div
@@ -47,8 +63,8 @@ export const ConnectionStatus: Component = () => {
             'border-radius': '4px',
           }}
         >
-          <Light on={true} color={!lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'red' : 'orange') : 'limegreen'} />
-          <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red' }}>{lastAuthStatus()?.host?.name ?? 'Disconnected'}</p>
+          <Light on={true} color={status().color} />
+          <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red' }}>{lastAuthStatus()?.host?.name ?? status().text}</p>
         </div>
       </div>
 
@@ -74,10 +90,10 @@ export const ConnectionStatus: Component = () => {
               <p
                 style={{
                   'text-align': 'end',
-                  color: !lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'red' : 'orange') : 'limegreen',
+                  color: status().color,
                 }}
               >
-                {!lastAuthStatus()?.isServerReachable ? 'disconnected' : !lastAuthStatus()?.isAuthenticated ? 'not authenticated' : 'connected'}
+                {status().text}
               </p>
             </div>
             <div
