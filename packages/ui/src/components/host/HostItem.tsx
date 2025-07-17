@@ -1,5 +1,5 @@
-import { HostInfo } from "@sureshot/api/src";
-import { Component, createEffect, createSignal, Show } from "solid-js";
+import { HostInfo } from '@sureshot/api/src';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 
 interface Props {
   host: HostInfo;
@@ -15,41 +15,36 @@ const HostItem: Component<Props> = (props) => {
     setSelected(props.selected ?? false);
   });
 
-  console.log(selected);
   return (
     <div
       onClick={() => props.onSelect?.(host)}
       style={{
-        display: "flex",
-        "flex-direction": "row",
-        padding: "8px",
-        "margin-bottom": "4px",
-        border: "1px solid #ddd",
-        "border-radius": "4px",
-        cursor: "pointer",
-        "align-items": "center",
-        gap: "8px",
-        "background-color": "#FFFFFF",
+        display: 'flex',
+        'flex-direction': 'row',
+        padding: '8px',
+        'margin-bottom': '4px',
+        border: '1px solid #ddd',
+        'border-radius': '4px',
+        cursor: 'pointer',
+        'align-items': 'center',
+        gap: '8px',
+        'background-color': '#FFFFFF',
       }}
     >
-      <div
+      <p
         style={{
-          display: "flex",
-          "flex-direction": "column",
+          'font-size': '12px',
+          'font-weight': 'bold',
+          'flex-grow': 1,
+          color: selected() ? '#007bff' : '#000',
         }}
       >
-        <p
-          style={{
-            "font-weight": "bold",
-            color: selected() ? "#007bff" : "#000",
-          }}
-        >
-          {host.name}
-        </p>
-        <p>
-          {host.ip}:{host.port}
-        </p>
-      </div>
+        {selected() ? '>  ' : ''}
+        {host.name}
+      </p>
+      <p>
+        {host.ip}:{host.port}
+      </p>
     </div>
   );
 };

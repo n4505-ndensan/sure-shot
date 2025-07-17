@@ -1,5 +1,5 @@
 import { Component, JSX } from "solid-js";
-import AppHeader from "./AppHeader";
+import TitleBar from "./TitleBar";
 
 interface AppLayoutProps {
   showConnectionStatus?: boolean;
@@ -13,17 +13,19 @@ const AppLayout: Component<AppLayoutProps> = (props) => {
         height: "100%",
         width: "100%",
         display: "flex",
-        padding: "1rem",
-        "box-sizing": "border-box",
         "flex-direction": "column",
+        "box-sizing": "border-box",
       }}
     >
-      <AppHeader showConnectionStatus={props.showConnectionStatus} />
+      <TitleBar />
+      {/* <AppHeader showConnectionStatus={props.showConnectionStatus} /> */}
 
       <main
         style={{
+          display: "flex",
           height: "100%",
           width: "100%",
+          "flex-grow": 1,
           "flex-direction": "column",
           //   border: "1px solid #ddd",
           //   "background-color": "#f9f9f9",

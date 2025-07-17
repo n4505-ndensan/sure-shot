@@ -1,21 +1,35 @@
-import { Component } from "solid-js";
-import MessageList from "~/components/messages/MessageList";
-import MessageInput from "~/components/messages/MessageInput";
-import AppLayout from "~/components/layout/AppLayout";
-import { useAuthRedirect } from "~/utils/useAuthRedirect";
+import { Component, onMount } from 'solid-js';
+import AppLayout from '~/components/layout/AppLayout';
+import MessageInput from '~/components/messages/MessageInput';
+import MessageList from '~/components/messages/MessageList';
+
+import '@styles/main.css';
+import { useAuthRedirect } from '~/utils/useAuthRedirect';
 
 const Home: Component = () => {
-  useAuthRedirect();
+  const { validateAuth } = useAuthRedirect('preserve');
+
+  onMount(() => {
+    validateAuth('preserve');
+  });
 
   return (
     <AppLayout showConnectionStatus={true}>
+      <div
+        style={{
+          width: '100%',
+          height: '1px',
+          'background-color': '#ddd',
+        }}
+      />
+
       <MessageList />
 
       <div
         style={{
-          width: "100%",
-          height: "1px",
-          "background-color": "#ddd",
+          width: '100%',
+          height: '1px',
+          'background-color': '#ddd',
         }}
       />
 

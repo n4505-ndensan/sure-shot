@@ -1,6 +1,20 @@
 
 
 @font-face {
+  font-family: 'ZFB03B';
+  src: url("./fonts/04B/04B_03B_.ttf") format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Terminus';
+  src: url("./fonts/terminus/TerminusTTF-4.49.3.ttf") format('truetype');
+  font-display: swap;
+}
+
+
+
+@font-face {
   font-family: 'K8x12';
   src: url("./fonts/k8x12.ttf") format('truetype');
   font-display: swap;
@@ -23,6 +37,11 @@
 
 * {
   font-family: 'PixelMPlus', sans-serif;
+  user-select: none;
+
+  image-rendering: pixelated;
+  shape-rendering: geometricPrecision;
+  text-rendering: auto;
 }
 
 .header {
@@ -34,6 +53,10 @@ p, a, label, span, button {
   margin: 0;
   padding: 0;
   font-size: 12px;
+}
+
+a {
+  cursor: pointer;
 }
 
 a:hover {
@@ -50,6 +73,12 @@ button {
   padding: 3px 9px;
   border-radius: 2px;
   cursor: pointer;
+}
+
+button:disabled {
+  color: #999;
+  border: 1px solid #999;
+  pointer-events: none;
 }
 
 button:hover {

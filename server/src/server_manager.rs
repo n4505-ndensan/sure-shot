@@ -118,8 +118,11 @@ impl ServerManager {
 
         // アプリケーション状態を初期化
         let messages = Arc::new(Mutex::new(Vec::<ReceivedMessage>::new()));
-        let (message_broadcaster, _) = broadcast::channel(100);
+        let (message_broadcaster, dummy_receiver) = broadcast::channel(100);
         let config_arc = Arc::new(Mutex::new(config.clone()));
+
+        // ダミーレシーバーを保持してチャンネルが閉じることを防ぐ
+        let _dummy_receiver = dummy_receiver;
 
         let app_state = AppState {
             messages: messages.clone(),

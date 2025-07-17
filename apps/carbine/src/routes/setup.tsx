@@ -1,84 +1,40 @@
-import { Component, createSignal, Show } from "solid-js";
-import LoginForm from "~/components/setup/LoginForm";
-import AppLayout from "~/components/layout/AppLayout";
-import { useAuthRedirect } from "~/utils/useAuthRedirect";
-import HostSetup from "~/components/setup/HostSetup";
-import { HostInfo } from "@sureshot/api/src";
+import { Component, createSignal, onMount } from 'solid-js';
 
-import "@styles/setup.scss";
-
-enum SetupSteps {
-  Host = 0,
-  Login = 1,
-}
+import '@styles/main.css';
+import { getVersion } from '@tauri-apps/api/app';
+import { useAuthRedirect } from '~/utils/useAuthRedirect';
 
 const Setup: Component = () => {
-  useAuthRedirect();
+  const { validateAuth } = useAuthRedirect("last-available");
 
-  const [step, setStep] = createSignal<SetupSteps>(SetupSteps.Host);
+  const [version, setVersion] = createSignal<string | null>(null);
 
-  const [selectedHost, setSelectedHost] = createSignal<HostInfo | null>(null);
-
-  const isHostSetupDone = () =>
-    step() === SetupSteps.Login && selectedHost() !== null;
-
-  const canBack = (toStep: SetupSteps) => step() > toStep;
+  onMount(async () => {
+    validateAuth("last-available");
+    setVersion(await getVersion());
+  });
 
   return (
-    <AppLayout showConnectionStatus={false}>
-      <div
-        style={{
-          display: "flex",
-          "flex-direction": "row",
-          gap: "2rem",
-          "align-items": "center",
-        }}
-      >
-        <p class="setup_header">SETUP</p>
-        <p
-          class="setup_subheader"
-          onClick={() => {
-            if (canBack(SetupSteps.Host)) {
-              setSelectedHost(null);
-              setStep(SetupSteps.Host);
-            }
-          }}
-          style={{
-            cursor: canBack(SetupSteps.Host) ? "pointer" : "default",
-            opacity: !isHostSetupDone() ? 1 : 0.5,
-          }}
-        >
-          1. HOST SELECTION
-        </p>
+    <div
+      style={{
+        display: 'flex',
+        'flex-direction': 'row',
+        height: '100%',
+        width: '100%',
+        gap: '20px',
+        'box-sizing': 'border-box',
+        'align-items': 'center',
+        'justify-content': 'center',
+        border: '1px solid #555',
+      }}
+    >
+      <img src='icon.png' alt='Setup Icon' width={50} height={50} />
 
-        <p>&gt;</p>
-        <p
-          class="setup_subheader"
-          onClick={() => {
-            if (canBack(SetupSteps.Login)) setStep(SetupSteps.Login);
-          }}
-          style={{
-            cursor: canBack(SetupSteps.Login) ? "pointer" : "default",
-            opacity: isHostSetupDone() ? 1 : 0.5,
-          }}
-        >
-          2. LOGIN
-        </p>
+      <div>
+        <p style={{ 'font-size': '24px' }}>sure-shot</p>
+        <p style={{ 'font-size': '12px' }}>carbine / {version()}</p>
       </div>
-      <Show
-        when={isHostSetupDone()}
-        fallback={
-          <HostSetup
-            onSelect={(host) => {
-              setSelectedHost(host);
-              setStep(SetupSteps.Login);
-            }}
-          />
-        }
-      >
-        <LoginForm host={selectedHost()!} />
-      </Show>
-    </AppLayout>
+    </div>
   );
 };
 

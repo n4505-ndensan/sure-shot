@@ -46,9 +46,4 @@ export default defineConfig({
       "@styles/": "/src/styles/",
     },
   },
-
-  // 依存関係の最適化
-  // optimizeDeps: {
-  //   include: ['@sureshot/ui'],
-  // },
 });

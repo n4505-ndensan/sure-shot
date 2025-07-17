@@ -77,16 +77,27 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
                                     let result = state.message_broadcaster.send(sent_message);
 
                                     let response = match result {
-                                        Ok(_) => SendMessageResponse {
-                                            success: true,
-                                            message: "Message sent successfully".to_string(),
-                                            timestamp: chrono::Utc::now().to_rfc3339(),
-                                        },
-                                        Err(err) => SendMessageResponse {
-                                            success: false,
-                                            message: format!("Failed to send message: {}", err),
-                                            timestamp: chrono::Utc::now().to_rfc3339(),
-                                        },
+                                        Ok(receiver_count) => {
+                                            println!(
+                                                "Message sent to {} receivers",
+                                                receiver_count
+                                            );
+                                            SendMessageResponse {
+                                                success: true,
+                                                message: "Message sent successfully".to_string(),
+                                                timestamp: chrono::Utc::now().to_rfc3339(),
+                                            }
+                                        }
+                                        Err(tokio::sync::broadcast::error::SendError(_)) => {
+                                            // 受信者がいない場合でも成功とみなす
+                                            // println!("No active SSE receivers, but message stored");
+                                            SendMessageResponse {
+                                                success: true,
+                                                message: "Message stored (no active receivers)"
+                                                    .to_string(),
+                                                timestamp: chrono::Utc::now().to_rfc3339(),
+                                            }
+                                        }
                                     };
 
                                     (StatusCode::OK, Json(response)).into_response()

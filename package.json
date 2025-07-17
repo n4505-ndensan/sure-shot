@@ -2,23 +2,22 @@
   "scripts": {
     "carbine:dev": "pnpm -F sure-shot-carbine tauri dev",
     "carbine:build": "pnpm -F sure-shot-carbine tauri build",
-
     "sidearm:dev": "pnpm -F sure-shot-sidearm dev",
     "sidearm:build": "pnpm -F sure-shot-sidearm build",
-
     "server:run": "cd ./server && cargo run",
-
     "generate-type": "cd ./server && typeshare --lang typescript --output-file ../packages/api/src/types/generated/api-types.ts src/"
   },
   "dependencies": {
-    "solid-js": "^1.9.7",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
-    "@tauri-apps/plugin-os": "~2.3.0"
+    "@tauri-apps/plugin-os": "~2.3.0",
+    "solid-js": "^1.9.7"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
     "@tauri-apps/cli": "^2",
-    "concurrently": "^7.6.0"
+    "concurrently": "^7.6.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "typescript": "^5.8.3"
   }
 }

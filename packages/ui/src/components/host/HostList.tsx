@@ -13,7 +13,8 @@ const HostList: Component<Props> = (props) => {
 
   const handleSelect = (host: HostInfo, index: number) => {
     props.onHostSelected?.(host);
-    setSelected(index);
+    if (index !== selected()) setSelected(index);
+    else setSelected(null); // Toggle selection
   };
 
   return (

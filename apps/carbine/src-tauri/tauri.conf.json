@@ -13,12 +13,47 @@
   "app": {
     "windows": [
       {
-        "label": "main",
-        "title": "sure-shot",
+        "label": "setup",
+        "title": "",
         "url": "/setup",
+        "width": 260,
+        "height": 100,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": true,
+        "resizable": false,
+        "decorations": false,
+        "center": true,
+        "create": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "focus": true
+      },
+      {
+        "label": "login",
+        "title": "",
+        "url": "/login",
+        "width": 400,
+        "height": 360,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": true,
+        "resizable": false,
+        "decorations": false,
+        "create": false
+      },
+      {
+        "label": "home",
+        "title": "",
+        "url": "/home",
         "width": 800,
-        "height": 650,
-        "resizable": false
+        "height": 540,
+        "maximizable": true,
+        "minimizable": true,
+        "closable": true,
+        "resizable": true,
+        "decorations": false,
+        "create": false
       }
     ],
     "security": {
@@ -42,12 +77,6 @@
 
     "resources": { "assets/**/*": "assets/" },
 
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
   }
 }

@@ -1,23 +1,21 @@
-import { HostInfo } from "@sureshot/api/src";
-import { HostList } from "@sureshot/ui/src";
-import { Component, createSignal, onMount, Show } from "solid-js";
-import { findHosts } from "~/api/hostApi";
-
-import "@styles/setup.scss";
+import { HostInfo } from '@sureshot/api/src';
+import { HostList } from '@sureshot/ui/src';
+import { Component, createSignal, onMount, Show } from 'solid-js';
+import { findHosts } from '~/api/hostApi';
 
 interface Props {
   onSelect: (host: HostInfo) => void;
 }
 
 const HostSetup: Component<Props> = (props) => {
-  const [hosts, setHosts] = createSignal<HostInfo[]>([]);
+  const [hosts, setHosts] = createSignal<HostInfo[] | undefined>(undefined);
 
   onMount(async () => {
     await loadHosts();
   });
 
   const loadHosts = async () => {
-    setHosts([]);
+    setHosts(undefined);
     const hosts = await findHosts();
     setHosts(hosts);
   };
@@ -25,31 +23,36 @@ const HostSetup: Component<Props> = (props) => {
   return (
     <div
       style={{
-        display: "flex",
-        "flex-direction": "column",
-        width: "100%",
-        height: "500px",
-        "align-items": "center",
-        "justify-content": "center",
+        display: 'flex',
+        'flex-direction': 'column',
+        height: '100%',
+        margin: '0 24px',
       }}
     >
-      <p class="setup_header">SELECT A HOST</p>
-
       <div
         style={{
-          display: "flex",
-          "flex-direction": "column",
-          "min-height": "200px",
-          "align-items": "center",
-          "margin-top": "1rem",
+          display: 'flex',
+          'flex-direction': 'column',
+          'flex-grow': 1,
+          gap: '16px',
         }}
       >
-        <Show when={hosts().length === 0}>
-          <p>ホストが見つかりません。ホストを追加してください。</p>
-        </Show>
-        <Show when={hosts().length > 0}>
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'row',
+            'justify-content': 'space-between',
+            'align-items': 'center',
+          }}
+        >
+          <p>{hosts() ? `found ${hosts()?.length} hosts.` : 'Loading...'}</p>
+          <a style={{ width: 'fit-content' }} onClick={loadHosts}>
+            RELOAD
+          </a>
+        </div>
+        <Show when={hosts()?.length ?? 0 > 0}>
           <HostList
-            hosts={hosts()}
+            hosts={hosts()!}
             selectable
             onHostSelected={(host) => {
               props.onSelect(host);
@@ -57,12 +60,6 @@ const HostSetup: Component<Props> = (props) => {
           />
         </Show>
       </div>
-      <button
-        style={{ width: "fit-content", "margin-top": "1rem" }}
-        onClick={loadHosts}
-      >
-        RELOAD
-      </button>
     </div>
   );
 };
