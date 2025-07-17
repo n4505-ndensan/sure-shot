@@ -1,5 +1,5 @@
 import { useLocation } from '@solidjs/router';
-import { getAuthStatus, login } from '@sureshot/api/src';
+import { AuthManager, getAuthStatus } from '@sureshot/api/src';
 import { AuthStatus } from '@sureshot/api/src/auth/AuthManager';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -56,15 +56,19 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
   };
 
   const validateAuth = async (mode: RedirectMode) => {
+    const authManager = AuthManager.getInstance();
     const status = getAuthStatus();
+
     if (status && status.host && status.name && status.password) {
       if (mode === 'last-available') {
         redirectByAuthStatus(true); // 残っていたらOK
       } else {
-        let loginResultStatus = await login(status.host, status.name, status.password);
-        if (loginResultStatus.authenticated) {
-          redirectByAuthStatus(loginResultStatus.authenticated);
+        // 保存されたホスト情報でトークンの有効性をチェック（トークンは再発行しない）
+        const isStillAuthenticated = await authManager.tryAuthWithSavedHost();
+        if (isStillAuthenticated) {
+          redirectByAuthStatus(true);
         } else if (mode === 'force-relogin') {
+          // 接続が失敗した場合のみ、ログイン画面へリダイレクト
           redirectByAuthStatus(false);
         }
       }

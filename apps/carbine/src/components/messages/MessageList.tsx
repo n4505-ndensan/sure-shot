@@ -1,9 +1,8 @@
 import { ReceivedMessage } from '@sureshot/api';
 import { getMessages, useEventsSource } from '@sureshot/api/src';
 import { sendNotification } from '@tauri-apps/plugin-notification';
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
-import { useAuthRedirect } from '~/utils/useAuthRedirect';
 import LinkifiedText from '../common/LinkifiedText';
 
 interface Props {
@@ -13,7 +12,7 @@ interface Props {
 const MessageList: Component<Props> = (props) => {
   let scrollList: HTMLDivElement | undefined;
   const [messages, setMessages] = createSignal<ReceivedMessage[] | undefined>(undefined);
-  const { eventSource, error, isConnected } = useEventsSource({
+  const { error, isConnected } = useEventsSource({
     onMessage: (message: ReceivedMessage) => {
       console.log('Received message:', message);
       setMessages((prev) => [...(prev || []), message]);
@@ -25,29 +24,25 @@ const MessageList: Component<Props> = (props) => {
           title: message.from_name || 'New Message',
           body: message.message || 'You have a new message',
           group: 'messages',
-
-          // attachments: [
-          //   {
-          //     id: "image-1",
-          //     url: "asset:///notification-image.jpg",
-          //   },
-          // ],
         });
       }
     },
-    reconnectWhenClosed: true,
-    closedCheckIntervalMs: 2000, // 5秒ごとに接続状態をチェック
   });
 
   // 過去のメッセージを取得
   const loadPastMessages = async () => {
     const messages = await getMessages();
-    if (messages) {
+    console.log('Loaded past messages:', messages);
+    if (messages !== undefined) {
       setMessages(messages);
     } else {
       console.error('Failed to load past messages');
     }
   };
+
+  onMount(() => {
+    loadPastMessages();
+  });
 
   // 時刻をフォーマット
   const formatTime = (timestamp: string) => {
@@ -58,12 +53,6 @@ const MessageList: Component<Props> = (props) => {
       return timestamp;
     }
   };
-
-  const { lastAuthStatus } = useAuthRedirect();
-
-  onMount(() => {
-    loadPastMessages();
-  });
 
   createEffect(() => {
     messages();
@@ -76,11 +65,11 @@ const MessageList: Component<Props> = (props) => {
   });
 
   // クリーンアップ
-  onCleanup(() => {
-    if (eventSource()) {
-      eventSource()?.close();
-    }
-  });
+  // onCleanup(() => {
+  //   if (eventSource()) {
+  //     eventSource()?.close();
+  //   }
+  // });
 
   return (
     <div
@@ -105,7 +94,6 @@ const MessageList: Component<Props> = (props) => {
           padding: '0.5rem',
         }}
       >
-        <p>{isConnected() ? 'connected' : 'disconnected'}</p>
         <For each={messages()}>
           {(message) => {
             const isSelf = message.from === globalStore.localIp;
@@ -312,6 +300,22 @@ const MessageList: Component<Props> = (props) => {
             No messages yet. Send a message to see it appear here!
           </div>
         )}
+
+        <Show when={error()}>
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'column',
+              height: '100px',
+              'justify-content': 'center',
+              'align-items': 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <p>connection lost.</p>
+            <button onClick={() => location.reload()}>Reconnect</button>
+          </div>
+        </Show>
       </div>
     </div>
   );

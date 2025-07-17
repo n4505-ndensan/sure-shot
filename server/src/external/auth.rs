@@ -1,5 +1,5 @@
 use crate::{AppState, AuthRequest, AuthResponse, AuthorizeDeviceRequest};
-use axum::{Json, http::StatusCode, response::IntoResponse, routing};
+use axum::{Json, http::HeaderMap, http::StatusCode, response::IntoResponse, routing};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -25,6 +25,10 @@ pub fn external_auth(router: routing::Router, app_state: AppState) -> routing::R
             let state = state.clone();
             async move { authorize_device_handler(state, request).await }
         })
+    });
+
+    let router = router.route("/auth/verify", {
+        routing::get(move |headers: HeaderMap| async move { verify_token_handler(headers).await })
     });
 
     router
@@ -130,4 +134,50 @@ pub async fn verify_token(token: &str) -> Option<String> {
 pub async fn is_device_authorized(app_state: &AppState, device_id: &str) -> bool {
     let config = app_state.config.lock().await;
     config.is_device_authorized(device_id)
+}
+
+async fn verify_token_handler(headers: HeaderMap) -> impl IntoResponse {
+    // Authorizationヘッダーからトークンを取得
+    let token = headers
+        .get("authorization")
+        .and_then(|header| header.to_str().ok())
+        .and_then(|auth_str| {
+            if auth_str.starts_with("Bearer ") {
+                Some(&auth_str[7..])
+            } else {
+                None
+            }
+        });
+
+    match token {
+        Some(token) => {
+            // トークンの検証
+            match verify_token(token).await {
+                Some(_device_id) => (
+                    StatusCode::OK,
+                    Json(AuthResponse {
+                        success: true,
+                        message: "Token is valid".to_string(),
+                        token: None,
+                    }),
+                ),
+                None => (
+                    StatusCode::UNAUTHORIZED,
+                    Json(AuthResponse {
+                        success: false,
+                        message: "Invalid token".to_string(),
+                        token: None,
+                    }),
+                ),
+            }
+        }
+        None => (
+            StatusCode::UNAUTHORIZED,
+            Json(AuthResponse {
+                success: false,
+                message: "No token provided".to_string(),
+                token: None,
+            }),
+        ),
+    }
 }

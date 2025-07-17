@@ -29,7 +29,7 @@ const MessageInput: Component = () => {
   });
 
   const handleSendMessage = async () => {
-    // await validateAuth("preserve");
+    await validateAuth('preserve');
 
     const msg = message().trim();
     const currentAttachments = attachments();

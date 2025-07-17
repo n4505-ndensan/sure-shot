@@ -47,7 +47,7 @@ export const ConnectionStatus: Component = () => {
             'border-radius': '4px',
           }}
         >
-          <Light on={true} color={lastAuthStatus()?.authenticated ? 'limegreen' : 'red'} />
+          <Light on={true} color={!lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'orange' : 'red') : 'limegreen'} />
           <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red' }}>{lastAuthStatus()?.host?.name ?? 'Disconnected'}</p>
         </div>
       </div>
@@ -71,8 +71,13 @@ export const ConnectionStatus: Component = () => {
               }}
             >
               <p style={{ 'font-weight': 'bold', 'text-align': 'start' }}>Status</p>
-              <p style={{ 'text-align': 'end', color: lastAuthStatus()?.authenticated ? 'limegreen' : 'red' }}>
-                {lastAuthStatus()?.authenticated ? 'OK' : 'NOT OK'}
+              <p
+                style={{
+                  'text-align': 'end',
+                  color: !lastAuthStatus()?.isServerReachable ? (!lastAuthStatus()?.isAuthenticated ? 'orange' : 'red') : 'limegreen',
+                }}
+              >
+                {!lastAuthStatus()?.isServerReachable ? 'disconnected' : !lastAuthStatus()?.isAuthenticated ? 'not authenticated' : 'connected'}
               </p>
             </div>
             <div
