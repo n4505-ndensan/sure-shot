@@ -59,6 +59,18 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
                                         }
                                     }
 
+                                    // データベースに永続化
+                                    if let Err(e) = state.message_store.save_message(&sent_message).await {
+                                        eprintln!("Failed to save message to database: {}", e);
+                                        // ログには送信するが、エラーとしてレスポンスは返さない
+                                        if let Some(ref log_sender) = state.log_sender {
+                                            let _ = log_sender.send(crate::ServerMessage::Log(format!(
+                                                "Failed to save message to database: {}",
+                                                e
+                                            )));
+                                        }
+                                    }
+
                                     // 自分のSSEクライアントにも配信
                                     let result = state.message_broadcaster.send(sent_message);
 

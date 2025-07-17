@@ -1,5 +1,8 @@
 pub mod external;
+pub mod message_store;
 pub mod whoami;
+
+use message_store::MessageStore;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -31,21 +34,45 @@ pub enum ServerState {
 }
 
 // メッセージ保持とSSE配信用の状態
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppState {
-    pub messages: Arc<Mutex<Vec<ReceivedMessage>>>,
+    pub messages: Arc<Mutex<Vec<ReceivedMessage>>>, // 一時的な互換性のため残す
     pub message_broadcaster: broadcast::Sender<ReceivedMessage>,
     pub config: Arc<Mutex<ServerConfig>>,
     pub log_sender: Option<mpsc::UnboundedSender<ServerMessage>>,
+    pub message_store: Arc<MessageStore>, // 永続化ストレージ
 }
 
 // サーバー設定
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ServerConfig {
     pub nickname: String,
     pub password_hash: String,
     pub authorized_devices: HashSet<String>, // IPアドレス or デバイスID
     pub salt: String,
+    pub log_config: LogConfig,
+}
+
+// ログ設定
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LogConfig {
+    pub show_requests: bool,          // リクエストログを表示するか
+    pub show_responses: bool,         // レスポンスログを表示するか
+    pub quiet_endpoints: Vec<String>, // ログを表示しないエンドポイント
+}
+
+impl Default for LogConfig {
+    fn default() -> Self {
+        Self {
+            show_requests: false, // デフォルトはリクエストログを表示しない
+            show_responses: true, // デフォルトはレスポンスログを表示
+            quiet_endpoints: vec![
+                "/ping".to_string(),
+                "/auth/verify".to_string(),
+                "/events".to_string(),
+            ],
+        }
+    }
 }
 
 impl Default for ServerConfig {
@@ -65,6 +92,7 @@ impl Default for ServerConfig {
             password_hash,
             authorized_devices: HashSet::new(),
             salt,
+            log_config: LogConfig::default(),
         }
     }
 }
@@ -92,12 +120,15 @@ impl ServerConfig {
     }
 
     pub fn create_with_setup() -> Result<Self, Box<dyn std::error::Error>> {
-        // サーバー名の設定
-        print!(
-            "サーバー名を入力してください (デフォルト: {}): ",
-            whoami::whoami().unwrap_or_else(|_| "Unknown".to_string())
-        );
         use std::io::{self, Write};
+        
+        // サーバー名の設定
+        let default_name = match whoami::whoami() {
+            Ok(name) => name.trim().to_string(),
+            Err(_) => "Unknown".to_string(),
+        };
+        
+        print!("サーバー名を入力してください (デフォルト: {}): ", default_name);
         io::stdout().flush()?;
 
         let mut nickname = String::new();
@@ -105,10 +136,12 @@ impl ServerConfig {
         nickname = nickname.trim().to_string();
 
         if nickname.is_empty() {
-            nickname = whoami::whoami().unwrap_or_else(|_| "Unknown".to_string());
+            nickname = default_name;
         }
 
         // パスワードの設定
+        print!("パスワードを入力してください: ");
+        io::stdout().flush()?;
         let password = rpassword::read_password()?;
 
         if password.is_empty() {
@@ -116,6 +149,8 @@ impl ServerConfig {
         }
 
         // パスワード確認
+        print!("確認用にもう一度パスワードを入力してください: ");
+        io::stdout().flush()?;
         let password_confirm = rpassword::read_password()?;
 
         if password != password_confirm {
@@ -137,6 +172,7 @@ impl ServerConfig {
             password_hash,
             authorized_devices: HashSet::new(),
             salt,
+            log_config: LogConfig::default(),
         };
 
         config.save()?;
@@ -202,7 +238,7 @@ pub struct SendMessageResponse {
     pub timestamp: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[typeshare]
 pub struct ReceivedMessage {
     pub from: String,
@@ -213,8 +249,6 @@ pub struct ReceivedMessage {
     pub is_self: bool,
     pub attachments: Vec<Attachment>,
 }
-
-
 
 #[derive(Serialize, Deserialize)]
 #[typeshare]
@@ -249,7 +283,7 @@ pub struct HostInfo {
     pub is_self: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[typeshare]
 pub struct Attachment {
     pub id: String,

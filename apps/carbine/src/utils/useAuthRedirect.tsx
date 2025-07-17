@@ -35,11 +35,11 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
 
       if (isMobile()) {
         // モバイル環境では同じウィンドウ内でページ遷移
-        navigate('/home');
+        navigate('/home', { replace: true, resolve: false });
       } else {
         // デスクトップ環境では新しいウィンドウを作成
         const homeWindow = new WebviewWindow('home', {
-          title: '',
+          title: 'sure-shot',
           url: '/home',
           width: 800,
           height: 540,
@@ -60,11 +60,11 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
 
       if (isMobile()) {
         // モバイル環境では同じウィンドウ内でページ遷移
-        navigate('/login');
+        navigate('/login', { replace: true, resolve: false });
       } else {
         // デスクトップ環境では新しいウィンドウを作成
         const setupWindow = new WebviewWindow('login', {
-          title: '',
+          title: 'sure-shot',
           url: '/login',
           width: 400,
           height: 350,

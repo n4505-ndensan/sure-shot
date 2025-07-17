@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "setup",
-        "title": "",
+        "title": "sure-shot",
         "url": "/setup",
         "width": 260,
         "height": 100,
@@ -31,7 +31,7 @@
       },
       {
         "label": "login",
-        "title": "",
+        "title": "sure-shot",
         "url": "/login",
         "width": 400,
         "height": 360,
@@ -44,7 +44,7 @@
       },
       {
         "label": "home",
-        "title": "",
+        "title": "sure-shot",
         "url": "/home",
         "width": 800,
         "height": 540,

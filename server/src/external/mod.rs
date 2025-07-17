@@ -61,33 +61,46 @@ async fn api_logger_middleware(
     let path = request.uri().path().to_string();
     let query = request.uri().query().unwrap_or("").to_string();
 
-    // リクエストの記録
-    let request_log = if query.is_empty() {
-        format!("→ {} {}", method, path)
-    } else {
-        format!("→ {} {}?{}", method, path, query)
-    };
+    // ログ設定を取得
+    let config = app_state.config.lock().await;
+    let log_config = config.log_config.clone();
+    drop(config); // 早期にロックを解放
 
-    if let Some(ref log_sender) = app_state.log_sender {
-        let _ = log_sender.send(ServerMessage::Log(request_log));
+    // quietエンドポイントのチェック
+    let is_quiet = log_config.quiet_endpoints.contains(&path) || 
+                   query.contains("quiet=true");
+
+    // リクエストの記録
+    if log_config.show_requests && !is_quiet {
+        let request_log = if query.is_empty() {
+            format!("→ {} {}", method, path)
+        } else {
+            format!("→ {} {}?{}", method, path, query)
+        };
+
+        if let Some(ref log_sender) = app_state.log_sender {
+            let _ = log_sender.send(ServerMessage::Log(request_log));
+        }
     }
 
     // 次のハンドラーを実行
     let response = next.run(request).await;
 
     // レスポンスの記録
-    let duration = start_time.elapsed();
-    let status = response.status();
-    let response_log = format!(
-        "← {} {} -> {} ({:.2}ms)",
-        method,
-        path,
-        status.as_u16(),
-        duration.as_millis() as f64
-    );
+    if log_config.show_responses && !is_quiet {
+        let duration = start_time.elapsed();
+        let status = response.status();
+        let response_log = format!(
+            "← {} {} -> {} ({:.2}ms)",
+            method,
+            path,
+            status.as_u16(),
+            duration.as_millis() as f64
+        );
 
-    if let Some(ref log_sender) = app_state.log_sender {
-        let _ = log_sender.send(ServerMessage::Log(response_log));
+        if let Some(ref log_sender) = app_state.log_sender {
+            let _ = log_sender.send(ServerMessage::Log(response_log));
+        }
     }
 
     response

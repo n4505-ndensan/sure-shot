@@ -55,6 +55,15 @@ impl App {
     /// Run the application's main loop.
     pub async fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         self.running = true;
+
+        // サーバーを自動起動
+        let server_manager_clone = self.server_manager.clone();
+        tokio::spawn(async move {
+            if let Err(e) = server_manager_clone.start_server().await {
+                eprintln!("Failed to start server: {}", e);
+            }
+        });
+
         while self.running {
             // 新しいメッセージを受信
             while let Ok(message) = self.message_receiver.try_recv() {
@@ -275,7 +284,6 @@ impl App {
                 Constraint::Length(3), // サーバー状態表示
                 Constraint::Length(3), // 起動ボタン
                 Constraint::Length(3), // 停止ボタン
-                Constraint::Min(0),    // 残りのスペース
             ])
             .margin(2)
             .split(content_chunks[1]);
@@ -322,6 +330,14 @@ impl App {
             .block(Block::bordered().title("Stop"))
             .centered();
         frame.render_widget(stop_button, control_chunks[2]);
+
+        // ログ設定
+        // let log_config_text = "Log Controls:\n'R' - Toggle Request Logs  |  'P' - Toggle Response Logs\n'M' - Toggle Quiet Mode for /ping, /events, /auth/verify";
+        // let log_config_paragraph = Paragraph::new(log_config_text)
+        //     .style(Style::default().cyan())
+        //     .block(Block::bordered().title("Log Settings"))
+        //     .wrap(ratatui::widgets::Wrap { trim: true });
+        // frame.render_widget(log_config_paragraph, control_chunks[3]);
     }
 
     /// Reads the crossterm events and updates the state of [`App`].
@@ -383,6 +399,32 @@ impl App {
                         }
                     });
                 }
+            }
+
+            // Controlタブでのログ設定操作
+            (_, KeyCode::Char('r') | KeyCode::Char('R')) if self.selected_tab == 2 => {
+                let server_manager = self.server_manager.clone();
+                tokio::spawn(async move {
+                    if let Err(e) = server_manager.toggle_request_logs().await {
+                        eprintln!("Failed to toggle request logs: {}", e);
+                    }
+                });
+            }
+            (_, KeyCode::Char('p') | KeyCode::Char('P')) if self.selected_tab == 2 => {
+                let server_manager = self.server_manager.clone();
+                tokio::spawn(async move {
+                    if let Err(e) = server_manager.toggle_response_logs().await {
+                        eprintln!("Failed to toggle response logs: {}", e);
+                    }
+                });
+            }
+            (_, KeyCode::Char('m') | KeyCode::Char('M')) if self.selected_tab == 2 => {
+                let server_manager = self.server_manager.clone();
+                tokio::spawn(async move {
+                    if let Err(e) = server_manager.toggle_quiet_mode().await {
+                        eprintln!("Failed to toggle quiet mode: {}", e);
+                    }
+                });
             }
 
             // その他のキーは無視

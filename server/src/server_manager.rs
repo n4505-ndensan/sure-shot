@@ -6,7 +6,7 @@ use tokio::task::JoinHandle;
 
 use server::{
     AppState, ReceivedMessage, ServerConfig, ServerMessage, ServerState, ServerStatus,
-    external::create_external_router, find_local_ip,
+    external::create_external_router, find_local_ip, message_store::MessageStore,
 };
 
 #[derive(Debug)]
@@ -14,6 +14,7 @@ pub struct ServerManager {
     message_sender: mpsc::UnboundedSender<ServerMessage>,
     server_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
     shutdown_sender: Arc<Mutex<Option<tokio::sync::oneshot::Sender<()>>>>,
+    app_state: Arc<Mutex<Option<AppState>>>, // AppStateを保持
 }
 
 impl ServerManager {
@@ -22,6 +23,7 @@ impl ServerManager {
             message_sender,
             server_handle: Arc::new(Mutex::new(None)),
             shutdown_sender: Arc::new(Mutex::new(None)),
+            app_state: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -65,7 +67,7 @@ impl ServerManager {
             .message_sender
             .send(ServerMessage::Log(format!("Found local IP: {}", ip)));
 
-        // 設定をロードまたは作成
+        // 設定をロード（事前にmain()でセットアップ済み）
         let config = match ServerConfig::load_or_create() {
             Ok(config) => {
                 let _ = self
@@ -74,36 +76,18 @@ impl ServerManager {
                 config
             }
             Err(e) => {
-                let _ = self.message_sender.send(ServerMessage::Log(format!(
-                    "設定ファイルが見つかりません。初期設定を開始します。Error: {}",
-                    e
-                )));
-                match ServerConfig::create_with_setup() {
-                    Ok(config) => {
-                        let _ = self.message_sender.send(ServerMessage::Log(
-                            "Config created successfully".to_string(),
-                        ));
-                        config
-                    }
-                    Err(e) => {
-                        let _ = self.message_sender.send(ServerMessage::Log(format!(
-                            "設定の作成に失敗しました: {}",
-                            e
-                        )));
-                        let _ =
-                            self.message_sender
-                                .send(ServerMessage::StatusUpdate(ServerStatus {
-                                    state: ServerState::Error(format!(
-                                        "Config creation failed: {}",
-                                        e
-                                    )),
-                                    nickname: None,
-                                    ip: Some(ip.to_string()),
-                                    port: None,
-                                }));
-                        return Ok(());
-                    }
-                }
+                let _ = self
+                    .message_sender
+                    .send(ServerMessage::Log(format!("Failed to load config: {}", e)));
+                let _ = self
+                    .message_sender
+                    .send(ServerMessage::StatusUpdate(ServerStatus {
+                        state: ServerState::Error(format!("Config load failed: {}", e)),
+                        nickname: None,
+                        ip: Some(ip.to_string()),
+                        port: None,
+                    }));
+                return Ok(());
             }
         };
 
@@ -121,6 +105,44 @@ impl ServerManager {
         let (message_broadcaster, dummy_receiver) = broadcast::channel(100);
         let config_arc = Arc::new(Mutex::new(config.clone()));
 
+        // メッセージストアを初期化
+        let message_store = match MessageStore::new(None) {
+            Ok(store) => Arc::new(store),
+            Err(e) => {
+                let _ = self.message_sender.send(ServerMessage::Log(format!(
+                    "Failed to initialize message store: {}",
+                    e
+                )));
+                let _ = self
+                    .message_sender
+                    .send(ServerMessage::StatusUpdate(ServerStatus {
+                        state: ServerState::Error(format!("Message store init failed: {}", e)),
+                        nickname: Some(config.nickname.clone()),
+                        ip: Some(ip.to_string()),
+                        port: None,
+                    }));
+                return Ok(());
+            }
+        };
+
+        // 既存のメッセージをロード
+        match message_store.get_recent_messages(100).await {
+            Ok(stored_messages) => {
+                let mut messages_guard = messages.lock().await;
+                *messages_guard = stored_messages;
+                let _ = self.message_sender.send(ServerMessage::Log(format!(
+                    "Loaded {} stored messages",
+                    messages_guard.len()
+                )));
+            }
+            Err(e) => {
+                let _ = self.message_sender.send(ServerMessage::Log(format!(
+                    "Failed to load stored messages: {}",
+                    e
+                )));
+            }
+        }
+
         // ダミーレシーバーを保持してチャンネルが閉じることを防ぐ
         let _dummy_receiver = dummy_receiver;
 
@@ -129,7 +151,14 @@ impl ServerManager {
             message_broadcaster: message_broadcaster.clone(),
             config: config_arc.clone(),
             log_sender: Some(self.message_sender.clone()),
+            message_store: message_store.clone(),
         };
+
+        // AppStateを保存
+        {
+            let mut app_state_guard = self.app_state.lock().await;
+            *app_state_guard = Some(app_state.clone());
+        }
 
         let port = 8000;
         let external_addr = SocketAddr::new(ip, port);
@@ -239,5 +268,71 @@ impl ServerManager {
             .message_sender
             .send(ServerMessage::Log("Server stopped".to_string()));
         Ok(())
+    }
+
+    // ログ設定を変更するメソッド
+    pub async fn toggle_request_logs(&self) -> Result<()> {
+        if let Some(app_state) = self.get_app_state().await {
+            let mut config = app_state.config.lock().await;
+            config.log_config.show_requests = !config.log_config.show_requests;
+            let _ = config.save();
+            let status = if config.log_config.show_requests {
+                "enabled"
+            } else {
+                "disabled"
+            };
+            let _ = self
+                .message_sender
+                .send(ServerMessage::Log(format!("Request logging {}", status)));
+        }
+        Ok(())
+    }
+
+    pub async fn toggle_response_logs(&self) -> Result<()> {
+        if let Some(app_state) = self.get_app_state().await {
+            let mut config = app_state.config.lock().await;
+            config.log_config.show_responses = !config.log_config.show_responses;
+            let _ = config.save();
+            let status = if config.log_config.show_responses {
+                "enabled"
+            } else {
+                "disabled"
+            };
+            let _ = self
+                .message_sender
+                .send(ServerMessage::Log(format!("Response logging {}", status)));
+        }
+        Ok(())
+    }
+
+    pub async fn toggle_quiet_mode(&self) -> Result<()> {
+        if let Some(app_state) = self.get_app_state().await {
+            let mut config = app_state.config.lock().await;
+            if config.log_config.quiet_endpoints.is_empty() {
+                // Quiet mode を有効にする
+                config.log_config.quiet_endpoints = vec![
+                    "/ping".to_string(),
+                    "/auth/verify".to_string(),
+                    "/events".to_string(),
+                ];
+                let _ = self.message_sender.send(ServerMessage::Log(
+                    "Quiet mode enabled for /ping, /auth/verify, /events".to_string(),
+                ));
+            } else {
+                // Quiet mode を無効にする
+                config.log_config.quiet_endpoints.clear();
+                let _ = self
+                    .message_sender
+                    .send(ServerMessage::Log("Quiet mode disabled".to_string()));
+            }
+            let _ = config.save();
+        }
+        Ok(())
+    }
+
+    // AppStateを取得するヘルパーメソッド
+    async fn get_app_state(&self) -> Option<AppState> {
+        let app_state_guard = self.app_state.lock().await;
+        app_state_guard.clone()
     }
 }

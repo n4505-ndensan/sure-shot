@@ -31,8 +31,18 @@ pub fn external_get_messages(router: routing::Router, app_state: AppState) -> ro
                         match verify_token(token).await {
                             Some(_device_id) => {
                                 // 認証成功、メッセージを返却
-                                let messages = state.messages.lock().await;
-                                (StatusCode::OK, Json(messages.clone())).into_response()
+                                // データベースから最新のメッセージを取得
+                                match state.message_store.get_recent_messages(100).await {
+                                    Ok(messages) => {
+                                        (StatusCode::OK, Json(messages)).into_response()
+                                    }
+                                    Err(e) => {
+                                        eprintln!("Failed to get messages from database: {}", e);
+                                        // フォールバック: メモリ内のメッセージを返す
+                                        let messages = state.messages.lock().await;
+                                        (StatusCode::OK, Json(messages.clone())).into_response()
+                                    }
+                                }
                             }
                             None => {
                                 // 無効なトークン
