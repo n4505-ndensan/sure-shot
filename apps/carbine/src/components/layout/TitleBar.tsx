@@ -1,6 +1,5 @@
-import { getAuthStatus } from '@sureshot/api/src';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createSignal, onMount, Show } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
 import '~/styles/title_bar_region.css';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
@@ -13,7 +12,11 @@ export default function TitleBar() {
   const [isMaximized, setMaximized] = createSignal(false);
   const [title, setTitle] = createSignal('');
 
-  const { lastAuthStatus } = useAuthRedirect();
+  const { lastAuthStatus } = useAuthRedirect('preserve');
+
+  createEffect(() => {
+    console.log(lastAuthStatus());
+  })
 
   onMount(async () => {
     const window = getCurrentWindow();
@@ -59,7 +62,7 @@ export default function TitleBar() {
           }}
         >
           <Show when={location.pathname.startsWith('/home')}>
-            <p style={{ 'font-weight': 'bold', 'text-align': 'start' }}>{getAuthStatus()?.credentials?.name}</p>
+            <p style={{ 'font-weight': 'bold', 'text-align': 'start' }}>{lastAuthStatus()?.credentials?.name}</p>
             <p style={{ opacity: 0.5, 'text-align': 'end' }}>({globalStore.localIp})</p>
           </Show>
           <Show when={location.pathname.startsWith('/setup')}>

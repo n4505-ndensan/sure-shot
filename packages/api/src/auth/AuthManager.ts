@@ -290,7 +290,7 @@ export class AuthManager {
       if (stored && this.persistAuth) {
         const data: PersistedAuthData = JSON.parse(stored);
         this.token = data.token;
-
+        console.log(data);
         // 古い形式のデータを新しい形式に移行
         if (data.authStatus) {
           // 古い形式かどうかチェック
@@ -308,16 +308,18 @@ export class AuthManager {
                       password: oldStatus.password,
                     }
                   : undefined,
-            };
+            } as AuthStatus;
           } else {
             // 新しい形式
-            this.authStatus = data.authStatus;
+            this.authStatus = data.authStatus as AuthStatus;
             // 起動時は認証状態をリセット（再確認が必要）
             this.authStatus.isAuthenticated = false;
             this.authStatus.isServerReachable = false;
           }
         }
       }
+
+      this.saveToStorage();
     } catch (error) {
       console.warn('Failed to load auth data from storage:', error);
       this.clearStorage();

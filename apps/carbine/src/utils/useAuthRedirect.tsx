@@ -85,7 +85,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
     const authManager = AuthManager.getInstance();
     const status = getAuthStatus();
 
-    if (status && status.host) {
+    if (status && status.host && status) {
       if (mode === 'last-available') {
         redirectByAuthStatus(true); // 残っていたらOK
       } else {

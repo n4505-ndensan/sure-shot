@@ -13,7 +13,7 @@ export const tryLogin = async (host: HostInfo, deviceId: string, password: strin
     const authStatus = await login(host, deviceId, password, log);
     log(`Login API response: ${JSON.stringify(authStatus)}`);
 
-    if (authStatus.authenticated) {
+    if (authStatus.isAuthenticated) {
       return true;
     } else {
       log('Login failed.');
