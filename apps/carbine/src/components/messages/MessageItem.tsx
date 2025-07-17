@@ -24,7 +24,7 @@ const MessageItem: Component<Props> = (props) => {
     <div
       style={{
         padding: '0.5rem 0.75rem',
-        margin: '0.25rem 0',
+        margin: '8px 0',
         'background-color': isSelf ? '#e3f2fd' : '#f1f1f1',
         'border-radius': '4px',
         // 'border-left': isSelf ? '3px solid #2196f3' : '3px solid #4caf50',
