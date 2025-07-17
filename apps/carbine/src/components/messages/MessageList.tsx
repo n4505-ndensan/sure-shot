@@ -4,6 +4,7 @@ import { sendNotification } from '@tauri-apps/plugin-notification';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
 import MessageItem from './MessageItem';
+import { onResume } from 'tauri-plugin-app-events-api';
 
 interface Props {
   className?: string;
@@ -44,6 +45,10 @@ const MessageList: Component<Props> = (props) => {
     loadPastMessages();
   });
 
+  onResume(() => {
+    loadPastMessages();
+  });
+
   createEffect(() => {
     messages();
     // スクロール位置を更新
@@ -53,6 +58,7 @@ const MessageList: Component<Props> = (props) => {
       }, 100);
     }
   });
+  
 
   // クリーンアップ
   // onCleanup(() => {

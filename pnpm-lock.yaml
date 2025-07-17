@@ -81,6 +81,9 @@ importers:
       solid-js:
         specifier: ^1.9.5
         version: 1.9.7
+      tauri-plugin-app-events-api:
+        specifier: ~0.2.0
+        version: 0.2.0
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^2
@@ -2475,6 +2478,9 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
+
+  tauri-plugin-app-events-api@0.2.0:
+    resolution: {integrity: sha512-CnlAeucWhT+Rgx6CCsqUpq2D3pqgx0fhjSPKomH7O2t1rGVu5kGLMkYvaCX6gqVTUYpIWX5BLV7LGY2DRri0QA==}
 
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
@@ -4926,6 +4932,10 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+
+  tauri-plugin-app-events-api@0.2.0:
+    dependencies:
+      '@tauri-apps/api': 2.6.0
 
   thenify-all@1.6.0:
     dependencies:

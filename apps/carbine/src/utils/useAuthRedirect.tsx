@@ -32,7 +32,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
   const redirectByAuthStatus = (authenticated: boolean) => {
     if (authenticated) {
       if (location.pathname === '/home') return;
-      
+
       if (isMobile()) {
         // モバイル環境では同じウィンドウ内でページ遷移
         navigate('/home');
@@ -50,13 +50,14 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
           decorations: false,
         });
         homeWindow.show();
+        homeWindow.setFocus();
         homeWindow.once('tauri://created', () => {
           getCurrentWindow().close();
         });
       }
     } else {
       if (location.pathname === '/login') return;
-      
+
       if (isMobile()) {
         // モバイル環境では同じウィンドウ内でページ遷移
         navigate('/login');
@@ -72,8 +73,9 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
           closable: true,
           resizable: false,
           decorations: false,
-        }); 
+        });
         setupWindow.show();
+        setupWindow.setFocus();
         setupWindow.once('tauri://created', () => {
           getCurrentWindow().close();
         });

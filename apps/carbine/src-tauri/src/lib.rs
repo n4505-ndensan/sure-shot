@@ -222,7 +222,13 @@ pub fn run() {
             get_local_ip,
             get_device_name,
         ])
-        .setup(|_app| Ok(()))
+         .setup(|app| {
+            #[cfg(mobile)]
+            {
+                app.handle().plugin(tauri_plugin_app_events::init())?;
+            }
+             Ok(())
+         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

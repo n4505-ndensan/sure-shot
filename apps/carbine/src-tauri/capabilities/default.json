@@ -1,10 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": [
-    "*"
-  ],
+  "description": "Capability for the windows",
+  "windows": ["*"],
   "permissions": [
     "machine-uid:default",
     "core:default",
@@ -13,6 +11,7 @@
     "opener:allow-open-url",
     "os:allow-hostname",
     "notification:default",
+
     "core:window:allow-show",
     "core:window:allow-center",
     "core:window:allow-close",
