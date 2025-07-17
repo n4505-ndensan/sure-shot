@@ -14,7 +14,6 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
             move |headers: HeaderMap, Json(request): Json<SendMessageRequest>| {
                 let state = state.clone();
                 async move {
-
                     // Authorizationヘッダーからトークンを取得
                     let token = headers
                         .get("authorization")

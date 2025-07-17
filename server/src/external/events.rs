@@ -21,9 +21,7 @@ pub fn external_events(router: routing::Router, app_state: AppState) -> routing:
                             Event::default().data(json),
                         ))
                     }
-                    Err(_) => {
-                        None
-                    }
+                    Err(_) => None,
                 });
 
                 Sse::new(stream).keep_alive(KeepAlive::default())
