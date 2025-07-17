@@ -9,6 +9,8 @@ import { createAttachment } from './attachment/createAttachment';
 import OptimizedAttachmentButton from './attachment/OptimizedAttachmentButton';
 
 const MessageInput: Component = () => {
+  let inputRef: HTMLInputElement;
+
   const [message, setMessage] = createSignal('');
   const [attachments, setAttachments] = createSignal<Attachment[]>([]);
   const [sendStatus, setSendStatus] = createSignal('');
@@ -57,6 +59,8 @@ const MessageInput: Component = () => {
       // 3秒後にステータスメッセージをクリア
       setTimeout(() => setSendStatus(''), 3000);
     }
+
+    inputRef?.focus();
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -138,6 +142,7 @@ const MessageInput: Component = () => {
           style={{ width: "200px" }}
         /> */}
           <input
+            ref={(ref) => (inputRef = ref)}
             name='message'
             placeholder='Type your message...'
             value={message()}

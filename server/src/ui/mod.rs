@@ -151,7 +151,7 @@ impl App {
             .split(inner_area);
 
         // タブ部分（ボーダーなし）
-        let tab_titles = vec!["Logs", "Info", "Control"];
+        let tab_titles = vec!["Logs", "Control"];
         let tabs = Tabs::new(tab_titles)
             .style(Style::default().white())
             .highlight_style(Style::default().yellow().bold())
@@ -163,8 +163,7 @@ impl App {
         // コンテンツ部分（選択されたタブに応じて変更）
         match self.selected_tab {
             0 => self.render_logs_content(frame, tab_chunks[1]),
-            1 => self.render_info_content(frame, tab_chunks[1]),
-            2 => self.render_control_content(frame, tab_chunks[1]),
+            1 => self.render_control_content(frame, tab_chunks[1]),
             _ => self.render_logs_content(frame, tab_chunks[1]),
         }
     }
@@ -197,9 +196,20 @@ impl App {
             .borders(ratatui::widgets::Borders::NONE)
             .padding(Padding::horizontal(1));
 
+        // 表示可能行数を計算（パディングを考慮）
+        let available_height = content_chunks[1].height.saturating_sub(0) as usize;
+        
+        // スクロール位置を計算（最新のログが常に表示されるように）
+        let total_lines = self.logs.len();
+        let scroll_offset = if total_lines > available_height {
+            (total_lines - available_height) as u16
+        } else {
+            0
+        };
+
         // ログ内容（ボーダーなし）
         let logs_paragraph = Paragraph::new(log_text)
-            .scroll((self.logs.len().saturating_sub(20) as u16, 0))
+            .scroll((scroll_offset, 0))
             .block(logs_container);
 
         frame.render_widget(logs_paragraph, content_chunks[1]);
