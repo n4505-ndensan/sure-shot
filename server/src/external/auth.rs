@@ -37,10 +37,6 @@ pub fn external_auth(router: routing::Router, app_state: AppState) -> routing::R
 async fn login_handler(app_state: AppState, request: AuthRequest) -> impl IntoResponse {
     let config = app_state.config.lock().await;
 
-    // println!(
-    //     "Login attempt for device: {} / {}",
-    //     request.device_id, request.password
-    // );
     if !config.verify_password(&request.password) {
         return (
             StatusCode::UNAUTHORIZED,
@@ -62,11 +58,7 @@ async fn login_handler(app_state: AppState, request: AuthRequest) -> impl IntoRe
             }),
         );
     }
-    // println!(
-    //     "Login succeed.: {} / {}",
-    //     request.device_id, request.password
-    // );
-
+    
     // 認証トークンを生成
     let token = Uuid::new_v4().to_string();
     let mut tokens = AUTH_TOKENS.lock().await;
@@ -104,7 +96,6 @@ async fn authorize_device_handler(
 
     // 設定を保存
     if let Err(_e) = config.save() {
-        // eprintln!("Failed to save config: {}", e);
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(AuthResponse {
@@ -129,11 +120,6 @@ async fn authorize_device_handler(
 pub async fn verify_token(token: &str) -> Option<String> {
     let tokens = AUTH_TOKENS.lock().await;
     tokens.get(token).cloned()
-}
-
-pub async fn is_device_authorized(app_state: &AppState, device_id: &str) -> bool {
-    let config = app_state.config.lock().await;
-    config.is_device_authorized(device_id)
 }
 
 async fn verify_token_handler(headers: HeaderMap) -> impl IntoResponse {

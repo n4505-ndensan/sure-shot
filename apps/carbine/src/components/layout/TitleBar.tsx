@@ -1,5 +1,7 @@
+import { useLocation } from '@solidjs/router';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createEffect, createSignal, onMount, Show } from 'solid-js';
+import { platform } from '@tauri-apps/plugin-os';
+import { createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
 import '~/styles/title_bar_region.css';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
@@ -16,7 +18,7 @@ export default function TitleBar() {
 
   createEffect(() => {
     console.log(lastAuthStatus());
-  })
+  });
 
   onMount(async () => {
     const window = getCurrentWindow();
@@ -29,6 +31,19 @@ export default function TitleBar() {
   getCurrentWindow().onResized(async (handler) => {
     setMaximized(await getCurrentWindow().isMaximized());
   });
+
+  const location = useLocation();
+  console.log(location.pathname)
+  const [isMobile, setIsMobile] = createSignal<boolean>(false);
+
+  // プラットフォーム検出
+  const checkPlatform = () => {
+    const currentPlatform = platform();
+    setIsMobile(currentPlatform === 'android' || currentPlatform === 'ios');
+  };
+
+  // 初期化時にプラットフォームを確認
+  checkPlatform();
 
   return (
     <header

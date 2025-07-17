@@ -92,8 +92,6 @@ impl ServerConfig {
     }
 
     pub fn create_with_setup() -> Result<Self, Box<dyn std::error::Error>> {
-        // println!("=== Sure-Shot Server 初期設定 ===");
-
         // サーバー名の設定
         print!(
             "サーバー名を入力してください (デフォルト: {}): ",
@@ -111,7 +109,6 @@ impl ServerConfig {
         }
 
         // パスワードの設定
-        // println!("管理者パスワードを設定してください:");
         let password = rpassword::read_password()?;
 
         if password.is_empty() {
@@ -119,7 +116,6 @@ impl ServerConfig {
         }
 
         // パスワード確認
-        // println!("パスワードを再度入力してください:");
         let password_confirm = rpassword::read_password()?;
 
         if password != password_confirm {
@@ -144,7 +140,6 @@ impl ServerConfig {
         };
 
         config.save()?;
-        // println!("設定が正常に保存されました。");
 
         Ok(config)
     }
@@ -219,34 +214,7 @@ pub struct ReceivedMessage {
     pub attachments: Vec<Attachment>,
 }
 
-#[derive(Serialize, Deserialize)]
-#[typeshare]
-pub struct ReceiveMessageResponse {
-    pub success: bool,
-    pub message: String,
-    pub received_at: String,
-}
 
-#[derive(Serialize, Deserialize)]
-#[typeshare]
-pub struct UpdateNicknameRequest {
-    pub nickname: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[typeshare]
-pub struct UpdateNicknameResponse {
-    pub success: bool,
-    pub message: String,
-    pub old_nickname: String,
-    pub new_nickname: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[typeshare]
-pub struct GetNicknameResponse {
-    pub nickname: String,
-}
 
 #[derive(Serialize, Deserialize)]
 #[typeshare]

@@ -35,7 +35,6 @@ pub fn external_get_messages(router: routing::Router, app_state: AppState) -> ro
                                 (StatusCode::OK, Json(messages.clone())).into_response()
                             }
                             None => {
-                                // println!("Invalid or expired token: {}", token);
                                 // 無効なトークン
                                 (StatusCode::UNAUTHORIZED, Json("Invalid or expired token"))
                                     .into_response()
@@ -43,7 +42,6 @@ pub fn external_get_messages(router: routing::Router, app_state: AppState) -> ro
                         }
                     }
                     None => {
-                        // println!("Token required");
                         // トークンが提供されていない
                         (StatusCode::UNAUTHORIZED, Json("Token required")).into_response()
                     }

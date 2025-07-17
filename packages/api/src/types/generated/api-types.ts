@@ -3,70 +3,66 @@
 */
 
 export interface Attachment {
-  id: string;
-  filename: string;
-  mime_type: string;
-  size: number;
-  data: string;
-  thumbnail?: string;
+	id: string;
+	filename: string;
+	mime_type: string;
+	size: number;
+	data: string;
+	thumbnail?: string;
 }
 
-export interface GetNicknameResponse {
-  nickname: string;
+export interface AuthRequest {
+	password: string;
+	device_id: string;
 }
 
-export interface PongResponse {
-  message: string;
-  name: string;
-  is_self: boolean;
+export interface AuthResponse {
+	success: boolean;
+	message: string;
+	token?: string;
 }
 
-export interface ReceiveMessageResponse {
-  success: boolean;
-  message: string;
-  received_at: string;
-}
-
-export interface ReceivedMessage {
-  from: string;
-  from_name: string;
-  message: string;
-  message_type: string;
-  timestamp: string;
-  is_self: boolean;
-  attachments: Attachment[];
-}
-
-export interface SendMessageRequest {
-  message: string;
-  message_type: string;
-  attachments: Attachment[];
-  from_name: string;
-  from_ip: string;
-}
-
-export interface SendMessageResponse {
-  success: boolean;
-  message: string;
-  timestamp: string;
+export interface AuthorizeDeviceRequest {
+	device_id: string;
+	password: string;
 }
 
 export interface HostInfo {
-  ip: string;
-  port: number;
-  status: string;
-  message: string;
-  name: string;
-  is_self: boolean;
+	ip: string;
+	port: number;
+	status: string;
+	message: string;
+	name: string;
+	is_self: boolean;
 }
 
-export interface UpdateNicknameRequest {
-  nickname: string;
+export interface PongResponse {
+	message: string;
+	name: string;
+	is_self: boolean;
 }
 
-export interface UpdateNicknameResponse {
-  success: boolean;
-  message: string;
-  old_nickname: string;
-  new_nickname: string;
+export interface ReceivedMessage {
+	from: string;
+	from_name: string;
+	message: string;
+	message_type: string;
+	timestamp: string;
+	is_self: boolean;
+	attachments: Attachment[];
 }
+
+export interface SendMessageRequest {
+	message: string;
+	message_type: string;
+	attachments: Attachment[];
+	from_name: string;
+	from_ip: string;
+}
+
+export interface SendMessageResponse {
+	success: boolean;
+	message: string;
+	timestamp: string;
+}
+

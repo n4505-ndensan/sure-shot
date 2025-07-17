@@ -240,14 +240,4 @@ impl ServerManager {
             .send(ServerMessage::Log("Server stopped".to_string()));
         Ok(())
     }
-
-    pub async fn is_running(&self) -> bool {
-        let handle_guard = self.server_handle.lock().await;
-        handle_guard.is_some()
-    }
-
-    // 従来のメソッドを維持（後方互換性のため）
-    pub async fn run_server(&self) -> Result<()> {
-        self.start_server().await
-    }
 }

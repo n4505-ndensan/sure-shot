@@ -21,8 +21,8 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
   const [isMobile, setIsMobile] = createSignal<boolean>(false);
 
   // プラットフォーム検出
-  const checkPlatform = async () => {
-    const currentPlatform = await platform();
+  const checkPlatform = () => {
+    const currentPlatform = platform();
     setIsMobile(currentPlatform === 'android' || currentPlatform === 'ios');
   };
 

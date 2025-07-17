@@ -14,10 +14,6 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
             move |headers: HeaderMap, Json(request): Json<SendMessageRequest>| {
                 let state = state.clone();
                 async move {
-                    // println!(
-                    //     "Received send request: {} from {} ({})",
-                    //     request.message, request.from_name, request.from_ip
-                    // );
 
                     // Authorizationヘッダーからトークンを取得
                     let token = headers
@@ -37,20 +33,11 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
                             match verify_token(token).await {
                                 Some(_device_id) => {
                                     // 認証成功、メッセージ処理を続行
-                                    // println!(
-                                    //     "Token authorized for send request: {} from {} ({})",
-                                    //     request.message, request.from_name, request.from_ip
-                                    // );
                                     let config = state.config.lock().await;
                                     drop(config); // ロックを早期に解放
 
                                     let from_name = request.from_name.clone();
                                     let from_ip = request.from_ip.clone();
-
-                                    // println!(
-                                    //     "send requested from {} ({}): {}",
-                                    //     from_name, from_ip, request.message
-                                    // );
 
                                     let sent_message = ReceivedMessage {
                                         from: from_ip.clone(), // クライアントのIP
@@ -77,14 +64,13 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
                                     let result = state.message_broadcaster.send(sent_message);
 
                                     let response = match result {
-                                        Ok(receiver_count) => SendMessageResponse {
+                                        Ok(_) => SendMessageResponse {
                                             success: true,
                                             message: "Message sent successfully".to_string(),
                                             timestamp: chrono::Utc::now().to_rfc3339(),
                                         },
                                         Err(tokio::sync::broadcast::error::SendError(_)) => {
                                             // 受信者がいない場合でも成功とみなす
-                                            // println!("No active SSE receivers, but message stored");
                                             SendMessageResponse {
                                                 success: true,
                                                 message: "Message stored (no active receivers)"
