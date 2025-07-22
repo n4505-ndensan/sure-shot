@@ -1,3 +1,15 @@
 [default]
-description = "Default permissions for the plugin"
-permissions = ["allow-ping"]
+description = """
+Default permissions for the carbine-notifications plugin.
+
+#### This permission set includes:
+
+- `allow-start-background-service`: Enables starting the background notification service
+- `allow-stop-background-service`: Enables stopping the background notification service  
+- `allow-get-service-status`: Enables getting the current service status
+"""
+permissions = [
+    "allow-start-background-service",
+    "allow-stop-background-service",
+    "allow-get-service-status",
+]

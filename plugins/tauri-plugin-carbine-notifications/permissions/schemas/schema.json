@@ -35,25 +35,17 @@
     "DefaultPermission": {
       "description": "The default permission set of the plugin.\n\nWorks similarly to a permission with the \"default\" identifier.",
       "type": "object",
-      "required": [
-        "permissions"
-      ],
+      "required": ["permissions"],
       "properties": {
         "version": {
           "description": "The version of the permission.",
-          "type": [
-            "integer",
-            "null"
-          ],
+          "type": ["integer", "null"],
           "format": "uint64",
           "minimum": 1.0
         },
         "description": {
           "description": "Human-readable description of what the permission does. Tauri convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "permissions": {
           "description": "All permissions this set contains.",
@@ -67,11 +59,7 @@
     "PermissionSet": {
       "description": "A set of direct permissions grouped together under a new name.",
       "type": "object",
-      "required": [
-        "description",
-        "identifier",
-        "permissions"
-      ],
+      "required": ["description", "identifier", "permissions"],
       "properties": {
         "identifier": {
           "description": "A unique identifier for the permission.",
@@ -93,16 +81,11 @@
     "Permission": {
       "description": "Descriptions of explicit privileges of commands.\n\nIt can enable commands to be accessible in the frontend of the application.\n\nIf the scope is defined it can be used to fine grain control the access of individual or multiple commands.",
       "type": "object",
-      "required": [
-        "identifier"
-      ],
+      "required": ["identifier"],
       "properties": {
         "version": {
           "description": "The version of the permission.",
-          "type": [
-            "integer",
-            "null"
-          ],
+          "type": ["integer", "null"],
           "format": "uint64",
           "minimum": 1.0
         },
@@ -112,10 +95,7 @@
         },
         "description": {
           "description": "Human-readable description of what the permission does. Tauri internal convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "commands": {
           "description": "Allowed or denied commands when using this permission.",
@@ -139,10 +119,7 @@
         },
         "platforms": {
           "description": "Target platforms this permission applies. By default all platforms are affected by this permission.",
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "items": {
             "$ref": "#/definitions/Target"
           }
@@ -177,20 +154,14 @@
       "properties": {
         "allow": {
           "description": "Data that defines what is allowed by the scope.",
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "items": {
             "$ref": "#/definitions/Value"
           }
         },
         "deny": {
           "description": "Data that defines what is denied by the scope. This should be prioritized by validation logic.",
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "items": {
             "$ref": "#/definitions/Value"
           }
@@ -257,43 +228,45 @@
         {
           "description": "MacOS.",
           "type": "string",
-          "enum": [
-            "macOS"
-          ]
+          "enum": ["macOS"]
         },
         {
           "description": "Windows.",
           "type": "string",
-          "enum": [
-            "windows"
-          ]
+          "enum": ["windows"]
         },
         {
           "description": "Linux.",
           "type": "string",
-          "enum": [
-            "linux"
-          ]
+          "enum": ["linux"]
         },
         {
           "description": "Android.",
           "type": "string",
-          "enum": [
-            "android"
-          ]
+          "enum": ["android"]
         },
         {
           "description": "iOS.",
           "type": "string",
-          "enum": [
-            "iOS"
-          ]
+          "enum": ["iOS"]
         }
       ]
     },
     "PermissionKind": {
       "type": "string",
       "oneOf": [
+        {
+          "description": "Enables the get_service_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-service-status",
+          "markdownDescription": "Enables the get_service_status command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_service_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-service-status",
+          "markdownDescription": "Denies the get_service_status command without any pre-configured scope."
+        },
         {
           "description": "Enables the ping command without any pre-configured scope.",
           "type": "string",
@@ -307,10 +280,34 @@
           "markdownDescription": "Denies the ping command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`",
+          "description": "Enables the start_background_service command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-start-background-service",
+          "markdownDescription": "Enables the start_background_service command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the start_background_service command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-start-background-service",
+          "markdownDescription": "Denies the start_background_service command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the stop_background_service command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-stop-background-service",
+          "markdownDescription": "Enables the stop_background_service command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the stop_background_service command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-stop-background-service",
+          "markdownDescription": "Denies the stop_background_service command without any pre-configured scope."
+        },
+        {
+          "description": "Default permissions for the carbine-notifications plugin.\n\n#### This permission set includes:\n\n- `allow-start-background-service`: Enables starting the background notification service\n- `allow-stop-background-service`: Enables stopping the background notification service  \n- `allow-get-service-status`: Enables getting the current service status\n\n#### This default permission set includes:\n\n- `allow-start-background-service`\n- `allow-stop-background-service`\n- `allow-get-service-status`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`"
+          "markdownDescription": "Default permissions for the carbine-notifications plugin.\n\n#### This permission set includes:\n\n- `allow-start-background-service`: Enables starting the background notification service\n- `allow-stop-background-service`: Enables stopping the background notification service  \n- `allow-get-service-status`: Enables getting the current service status\n\n#### This default permission set includes:\n\n- `allow-start-background-service`\n- `allow-stop-background-service`\n- `allow-get-service-status`"
         }
       ]
     }

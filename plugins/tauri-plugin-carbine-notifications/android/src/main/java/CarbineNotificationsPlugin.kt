@@ -14,13 +14,12 @@ import app.tauri.plugin.Plugin
 import app.tauri.plugin.Invoke
 
 @InvokeArg
-class StartServiceArgs {
+internal class StartServiceArgs {
     var serverUrl: String? = null
-    var localIp: String? = null
 }
 
 @InvokeArg
-class StopServiceArgs {
+internal class StopServiceArgs {
     // Empty for now
 }
 
@@ -36,12 +35,12 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
         try {
             val args = invoke.parseArgs(StartServiceArgs::class.java)
             
+            Log.d("CarbineNotifications", "Starting background service with Args: ${args.toString()}")
             Log.d("CarbineNotifications", "Starting background service with URL: ${args.serverUrl}")
             Toast.makeText(activity, "Starting background notification service...", Toast.LENGTH_SHORT).show()
             
             val intent = Intent(activity, BackgroundNotificationService::class.java).apply {
                 putExtra("server_url", args.serverUrl)
-                putExtra("local_ip", args.localIp)
             }
             
             activity.startForegroundService(intent)

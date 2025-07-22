@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.plugin.carbine-notifications"
+    namespace = "com.plugin.carbine_notifications"
     compileSdk = 34
 
     defaultConfig {

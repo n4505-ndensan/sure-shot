@@ -31,7 +31,6 @@ class BackgroundNotificationService : Service() {
     }
     
     private var serverUrl: String? = null
-    private var localIp: String? = null
     
     private var serviceJob: Job? = null
     private lateinit var notificationManager: NotificationManager
@@ -44,10 +43,16 @@ class BackgroundNotificationService : Service() {
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        serverUrl = intent?.getStringExtra("server_url")
-        localIp = intent?.getStringExtra("local_ip")
+        Log.d(TAG, "onStartCommand called with intent: $intent")
+        Log.d(TAG, "Intent extras: ${intent?.extras}")
         
-        Log.d(TAG, "Service started with URL: $serverUrl, LocalIP: $localIp")
+        serverUrl = intent?.getStringExtra("server_url")
+        
+        Log.d(TAG, "Extracted serverUrl: '$serverUrl'")
+        Log.d(TAG, "serverUrl is null: ${serverUrl == null}")
+        Log.d(TAG, "serverUrl is empty: ${serverUrl?.isEmpty()}")
+        
+        Log.d(TAG, "Service started with URL: $serverUrl")
         Log.d(TAG, "Starting foreground service and background work...")
         
         // フォアグラウンド通知を開始
@@ -141,7 +146,7 @@ class BackgroundNotificationService : Service() {
             Log.d(TAG, "SSE connection established successfully!")
             showStatusNotification("Connected", "Successfully connected to server")
             
-            var line: String?
+            var line: String? = null
             
             while (isRunning && reader.readLine().also { line = it } != null) {
                 line?.let { processSSELine(it) }
@@ -174,14 +179,9 @@ class BackgroundNotificationService : Service() {
                 
                 Log.d(TAG, "Message from $fromName ($fromIp): $message")
                 
-                // 自分自身からのメッセージは無視
-                if (fromIp != localIp) {
-                    Log.d(TAG, "Showing notification for external message")
-                    showMessageNotification(fromName, message)
-                    messageCount++
-                } else {
-                    Log.d(TAG, "Ignoring own message")
-                }
+                Log.d(TAG, "Showing notification for external message")
+                showMessageNotification(fromName, message)
+                messageCount++
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse SSE message", e)

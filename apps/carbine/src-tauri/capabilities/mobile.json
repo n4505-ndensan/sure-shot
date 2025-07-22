@@ -3,6 +3,6 @@
   "identifier": "mobile",
   "description": "Capability for the windows on mobile platform",
   "windows": ["*"],
-  "permissions": ["app-events:default"],
+  "permissions": ["app-events:default", "carbine-notifications:default"],
   "platforms": ["android", "iOS"]
 }

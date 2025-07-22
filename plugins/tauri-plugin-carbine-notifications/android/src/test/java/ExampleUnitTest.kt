@@ -1,4 +1,4 @@
-package com.plugin.carbine-notifications
+package com.plugin.carbine_notifications
 
 import org.junit.Test
 

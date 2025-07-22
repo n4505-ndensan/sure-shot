@@ -4,7 +4,6 @@ import { sendNotification } from '@tauri-apps/plugin-notification';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { onPause, onResume } from 'tauri-plugin-app-events-api';
 import { startBackgroundService, stopBackgroundService } from 'tauri-plugin-carbine-notifications';
-import { getLocalIp } from '~/api/getLocalIp';
 import { globalStore } from '~/store/GlobalStore';
 import { isMobile } from '~/utils/PlatformUtils';
 import MessageItem from './MessageItem';
@@ -35,7 +34,6 @@ const MessageList: Component<Props> = (props) => {
           silent: false,
           title: message.from_name || 'New Message',
           body: message.message || 'You have a new message',
-          group: 'messages',
         });
       }
     },
@@ -72,11 +70,10 @@ const MessageList: Component<Props> = (props) => {
   onPause(async () => {
     if (isMobile()) {
       const authStatus = getAuthStatus();
-      const localIp = await getLocalIp();
+      console.log('Auth status on pause:', `http://${authStatus?.host?.ip}:${authStatus?.host?.port}`);
       if (authStatus && authStatus.isAuthenticated && authStatus.host) {
         await startBackgroundService({
-          serverUrl: `${authStatus.host.ip}:${authStatus.host.port}`,
-          localIp,
+          serverUrl: `http://${authStatus.host.ip}:${authStatus.host.port}`,
         });
       }
     }

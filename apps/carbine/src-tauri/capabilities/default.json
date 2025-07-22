@@ -11,6 +11,7 @@
     "opener:allow-open-url",
     "os:allow-hostname",
     "notification:default",
+    "carbine-notifications:default",
 
     "core:window:allow-show",
     "core:window:allow-center",
@@ -29,7 +30,6 @@
     
     "dialog:default",
 
-    "carbine-notifications:allow-ping",
     "notification:allow-register-action-types",
     "notification:allow-check-permissions",
     "notification:allow-create-channel",

@@ -2,7 +2,6 @@ import { invoke } from '@tauri-apps/api/core';
 
 export interface StartServiceRequest {
   serverUrl: string;
-  localIp: string;
 }
 
 export interface ServiceStatusResponse {

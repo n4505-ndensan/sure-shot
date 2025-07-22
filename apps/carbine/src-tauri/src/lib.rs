@@ -225,10 +225,8 @@ pub fn run() {
         ])
          .setup(|app| {
             #[cfg(mobile)]
-            {
-                app.handle().plugin(tauri_plugin_app_events::init())?;
-            }
-             Ok(())
+            app.handle().plugin(tauri_plugin_app_events::init())?;
+            Ok(())
          })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

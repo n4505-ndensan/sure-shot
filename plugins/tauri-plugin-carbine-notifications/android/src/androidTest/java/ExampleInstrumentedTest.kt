@@ -1,4 +1,4 @@
-package com.plugin.carbine-notifications
+package com.plugin.carbine_notifications
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.plugin.carbine-notifications", appContext.packageName)
+        assertEquals("com.plugin.carbine_notifications", appContext.packageName)
     }
 }

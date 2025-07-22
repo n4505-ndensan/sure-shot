@@ -9,12 +9,6 @@ pub enum Error {
     #[cfg(mobile)]
     #[error(transparent)]
     PluginInvoke(#[from] tauri::plugin::mobile::PluginInvokeError),
-    #[error("Background service not supported on this platform")]
-    PlatformNotSupported,
-    #[error("Failed to start background service: {0}")]
-    ServiceError(String),
-    #[error("Permission denied")]
-    PermissionDenied,
 }
 
 impl Serialize for Error {

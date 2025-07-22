@@ -1,5 +1,5 @@
 import { Route, Router, useNavigate } from '@solidjs/router';
-import { isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification';
+import { createChannel, Importance, isPermissionGranted, requestPermission, Visibility } from '@tauri-apps/plugin-notification';
 import { onMount } from 'solid-js';
 import { getLocalIp } from './api/getLocalIp';
 import Home from './routes/home';
@@ -29,6 +29,18 @@ const App = () => {
       const permission = await requestPermission();
       permissionGranted = permission === 'granted';
     }
+
+    await createChannel({
+      id: 'messages',
+      name: 'Messages',
+      description: 'Notifications for new messages',
+      importance: Importance.High,
+      visibility: Visibility.Private,
+      lights: true,
+      lightColor: '#ff0000',
+      vibration: true,
+      sound: 'notification_sound',
+    });
   });
 
   return (
