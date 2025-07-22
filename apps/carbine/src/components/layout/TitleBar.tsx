@@ -33,17 +33,6 @@ export default function TitleBar() {
   });
 
   const location = useLocation();
-  console.log(location.pathname)
-  const [isMobile, setIsMobile] = createSignal<boolean>(false);
-
-  // プラットフォーム検出
-  const checkPlatform = () => {
-    const currentPlatform = platform();
-    setIsMobile(currentPlatform === 'android' || currentPlatform === 'ios');
-  };
-
-  // 初期化時にプラットフォームを確認
-  checkPlatform();
 
   return (
     <header
@@ -63,7 +52,7 @@ export default function TitleBar() {
         }}
         data-tauri-drag-region
       >
-        <img src={'icon.png'} width={16} height={16} />
+        <img src={'/app_icon/sureshot2_16.png'} width={16} height={16} />
 
         <div
           style={{

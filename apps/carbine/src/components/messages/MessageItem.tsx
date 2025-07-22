@@ -79,7 +79,7 @@ const MessageItem: Component<Props> = (props) => {
         {/* メッセージテキスト */}
         <Show when={message.message.trim()}>
           <div style={{ 'margin-bottom': '0.5rem' }}>
-            <LinkifiedText text={message.message} />
+            <p>{message.message}</p>
           </div>
         </Show>
 

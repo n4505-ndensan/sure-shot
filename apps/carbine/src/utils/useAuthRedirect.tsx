@@ -5,6 +5,7 @@ import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { platform } from '@tauri-apps/plugin-os';
 import { createSignal, onCleanup } from 'solid-js';
+import { isMobile } from './PlatformUtils';
 
 let validateInterval: NodeJS.Timeout | undefined;
 
@@ -18,16 +19,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
   const navigate = useNavigate();
 
   const [lastAuthStatus, setLastAuthStatus] = createSignal<AuthStatus | null>(getAuthStatus());
-  const [isMobile, setIsMobile] = createSignal<boolean>(false);
 
-  // プラットフォーム検出
-  const checkPlatform = () => {
-    const currentPlatform = platform();
-    setIsMobile(currentPlatform === 'android' || currentPlatform === 'ios');
-  };
-
-  // 初期化時にプラットフォームを確認
-  checkPlatform();
 
   const redirectByAuthStatus = (authenticated: boolean) => {
     if (authenticated) {

@@ -1,17 +1,16 @@
-import { defineConfig } from "wxt";
-import tsConfigPaths from "vite-tsconfig-paths";
+import tsConfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'wxt';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
-  modules: ["@wxt-dev/module-solid", "@wxt-dev/auto-icons"],
+  modules: ['@wxt-dev/module-solid', '@wxt-dev/auto-icons'],
 
   manifest: {
-    permissions: ["contextMenus", "activeTab", "storage"],
-    host_permissions: ["http://*/*"],
+    permissions: ['contextMenus', 'activeTab', 'storage'],
+    // host_permissions: ['http://192.168.*:8000/*'],
   },
-
   autoIcons: {
-    baseIconPath: "./assets/icon.png",
+    baseIconPath: './assets/icon.png',
     enabled: true,
     grayscaleOnDevelopment: true,
     sizes: [16, 24, 32, 48, 64, 96, 128],
@@ -23,8 +22,8 @@ export default defineConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          api: "modern-compiler",
-          loadPaths: ["node_modules", "../../packages/ui/src"],
+          api: 'modern-compiler',
+          loadPaths: ['node_modules', '../../packages/ui/src'],
         },
       },
     },

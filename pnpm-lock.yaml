@@ -84,6 +84,9 @@ importers:
       tauri-plugin-app-events-api:
         specifier: ~0.2.0
         version: 0.2.0
+      tauri-plugin-carbine-notifications:
+        specifier: file:../../plugins/tauri-plugin-carbine-notifications
+        version: file:plugins/tauri-plugin-carbine-notifications
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^2
@@ -2481,6 +2484,9 @@ packages:
 
   tauri-plugin-app-events-api@0.2.0:
     resolution: {integrity: sha512-CnlAeucWhT+Rgx6CCsqUpq2D3pqgx0fhjSPKomH7O2t1rGVu5kGLMkYvaCX6gqVTUYpIWX5BLV7LGY2DRri0QA==}
+
+  tauri-plugin-carbine-notifications@file:plugins/tauri-plugin-carbine-notifications:
+    resolution: {directory: plugins/tauri-plugin-carbine-notifications, type: directory}
 
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
@@ -4934,6 +4940,10 @@ snapshots:
       has-flag: 4.0.0
 
   tauri-plugin-app-events-api@0.2.0:
+    dependencies:
+      '@tauri-apps/api': 2.6.0
+
+  tauri-plugin-carbine-notifications@file:plugins/tauri-plugin-carbine-notifications:
     dependencies:
       '@tauri-apps/api': 2.6.0
 

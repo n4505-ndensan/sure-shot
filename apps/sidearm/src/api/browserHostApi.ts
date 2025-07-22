@@ -1,10 +1,6 @@
-import {
-  ApiToken,
-  AuthStatus,
-  getAuthStatus,
-  login,
-  HostInfo,
-} from "@sureshot/api/src";
+import { getAuthStatus, HostInfo, login } from '@sureshot/api';
+import { AuthStatus } from '@sureshot/api/src/auth/AuthManager';
+import { ChromeAuthManager } from '../utils/ChromeAuthManager';
 
 /**
  * ブラウザ拡張機能用のホスト検索
@@ -19,21 +15,19 @@ export async function findHostsInBrowser(): Promise<HostInfo[]> {
     const localIPs = await getLocalNetworkRange();
 
     // 並行してホストをスキャン
-    const scanPromises = localIPs.flatMap((ip) =>
-      commonPorts.map((port) => scanHost(ip, port))
-    );
+    const scanPromises = localIPs.flatMap((ip) => commonPorts.map((port) => scanHost(ip, port)));
 
     const results = await Promise.allSettled(scanPromises);
 
     results.forEach((result) => {
-      if (result.status === "fulfilled" && result.value) {
+      if (result.status === 'fulfilled' && result.value) {
         hosts.push(result.value);
       }
     });
 
     return hosts;
   } catch (error) {
-    console.error("Failed to scan for hosts:", error);
+    console.error('Failed to scan for hosts:', error);
     return [];
   }
 }
@@ -48,10 +42,10 @@ async function scanHost(ip: string, port: number): Promise<HostInfo | null> {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(`http://${ip}:${port}/ping`, {
-      method: "GET",
+      method: 'GET',
       signal: controller.signal,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -62,9 +56,9 @@ async function scanHost(ip: string, port: number): Promise<HostInfo | null> {
       return {
         ip,
         port,
-        status: "online",
-        message: "Connected",
-        name: HostInfo.name || "Unknown Server",
+        status: 'online',
+        message: 'Connected',
+        name: HostInfo.name || 'Unknown Server',
         is_self: false,
       };
     }
@@ -85,7 +79,7 @@ async function getLocalNetworkRange(): Promise<string[]> {
     // WebRTC APIを使用してローカルIPを取得
     const localIP = await getLocalIP();
     if (localIP) {
-      const ipParts = localIP.split(".");
+      const ipParts = localIP.split('.');
       if (ipParts.length === 4) {
         const network = `${ipParts[0]}.${ipParts[1]}.${ipParts[2]}`;
 
@@ -96,7 +90,7 @@ async function getLocalNetworkRange(): Promise<string[]> {
       }
     }
   } catch (error) {
-    console.warn("Could not determine local network range:", error);
+    console.warn('Could not determine local network range:', error);
   }
 
   return ips;
@@ -108,10 +102,10 @@ async function getLocalNetworkRange(): Promise<string[]> {
 async function getLocalIP(): Promise<string | null> {
   return new Promise((resolve) => {
     const rtc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
 
-    rtc.createDataChannel("");
+    rtc.createDataChannel('');
 
     rtc.onicecandidate = (event) => {
       if (event.candidate) {
@@ -120,11 +114,8 @@ async function getLocalIP(): Promise<string | null> {
         if (match && match[1]) {
           const ip = match[1];
           // プライベートIPアドレスかチェック
-          if (
-            ip.startsWith("192.168.") ||
-            ip.startsWith("10.") ||
-            ip.startsWith("172.")
-          ) {
+          // if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+          if (ip.startsWith('192.168.')) {
             rtc.close();
             resolve(ip);
             return;
@@ -148,29 +139,24 @@ async function getLocalIP(): Promise<string | null> {
 /**
  * サーバーにログインする
  */
-export async function loginToServer(host: HostInfo): Promise<AuthStatus> {
+export async function loginToServer(host: HostInfo): Promise<AuthStatus | null> {
   try {
     const localIp = await getLocalIP();
     if (!localIp) {
-      throw new Error("Could not determine local IP address");
+      throw new Error('Could not determine local IP address');
     }
-    await login({
-      deviceId: "test-device",
-      host: host,
-      selfLocalIp: localIp,
-    });
+    await login(host, 'test1', localIp);
   } catch (error) {
-    console.error("Login failed:", error);
+    console.error('Login failed:', error);
   }
 
   return getAuthStatus();
 }
 
-export async function validateToken(token: ApiToken): Promise<boolean> {
-  try {
-    return true;
-  } catch (error) {
-    console.error("Token validation failed:", error);
-    return false;
-  }
+/**
+ * トークンの有効性を検証
+ */
+export async function validateToken(token: string): Promise<boolean> {
+  const authManager = ChromeAuthManager.getInstance();
+  return await authManager.validateToken();
 }

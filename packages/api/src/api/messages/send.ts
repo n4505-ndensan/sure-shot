@@ -1,21 +1,21 @@
-import { AuthManager } from "../../auth/AuthManager";
-import {
-  SendMessageResponse,
-  Attachment,
-} from "../../types/generated/api-types";
+import { AuthManager } from '../../auth/AuthManager';
+import { Attachment, SendMessageResponse } from '../../types/generated/api-types';
+import { getAuthStatus } from '../auth/login';
 
 export const sendMessage = async (
   fromName: string,
   fromIp: string,
   message: string,
-  messageType: string = "text",
+  messageType: string = 'text',
   attachments: Attachment[] = []
 ): Promise<SendMessageResponse> => {
   try {
     const authManager = AuthManager.getInstance();
+    console.log('send request from: ', getAuthStatus());
     const sendUrl = `${authManager.getBaseUrl()}/send`;
+    console.log('send request to: ', sendUrl);
     const response = await fetch(sendUrl, {
-      method: "POST",
+      method: 'POST',
       headers: authManager.getAuthHeaders(),
       body: JSON.stringify({
         message: message,
@@ -31,10 +31,10 @@ export const sendMessage = async (
     }
 
     const result: SendMessageResponse = await response.json();
-    console.log(result)
+    console.log(result);
     return result;
   } catch (error) {
-    console.error("Failed to send message:", error);
+    console.error('Failed to send message:', error);
     return {
       success: false,
       message: `Failed to send message: ${error}`,

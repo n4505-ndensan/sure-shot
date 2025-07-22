@@ -198,7 +198,7 @@ impl App {
 
         // 表示可能行数を計算（パディングを考慮）
         let available_height = content_chunks[1].height.saturating_sub(0) as usize;
-        
+
         // スクロール位置を計算（最新のログが常に表示されるように）
         let total_lines = self.logs.len();
         let scroll_offset = if total_lines > available_height {

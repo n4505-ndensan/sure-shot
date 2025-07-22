@@ -433,6 +433,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-app-events",
+ "tauri-plugin-carbine-notifications",
  "tauri-plugin-dialog",
  "tauri-plugin-machine-uid",
  "tauri-plugin-notification",
@@ -4157,6 +4158,16 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "thiserror 1.0.69",
+]
+
+[[package]]
+name = "tauri-plugin-carbine-notifications"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.12",
 ]
 
 [[package]]

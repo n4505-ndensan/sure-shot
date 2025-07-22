@@ -217,6 +217,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_machine_uid::init())
+        .plugin(tauri_plugin_carbine_notifications::init())
         .invoke_handler(tauri::generate_handler![
             find_host,
             get_local_ip,

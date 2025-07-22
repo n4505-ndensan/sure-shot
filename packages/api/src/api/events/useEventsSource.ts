@@ -14,11 +14,33 @@ export function useEventsSource(props: Props): {
   const [connectionError, setConnectionError] = createSignal<string | undefined>(undefined);
   const [isConnected, setIsConnected] = createSignal<boolean | undefined>(undefined);
 
+  const onEventSourceOpen = () => {
+    console.log('SSE connection opened');
+    setIsConnected(true);
+    setConnectionError(undefined);
+  };
+  const onEventSourceMessage = (event: MessageEvent) => {
+    try {
+      const message: ReceivedMessage = JSON.parse(event.data);
+      props.onMessage(message);
+    } catch (error) {
+      console.error('Failed to parse SSE message:', error);
+    }
+  };
+  const onEventSourceError = (error: Event) => {
+    console.error('SSE error:', error);
+    setIsConnected(false);
+    setConnectionError('Connection lost.');
+  };
+
   // SSE接続の初期化
   const initializeSSE = async () => {
     setIsConnected(undefined);
     try {
       if (eventSource) {
+        eventSource.removeEventListener('open', onEventSourceOpen);
+        eventSource.removeEventListener('message', onEventSourceMessage);
+        eventSource.removeEventListener('error', onEventSourceError);
         eventSource.close();
       }
       const authManager = AuthManager.getInstance();
@@ -30,26 +52,11 @@ export function useEventsSource(props: Props): {
       const eventsUrl = `${authManager.getBaseUrl()}/events`;
       eventSource = new EventSource(eventsUrl);
 
-      eventSource.onopen = () => {
-        console.log('SSE connection opened to:', eventsUrl);
-        setIsConnected(true);
-        setConnectionError(undefined);
-      };
+      eventSource.addEventListener('open', onEventSourceOpen);
 
-      eventSource.onmessage = (event) => {
-        try {
-          const message: ReceivedMessage = JSON.parse(event.data);
-          props.onMessage(message);
-        } catch (error) {
-          console.error('Failed to parse SSE message:', error);
-        }
-      };
+      eventSource.addEventListener('message', onEventSourceMessage);
 
-      eventSource.onerror = (error) => {
-        console.error('SSE error:', error);
-        setIsConnected(false);
-        setConnectionError('Connection lost.');
-      };
+      eventSource.addEventListener('error', onEventSourceError);
     } catch (error) {
       console.error('Failed to initialize SSE:', error);
       setIsConnected(false);

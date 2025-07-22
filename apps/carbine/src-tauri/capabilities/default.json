@@ -26,6 +26,13 @@
     "core:window:allow-unmaximize",
     "core:webview:default",
     "core:webview:allow-create-webview-window",
-    "dialog:default"
+    
+    "dialog:default",
+
+    "carbine-notifications:allow-ping",
+    "notification:allow-register-action-types",
+    "notification:allow-check-permissions",
+    "notification:allow-create-channel",
+    "notification:allow-register-listener"
   ]
 }
