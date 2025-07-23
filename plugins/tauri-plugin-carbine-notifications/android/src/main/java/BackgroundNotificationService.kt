@@ -59,7 +59,7 @@ class BackgroundNotificationService : Service() {
         startForeground(NOTIFICATION_ID, createForegroundNotification())
         
         // サービス開始の即時通知を表示
-        showStatusNotification("Sure Shot Service Started", "Background service is now running")
+        // showStatusNotification("Sure Shot Service Started", "Background service is now running")
         
         startBackgroundWork()
         
@@ -73,7 +73,7 @@ class BackgroundNotificationService : Service() {
         Log.d(TAG, "Service destroyed")
         
         // サービス停止の通知を表示
-        showStatusNotification("Sure Shot Service Stopped", "Background service has been stopped")
+        // showStatusNotification("Sure Shot Service Stopped", "Background service has been stopped")
     }
     
     override fun onBind(intent: Intent?): IBinder? = null
@@ -113,15 +113,15 @@ class BackgroundNotificationService : Service() {
             try {
                 if (serverUrl != null) {
                     Log.d(TAG, "Attempting SSE connection to: $serverUrl")
-                    showStatusNotification("Connecting...", "Attempting to connect to server")
+                    // showStatusNotification("Connecting...", "Attempting to connect to server")
                     connectToSSE()
                 } else {
                     Log.e(TAG, "Server URL is null")
-                    showStatusNotification("Error", "Server URL is null")
+                    // showStatusNotification("Error", "Server URL is null")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "SSE connection failed, falling back to polling", e)
-                showStatusNotification("Connection Failed", "Falling back to polling mode")
+                // showStatusNotification("Connection Failed", "Falling back to polling mode")
                 startPolling()
             }
         }
@@ -144,7 +144,7 @@ class BackgroundNotificationService : Service() {
             
             val reader = BufferedReader(InputStreamReader(connection.inputStream))
             Log.d(TAG, "SSE connection established successfully!")
-            showStatusNotification("Connected", "Successfully connected to server")
+            // showStatusNotification("Connected", "Successfully connected to server")
             
             var line: String? = null
             
@@ -154,7 +154,7 @@ class BackgroundNotificationService : Service() {
             
         } catch (e: Exception) {
             Log.e(TAG, "SSE connection error", e)
-            showStatusNotification("Connection Error", "SSE connection failed: ${e.message}")
+            // showStatusNotification("Connection Error", "SSE connection failed: ${e.message}")
             if (isRunning) {
                 delay(5000) // 5秒待ってから再接続
                 Log.d(TAG, "Attempting to reconnect...")
@@ -228,7 +228,7 @@ class BackgroundNotificationService : Service() {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("New message from $fromName")
             .setContentText(message)
-            .setSmallIcon(android.R.drawable.ic_dialog_email)
+            .setSmallIcon(R.drawable.icon)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()

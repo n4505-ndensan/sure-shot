@@ -31,3 +31,5 @@ repomix-output.xml
 
 server/target
 sure-shot-config.toml
+
+local.properties

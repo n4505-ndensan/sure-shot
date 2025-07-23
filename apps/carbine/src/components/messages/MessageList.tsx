@@ -29,12 +29,13 @@ const MessageList: Component<Props> = (props) => {
       }
 
       if (message.from !== globalStore.localIp) {
-        sendNotification({
-          channelId: 'messages',
-          silent: false,
-          title: message.from_name || 'New Message',
-          body: message.message || 'You have a new message',
-        });
+        if (!isMobile())
+          sendNotification({
+            channelId: 'messages',
+            silent: false,
+            title: message.from_name || 'New Message',
+            body: message.message || 'You have a new message',
+          });
       }
     },
   });
