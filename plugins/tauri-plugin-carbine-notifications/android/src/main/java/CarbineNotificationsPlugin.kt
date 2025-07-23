@@ -15,7 +15,9 @@ import app.tauri.plugin.Invoke
 
 @InvokeArg
 internal class StartServiceArgs {
+    // Accept either camelCase or snake_case keys
     var serverUrl: String? = null
+    var server_url: String? = null
 }
 
 @InvokeArg

@@ -22,7 +22,8 @@ export interface StopServiceResponse {
  * Android専用機能です
  */
 export async function startBackgroundService(payload: StartServiceRequest): Promise<ServiceStatusResponse> {
-  return await invoke('plugin:carbine-notifications|start_background_service', { payload });
+  // Pass payload fields directly so native plugin receives serverUrl correctly
+  return await invoke<ServiceStatusResponse>('plugin:carbine-notifications|start_background_service', payload as unknown as Record<string, unknown>);
 }
 
 /**
