@@ -23,6 +23,6 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 }
 
 /// Access to the carbine-notifications APIs.
-pub struct CarbineNotifications<R: Runtime>(PluginHandle<R>);
+pub struct CarbineNotifications<R: Runtime>(pub PluginHandle<R>);
 
 impl<R: Runtime> CarbineNotifications<R> {}

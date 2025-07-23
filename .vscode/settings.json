@@ -4,5 +4,6 @@
   "prettier.configPath": ".prettierrc",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
-  }
+  },
+  "rust-analyzer.linkedProjects": ["plugins\\tauri-plugin-carbine-notifications\\Cargo.toml"]
 }

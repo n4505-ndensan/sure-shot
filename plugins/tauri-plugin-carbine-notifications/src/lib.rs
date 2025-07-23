@@ -35,7 +35,11 @@ impl<R: Runtime, T: Manager<R>> crate::CarbineNotificationsExt<R> for T {
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("carbine-notifications")
-        // .invoke_handler()
+        .invoke_handler(tauri::generate_handler![
+            commands::start_background_service,
+            commands::stop_background_service,
+            commands::get_service_status
+        ])
         .setup(|app, api| {
             #[cfg(mobile)]
             let carbine_notifications = mobile::init(app, api)?;

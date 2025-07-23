@@ -22,8 +22,7 @@ export interface StopServiceResponse {
  * Android専用機能です
  */
 export async function startBackgroundService(payload: StartServiceRequest): Promise<ServiceStatusResponse> {
-  // Pass payload fields directly so native plugin receives serverUrl correctly
-  return await invoke<ServiceStatusResponse>('plugin:carbine-notifications|start_background_service', payload as unknown as Record<string, unknown>);
+  return await invoke<ServiceStatusResponse>('plugin:carbine-notifications|start_background_service', { payload });
 }
 
 /**
@@ -31,7 +30,7 @@ export async function startBackgroundService(payload: StartServiceRequest): Prom
  * Android専用機能です
  */
 export async function stopBackgroundService(): Promise<StopServiceResponse> {
-  return await invoke('plugin:carbine-notifications|stop_background_service', { payload: {} });
+  return await invoke<StopServiceResponse>('plugin:carbine-notifications|stop_background_service', { payload: {} });
 }
 
 /**
@@ -39,5 +38,5 @@ export async function stopBackgroundService(): Promise<StopServiceResponse> {
  * Android専用機能です
  */
 export async function getServiceStatus(): Promise<ServiceStatusResponse> {
-  return await invoke('plugin:carbine-notifications|get_service_status');
+  return await invoke<ServiceStatusResponse>('plugin:carbine-notifications|get_service_status');
 }
