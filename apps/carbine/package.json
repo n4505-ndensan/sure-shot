@@ -4,9 +4,10 @@
   "description": "carbine is the client application for Sure Shot, a cross-platform file sharing tool.",
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "vite:dev": "vite",
+    "vite:build": "vite build",
     "serve": "vite preview",
     "tauri": "tauri",
     "android:build": "tauri android build",

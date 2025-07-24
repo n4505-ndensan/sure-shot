@@ -58,8 +58,8 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
         const setupWindow = new WebviewWindow('login', {
           title: 'sure-shot',
           url: '/login',
-          width: 400,
-          height: 350,
+          width: 350,
+          height: 420,
           maximizable: false,
           minimizable: false,
           closable: true,

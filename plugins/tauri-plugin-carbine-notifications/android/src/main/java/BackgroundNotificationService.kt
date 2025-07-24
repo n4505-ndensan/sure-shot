@@ -12,13 +12,18 @@ import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONObject
 import android.util.Log
+import androidx.core.app.NotificationCompat.FOREGROUND_SERVICE_DEFAULT
+import androidx.core.app.NotificationCompat.FOREGROUND_SERVICE_DEFERRED
 
 class BackgroundNotificationService : Service() {
     
     companion object {
         private const val NOTIFICATION_ID = 1001
-        private const val CHANNEL_ID = "sure_shot_background"
-        private const val TAG = "BackgroundNotificationService"
+        private const val BG_CHANNEL_ID = "background"
+        private const val BG_GROUP_ID = "com.sureshot.app.background"
+        private const val MSG_CHANNEL_ID = "messages"
+        private const val MSG_GROUP_ID = "com.sureshot.app.messages"
+        private const val TAG = "CarbineBGService"
         
         @Volatile
         private var isRunning = false
@@ -38,22 +43,13 @@ class BackgroundNotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        createNotificationChannel()
+        createChannels()
         Log.d(TAG, "Service created")
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand called with intent: $intent")
-        Log.d(TAG, "Intent extras: ${intent?.extras}")
         
         serverUrl = intent?.getStringExtra("server_url")
-        
-        Log.d(TAG, "Extracted serverUrl: '$serverUrl'")
-        Log.d(TAG, "serverUrl is null: ${serverUrl == null}")
-        Log.d(TAG, "serverUrl is empty: ${serverUrl?.isEmpty()}")
-        
-        Log.d(TAG, "Service started with URL: $serverUrl")
-        Log.d(TAG, "Starting foreground service and background work...")
         
         // フォアグラウンド通知を開始
         startForeground(NOTIFICATION_ID, createForegroundNotification())
@@ -78,27 +74,39 @@ class BackgroundNotificationService : Service() {
     
     override fun onBind(intent: Intent?): IBinder? = null
     
-    private fun createNotificationChannel() {
+    private fun createChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Sure Shot Background Service",
-                NotificationManager.IMPORTANCE_LOW
+            val bgChannel = NotificationChannel(
+                BG_CHANNEL_ID,
+                "Background Service",
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Keeps sure-shot connected in background"
                 setShowBadge(false)
             }
-            notificationManager.createNotificationChannel(channel)
+
+            val msgChannel = NotificationChannel(
+                MSG_CHANNEL_ID,
+                "Messages",
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "New messages on app paused"
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannels(listOf(bgChannel, msgChannel))
         }
     }
     
     private fun createForegroundNotification(): Notification {
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Sure Shot")
+        return NotificationCompat.Builder(this, BG_CHANNEL_ID)
+            .setContentTitle("Sure Shot is running")
             .setContentText("Listening for messages in background")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.icon)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
+            .setAutoCancel(false)
+            .setSilent(true)
+            .setGroup(BG_GROUP_ID)
             .build()
     }
     
@@ -172,17 +180,21 @@ class BackgroundNotificationService : Service() {
                 Log.d(TAG, "Processing message data: $jsonData")
                 
                 val messageJson = JSONObject(jsonData)
+
+                Log.d(TAG, "Parsed JSON: $messageJson")
                 
                 val fromIp = messageJson.optString("from")
                 val fromName = messageJson.optString("from_name", "Unknown")
                 val message = messageJson.optString("message", "")
+                val isSelf = messageJson.optBoolean("is_self", false)
                 
                 Log.d(TAG, "Message from $fromName ($fromIp): $message")
-                
-                Log.d(TAG, "Showing notification for external message")
-                showMessageNotification(fromName, message)
+
+                if (!isSelf) {
+                    Log.d(TAG, "Showing notification for external message")
+                    showMessageNotification(fromName, message)
+                }
                 messageCount++
-                
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse SSE message", e)
             }
@@ -225,11 +237,12 @@ class BackgroundNotificationService : Service() {
     }
     
     private fun showMessageNotification(fromName: String, message: String) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("New message from $fromName")
+        val notification = NotificationCompat.Builder(this, MSG_CHANNEL_ID)
+            .setContentTitle("$fromName")
             .setContentText(message)
             .setSmallIcon(R.drawable.icon)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setGroup(MSG_GROUP_ID)
             .setAutoCancel(true)
             .build()
             
@@ -239,22 +252,5 @@ class BackgroundNotificationService : Service() {
         )
         
         Log.d(TAG, "Notification shown: $fromName - $message")
-    }
-    
-    private fun showStatusNotification(title: String, message: String) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .build()
-            
-        notificationManager.notify(
-            System.currentTimeMillis().toInt(), // 一意のID
-            notification
-        )
-        
-        Log.d(TAG, "Status notification: $title - $message")
     }
 }

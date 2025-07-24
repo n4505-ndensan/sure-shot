@@ -1,0 +1,262 @@
+.carbine_anim_logo_root {
+  --masterlength: 5s;
+  overflow: visible;
+}
+
+.carbine_logo {
+  position: absolute;
+  overflow: visible;
+  transform-origin: center center;
+  box-sizing: border-box;
+  animation-name: carbine_logo;
+  animation-duration: var(--masterlength);
+  animation-direction: normal;
+  animation-iteration-count: infinite;
+  animation-fill-mode: none;
+}
+
+.bullet1 {
+  position: absolute;
+  margin-top: 54px;
+  transform-origin: center center;
+  animation:
+    var(--masterlength) carbine_bullet_motionblur linear infinite,
+    var(--masterlength) carbine_bullet linear infinite;
+}
+
+.bullet2 {
+  position: absolute;
+  margin-top: 53px;
+  transform-origin: center center;
+  animation:
+    var(--masterlength) calc(var(--masterlength) * 0.01) carbine_bullet_motionblur linear infinite,
+    var(--masterlength) calc(var(--masterlength) * 0.01) carbine_bullet linear infinite;
+}
+
+.bullet3 {
+  position: absolute;
+  margin-top: 54px;
+  transform-origin: center center;
+  animation:
+    var(--masterlength) calc(var(--masterlength) * 0.02) carbine_bullet_motionblur linear infinite,
+    var(--masterlength) calc(var(--masterlength) * 0.02) carbine_bullet linear infinite;
+}
+
+.cartridge1 {
+  position: absolute;
+  transform-origin: center center;
+  top: 35px;
+  left: 132px;
+  width: 20px;
+  height: 7px;
+  background-color: black;
+  animation: var(--masterlength) calc(var(--masterlength) * 0.01) carbine_cartridge linear infinite;
+  offset-path: path('M 0 0 S 50 -100, 90 50');
+}
+
+.cartridge2 {
+  position: absolute;
+  transform-origin: center center;
+  top: 35px;
+  left: 132px;
+  width: 20px;
+  height: 7px;
+  background-color: black;
+  animation: var(--masterlength) calc(var(--masterlength) * 0.03) carbine_cartridge linear infinite;
+  offset-path: path('M 0 0 S 50 -120, 130 50');
+}
+
+.cartridge3 {
+  position: absolute;
+  transform-origin: center center;
+  top: 35px;
+  left: 132px;
+  width: 20px;
+  height: 7px;
+  background-color: black;
+  animation: var(--masterlength) calc(var(--masterlength) * 0.06) carbine_cartridge linear infinite;
+  offset-path: path('M 0 0 S 56 -104, 99 50');
+}
+
+.flash1 {
+  position: absolute;
+  transform-origin: center center;
+  box-sizing: border-box;
+  left: -26px;
+  bottom: 95px;
+  z-index: 100;
+  animation: var(--masterlength) carbine_flash linear infinite;
+}
+.flash2 {
+  position: absolute;
+  transform-origin: center center;
+  box-sizing: border-box;
+  left: -13px;
+  bottom: 45px;
+  z-index: 100;
+  animation: var(--masterlength) calc(var(--masterlength) * 0.03) carbine_flash linear infinite;
+}
+.flash3 {
+  position: absolute;
+  transform-origin: center center;
+  box-sizing: border-box;
+  left: 15px;
+  bottom: 105px;
+  z-index: 100;
+  animation: var(--masterlength) calc(var(--masterlength) * 0.06) carbine_flash linear infinite;
+}
+
+@keyframes carbine_logo {
+  0% {
+    transform: rotate(370deg);
+  }
+  15% {
+    transform: rotate(340deg);
+  }
+  30% {
+    transform: rotate(360deg);
+    transform-origin: center center;
+  }
+  /* bang */
+  43% {
+    transform: rotate(360deg);
+    scale: 1;
+    transform-origin: center center;
+  }
+  45% {
+    transform: rotate(365deg);
+    scale: 1.05;
+    transform-origin: center center;
+  }
+  46% {
+    transform: rotate(360deg);
+    scale: 1;
+    transform-origin: center center;
+  }
+  48% {
+    transform: rotate(365deg);
+    scale: 1.05;
+    transform-origin: center center;
+  }
+  49% {
+    transform: rotate(360deg);
+    scale: 1;
+    transform-origin: center center;
+  }
+  51% {
+    transform: rotate(370deg);
+    scale: 1.08;
+    transform-origin: center center;
+  }
+  57% {
+    scale: 1;
+  }
+  73% {
+    transform: rotate(360deg);
+  }
+  86% {
+    transform: rotate(370deg);
+  }
+  100% {
+    transform: rotate(370deg);
+    transform-origin: center center;
+  }
+}
+
+@keyframes carbine_bullet {
+  0% {
+    opacity: 0;
+  }
+  44% {
+    opacity: 0;
+  }
+  /* bang */
+  45% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  46% {
+    opacity: 0.2;
+    transform: translateX(-300%);
+  }
+  47% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0%);
+  }
+}
+@keyframes carbine_bullet_motionblur {
+  0% {
+    filter: drop-shadow(0 0) blur(0);
+  }
+  44% {
+    filter: drop-shadow(0 0) blur(0);
+  }
+  /* bang */
+  45% {
+    filter: url(#blur);
+  }
+  100% {
+    filter: url(#blur);
+  }
+}
+
+@keyframes carbine_cartridge {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0;
+  }
+  46% {
+    transform: rotate(0deg);
+    offset-distance: 0%;
+    opacity: 1;
+    background-color: red;
+  }
+
+  53% {
+    background-color: orange;
+    opacity: 1;
+  }
+  60% {
+    background-color: black;
+    opacity: 0.5;
+  }
+  69% {
+    opacity: 0;
+  }
+  70% {
+    transform: rotate(3600deg);
+    offset-distance: 100%;
+    background-color: black;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes carbine_flash {
+  0% {
+    opacity: 0;
+  }
+  44% {
+    opacity: 0;
+  }
+  /* bang */
+  45% {
+    opacity: 0.6;
+  }
+  46% {
+    opacity: 0.1;
+  }
+  48% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}

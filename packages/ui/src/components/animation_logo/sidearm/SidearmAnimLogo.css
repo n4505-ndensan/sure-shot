@@ -1,0 +1,182 @@
+.sidearm_anim_logo_root {
+  --masterlength: 2.5s;
+  overflow: visible;
+}
+
+.sidearm_logo {
+  position: absolute;
+  overflow: visible;
+  transform-origin: center center;
+  box-sizing: border-box;
+  animation-name: sidearm_logo;
+  animation-duration: var(--masterlength);
+  animation-direction: normal;
+  animation-iteration-count: infinite;
+  animation-fill-mode: none;
+}
+
+.bullet {
+  position: absolute;
+  transform-origin: center center;
+  box-sizing: border-box;
+  top: 17px;
+  left: 24%;
+  animation:
+    var(--masterlength) sidearm_bullet_motionblur linear infinite,
+    var(--masterlength) sidearm_bullet linear infinite;
+}
+
+.cartridge {
+  position: absolute;
+  transform-origin: center center;
+  top: 35px;
+  left: 112px;
+  width: 20px;
+  height: 7px;
+  background-color: black;
+  animation-name: sidearm_cartridge;
+  animation-duration: var(--masterlength);
+  animation-direction: normal;
+  animation-iteration-count: infinite;
+  animation-fill-mode: none;
+  animation-timing-function: ease-out;
+  offset-path: path('M 0 0 S 50 -100, 90 50');
+}
+
+.flash {
+  position: absolute;
+  transform-origin: center center;
+  box-sizing: border-box;
+  bottom: 85px;
+  z-index: 100;
+  animation: var(--masterlength) sidearm_flash linear infinite;
+}
+
+@keyframes sidearm_logo {
+  0% {
+    transform: rotate(0deg);
+    transform-origin: center center;
+  }
+  30% {
+    transform: rotate(360deg);
+    transform-origin: center center;
+  }
+  /* bang */
+  43% {
+    transform: rotate(360deg);
+    scale: 1;
+    transform-origin: center center;
+  }
+  45% {
+    transform: rotate(400deg);
+    scale: 1.15;
+    transform-origin: center center;
+  }
+  46% {
+    scale: 1;
+  }
+  73% {
+    transform: rotate(360deg);
+  }
+  76% {
+    transform: rotate(370deg);
+  }
+  100% {
+    transform: rotate(360deg);
+    transform-origin: center center;
+  }
+}
+
+@keyframes sidearm_bullet {
+  0% {
+    opacity: 0;
+  }
+  44% {
+    opacity: 0;
+  }
+  /* bang */
+  45% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  47% {
+    opacity: 1;
+    transform: translateX(-400%);
+  }
+  48% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0%);
+  }
+}
+@keyframes sidearm_bullet_motionblur {
+  0% {
+    filter: drop-shadow(0 0) blur(0);
+  }
+  44% {
+    filter: drop-shadow(0 0) blur(0);
+  }
+  /* bang */
+  45% {
+    filter: url(#blur);
+  }
+  100% {
+    filter: url(#blur);
+  }
+}
+
+@keyframes sidearm_cartridge {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0;
+  }
+  76% {
+    transform: rotate(0deg);
+    offset-distance: 0%;
+    opacity: 1;
+    background-color: red;
+  }
+
+  83% {
+    background-color: orange;
+    opacity: 1;
+  }
+  90% {
+    background-color: black;
+    opacity: 0.5;
+  }
+  99% {
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(3600deg);
+    offset-distance: 100%;
+    background-color: black;
+  }
+}
+
+@keyframes sidearm_flash {
+  0% {
+    opacity: 0;
+  }
+  44% {
+    opacity: 0;
+  }
+  /* bang */
+  45% {
+    opacity: 0.6;
+  }
+  48% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}

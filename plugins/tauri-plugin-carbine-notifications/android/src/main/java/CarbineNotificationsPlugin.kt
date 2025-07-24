@@ -30,6 +30,9 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
 
     override fun load(webView: WebView) {
         // Plugin loaded
+        activity.window?.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+        )
     }
 
     @Command

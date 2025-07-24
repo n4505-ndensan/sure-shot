@@ -63,22 +63,22 @@ const MessageList: Component<Props> = (props) => {
 
   onResume(async () => {
     await loadPastMessages();
-    if (isMobile()) {
-      await stopBackgroundService();
-    }
+    // if (isMobile()) {
+    //   await stopBackgroundService();
+    // }
   });
 
-  onPause(async () => {
-    if (isMobile()) {
-      const authStatus = getAuthStatus();
-      console.log('Auth status on pause:', `http://${authStatus?.host?.ip}:${authStatus?.host?.port}`);
-      if (authStatus && authStatus.isAuthenticated && authStatus.host) {
-        await startBackgroundService({
-          serverUrl: `http://${authStatus.host.ip}:${authStatus.host.port}`,
-        });
-      }
-    }
-  });
+  // onPause(async () => {
+  //   if (isMobile()) {
+  //     const authStatus = getAuthStatus();
+  //     console.log('Auth status on pause:', `http://${authStatus?.host?.ip}:${authStatus?.host?.port}`);
+  //     if (authStatus && authStatus.isAuthenticated && authStatus.host) {
+  //       await startBackgroundService({
+  //         serverUrl: `http://${authStatus.host.ip}:${authStatus.host.port}`,
+  //       });
+  //     }
+  //   }
+  // });
 
   return (
     <div
