@@ -8,16 +8,18 @@ interface Props {
 }
 
 const HostItem: Component<Props> = (props) => {
+  const [host, setHost] = createSignal<HostInfo>(props.host);
   const [selected, setSelected] = createSignal<boolean>(false);
-  const { host } = props;
+
 
   createEffect(() => {
+    setHost(props.host);
     setSelected(props.selected ?? false);
   });
 
   return (
     <div
-      onClick={() => props.onSelect?.(host)}
+      onClick={() => props.onSelect?.(host())}
       style={{
         display: 'flex',
         'flex-direction': 'row',
@@ -40,10 +42,10 @@ const HostItem: Component<Props> = (props) => {
         }}
       >
         {selected() ? '>  ' : ''}
-        {host.name}
+        {host().name}
       </p>
       <p>
-        {host.ip}:{host.port}
+        {host().ip}:{host().port}
       </p>
     </div>
   );

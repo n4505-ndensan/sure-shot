@@ -30,8 +30,20 @@ const Login: Component = () => {
 
   return (
     <AppLayout showConnectionStatus={false}>
-      <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'center', 'padding-top': '12px' }}>
-        <CarbineAnimLogo scale={0.8} />
+      <div style={{ display: 'flex', 'flex-direction': 'column', width: '100%', height: '100%', 'align-items': 'center', 'padding-top': '12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'row',
+            'box-sizing': 'border-box',
+            margin: '-12px',
+            'align-items': 'center',
+            'justify-content': 'center',
+          }}
+        >
+          <CarbineAnimLogo scale={0.7} width={100} height={100} />
+          {/* <SidearmAnimLogo scale={0.7} /> */}
+        </div>
         <div
           style={{
             display: 'flex',
@@ -76,6 +88,7 @@ const Login: Component = () => {
           style={{
             display: 'flex',
             'flex-direction': 'column',
+            width: '100%',
             'flex-grow': 1,
           }}
         >

@@ -1,6 +1,6 @@
-import { HostInfo } from "@sureshot/api/src";
-import { Component, createSignal } from "solid-js";
-import HostItem from "./HostItem";
+import { HostInfo } from '@sureshot/api/src';
+import { Component, createSignal } from 'solid-js';
+import HostItem from './HostItem';
 
 interface Props {
   selectable?: boolean;
@@ -20,18 +20,17 @@ const HostList: Component<Props> = (props) => {
   return (
     <div
       style={{
-        display: "flex",
-        "flex-direction": "column",
-        gap: "8px",
-        "min-width": "150px",
+        display: 'flex',
+        'flex-direction': 'column',
+        gap: '8px',
+        width: '100%',
+        'min-width': '150px',
       }}
     >
       {props.hosts.map((host, index) => (
         <HostItem
           host={host}
-          selected={
-            props.selectable && selected() !== null && selected() === index
-          }
+          selected={props.selectable && selected() !== null && selected() === index}
           onSelect={(host) => {
             handleSelect(host, index);
           }}

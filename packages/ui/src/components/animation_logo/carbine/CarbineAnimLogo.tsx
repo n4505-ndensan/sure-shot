@@ -2,15 +2,15 @@ import { Component } from 'solid-js';
 
 import './CarbineAnimLogo.css';
 
-const CarbineAnimLogo: Component<{scale?: number}> = (props) => {
+const CarbineAnimLogo: Component<{ scale?: number; width?: number; height?: number }> = (props) => {
   return (
     <div
       class={'carbine_anim_logo_root'}
       style={{
         display: 'flex',
         position: 'relative',
-        width: '160px',
-        height: '160px',
+        width: `${160}px`,
+        height: `${160}px`,
         overflow: 'visible',
         scale: props.scale || 1,
       }}

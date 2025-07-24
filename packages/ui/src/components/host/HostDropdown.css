@@ -1,0 +1,48 @@
+.host_dropdown {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.host_dropdown select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  width: 100%;
+  background: none;
+  border: 1px solid transparent;
+  font-size: 12px;
+  outline: none;
+  display: flex;
+  flex-direction: row;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+}
+
+.host_dropdown::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 8px;
+  top: 50%;
+  right: 1em;
+  margin-top: -4px;
+  z-index: 2;
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3E%3Cpolygon fill='rgb(102,102,102)' points='8,12 0,0 16,0'/%3E%3C/svg%3E")
+    0 0 no-repeat;
+  /* These hacks make the select behind the arrow clickable in some browsers */
+  pointer-events: none;
+}
+
+.host_dropdown_select:first-of-type {
+    color: #007bff;
+}
+.host_dropdown_select option {
+    color: #000;
+}

@@ -66,7 +66,6 @@ const LoginForm: Component<Props> = (props) => {
         style={{
           display: 'flex',
           'flex-direction': 'column',
-          'margin-top': '24px',
           gap: '1rem',
         }}
       >

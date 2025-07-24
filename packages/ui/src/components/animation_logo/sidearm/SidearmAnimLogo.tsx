@@ -3,6 +3,7 @@ import { Component } from 'solid-js';
 import './SidearmAnimLogo.css';
 
 interface Props {
+  scale?: number;
   width?: string;
   height?: string;
 }
@@ -17,7 +18,7 @@ const SidearmAnimLogo: Component<Props> = (props) => {
         width: '160px',
         height: '160px',
         overflow: 'visible',
-        scale: 0.5,
+        scale: props.scale || 1,
       }}
     >
       <img class='flash' alt='flash' src='app_icon/flash.png' width={96} height={96} />

@@ -1,5 +1,6 @@
 import { HostInfo } from '@sureshot/api/src';
-import { HostList } from '@sureshot/ui/src';
+import { HostDropdown } from '@sureshot/ui/src';
+import { message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { findHosts } from '~/api/hostApi';
 
@@ -13,9 +14,6 @@ const HostSetup: Component<Props> = (props) => {
   const [customFormShown, setCustomFormShown] = createSignal(false);
 
   const [customIp, setCustomIp] = createSignal('');
-  const [customPort, setCustomPort] = createSignal(8000);
-
-  const [customConnectResult, setCustomConnectResult] = createSignal('');
 
   onMount(async () => {
     await loadHosts();
@@ -32,8 +30,10 @@ const HostSetup: Component<Props> = (props) => {
       style={{
         display: 'flex',
         'flex-direction': 'column',
+        'box-sizing': 'border-box',
         height: '100%',
-        margin: '0 24px',
+        width: '100%',
+        padding: '0 24px',
       }}
     >
       <div
@@ -41,6 +41,7 @@ const HostSetup: Component<Props> = (props) => {
           display: 'flex',
           'flex-direction': 'column',
           'flex-grow': 1,
+          width: '100%',
           gap: '16px',
         }}
       >
@@ -48,8 +49,9 @@ const HostSetup: Component<Props> = (props) => {
           style={{
             display: 'flex',
             'flex-direction': 'row',
-            'justify-content': 'space-between',
+            width: '100%',
             'align-items': 'center',
+            'justify-content': 'space-between',
           }}
         >
           <p>{hosts() ? `found ${hosts()?.length} hosts.` : 'Loading...'}</p>
@@ -57,14 +59,20 @@ const HostSetup: Component<Props> = (props) => {
             RELOAD
           </a>
         </div>
-        <Show when={hosts()?.length ?? 0 > 0}>
-          <HostList
+        <Show when={hosts()?.length}>
+          <HostDropdown
+            hosts={hosts()!}
+            onHostSelected={(host) => {
+              props.onSelect(host);
+            }}
+          />
+          {/* <HostList
             hosts={hosts()!}
             selectable
             onHostSelected={(host) => {
               props.onSelect(host);
             }}
-          />
+          /> */}
         </Show>
 
         <a
@@ -72,7 +80,7 @@ const HostSetup: Component<Props> = (props) => {
             setCustomFormShown(!customFormShown());
           }}
         >
-          {customFormShown() ? 'Hide custom host' : 'Use custom host'}
+          {customFormShown() ? 'Hide' : 'Use custom host'}
         </a>
 
         <Show when={customFormShown()}>
@@ -85,17 +93,17 @@ const HostSetup: Component<Props> = (props) => {
             }}
             onSubmit={async (e) => {
               e.preventDefault();
-              if (!customIp() || !customPort()) {
+              if (!customIp()) {
                 alert('Please enter both IP and Port');
                 return;
               }
-              if (hosts()?.some((h) => h.ip === customIp() && h.port === customPort())) {
+              if (hosts()?.some((h) => h.ip === customIp())) {
                 alert('This host is already in the list');
                 return;
               }
 
               // pingをフェッチ
-              const result = await fetch(`http://${customIp()}:${customPort()}/ping`, {
+              const result = await fetch(`http://${customIp()}:8000/ping`, {
                 method: 'GET',
               });
               if (result.ok) {
@@ -103,7 +111,7 @@ const HostSetup: Component<Props> = (props) => {
                 if (data.name) {
                   const host: HostInfo = {
                     ip: customIp(),
-                    port: customPort(),
+                    port: 8000,
                     name: (data.name as string) || 'Custom Host',
                     status: result.status.toString(),
                     message: (data.message as string) || 'no message',
@@ -112,26 +120,18 @@ const HostSetup: Component<Props> = (props) => {
                   setHosts([...(hosts() || []), host]);
                   props.onSelect(host);
 
-                  setCustomConnectResult('successfully ping to ' + data.name);
+                  await message(`Host "${data.name}" found.`, { title: 'carbine', kind: 'info' });
                   return;
                 }
               }
-              setCustomConnectResult('Failed to connect');
+              await message(`Host not found.`, { title: 'carbine', kind: 'warning' });
             }}
           >
-            <label style={{ display: 'flex', 'flex-direction': 'row' }}>
-              <p style={{ width: '40px' }}>IP:</p>
-              <input type='text' value={customIp()} onInput={(e) => setCustomIp(e.currentTarget.value.toString().trim())} />
-            </label>
-            <label style={{ display: 'flex', 'flex-direction': 'row' }}>
-              <p style={{ width: '40px' }}>Port:</p>
-              <input type='number' value={customPort()} onInput={(e) => setCustomPort(Number(e.currentTarget.value.toString().trim()))} />
-            </label>
-            <div style={{ display: 'flex', 'flex-direction': 'row', gap: '8px' }}>
+            <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2px' }}>
+              <input type='text' value={customIp()} placeholder='IP' onInput={(e) => setCustomIp(e.currentTarget.value.toString().trim())} />
               <button type='submit' style={{ width: 'fit-content' }}>
                 Connect
               </button>
-              <p>{customConnectResult()}</p>
             </div>
           </form>
         </Show>
