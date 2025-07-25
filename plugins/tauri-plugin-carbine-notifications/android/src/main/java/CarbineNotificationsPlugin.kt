@@ -31,7 +31,8 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
     override fun load(webView: WebView) {
         // Plugin loaded
         activity.window?.setSoftInputMode(
-            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
         )
     }
 
@@ -42,7 +43,6 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
             
             Log.d("CarbineNotifications", "Starting background service with Args: ${args.toString()}")
             Log.d("CarbineNotifications", "Starting background service with URL: ${args.serverUrl}")
-            Toast.makeText(activity, "Starting background notification service...", Toast.LENGTH_SHORT).show()
             
             val intent = Intent(activity, BackgroundNotificationService::class.java).apply {
                 putExtra("server_url", args.serverUrl)
@@ -51,7 +51,6 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
             activity.startForegroundService(intent)
             
             Log.d("CarbineNotifications", "Background service started successfully")
-            Toast.makeText(activity, "Background service started!", Toast.LENGTH_SHORT).show()
             
             val ret = JSObject()
             ret.put("isRunning", true)
@@ -62,7 +61,6 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
             invoke.resolve(ret)
         } catch (e: Exception) {
             Log.e("CarbineNotifications", "Failed to start background service", e)
-            Toast.makeText(activity, "Failed to start service: ${e.message}", Toast.LENGTH_LONG).show()
             
             val ret = JSObject()
             ret.put("isRunning", false)
@@ -78,13 +76,11 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
     fun stopBackgroundService(invoke: Invoke) {
         try {
             Log.d("CarbineNotifications", "Stopping background service")
-            Toast.makeText(activity, "Stopping background service...", Toast.LENGTH_SHORT).show()
             
             val intent = Intent(activity, BackgroundNotificationService::class.java)
             activity.stopService(intent)
             
             Log.d("CarbineNotifications", "Background service stopped")
-            Toast.makeText(activity, "Background service stopped!", Toast.LENGTH_SHORT).show()
             
             val ret = JSObject()
             ret.put("success", true)
@@ -92,7 +88,6 @@ class CarbineNotificationsPlugin(private val activity: Activity): Plugin(activit
             invoke.resolve(ret)
         } catch (e: Exception) {
             Log.e("CarbineNotifications", "Failed to stop background service", e)
-            Toast.makeText(activity, "Failed to stop service: ${e.message}", Toast.LENGTH_LONG).show()
             
             val ret = JSObject()
             ret.put("success", false)

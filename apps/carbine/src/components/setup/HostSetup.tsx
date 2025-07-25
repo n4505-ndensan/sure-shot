@@ -5,6 +5,8 @@ import { Component, createSignal, onMount, Show } from 'solid-js';
 import { findHosts } from '~/api/hostApi';
 import { globalStore } from '~/store/GlobalStore';
 
+import '@styles/login.css';
+
 interface Props {
   onProceed: (selectedHost: HostInfo) => void;
 }
@@ -80,21 +82,13 @@ const HostSetup: Component<Props> = (props) => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        'flex-direction': 'column',
-        'box-sizing': 'border-box',
-        height: '100%',
-        'justify-content': 'center',
-        padding: '0 24px',
-      }}
-    >
+    <div class='content'>
       <div
         style={{
           display: 'flex',
           'flex-direction': 'column',
-          gap: '12px',
+          width: '100%',
+          gap: '18px',
         }}
       >
         <div
@@ -102,7 +96,7 @@ const HostSetup: Component<Props> = (props) => {
             display: 'flex',
             'flex-direction': 'row',
             'align-items': 'center',
-            width: '240px',
+            width: '100%',
             'justify-content': 'space-between',
           }}
         >
@@ -112,20 +106,29 @@ const HostSetup: Component<Props> = (props) => {
           </a>
         </div>
 
-        <HostDropdown
-          hosts={hosts() ?? []}
-          onHostSelected={(host) => {
-            setSelectedHost(host);
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'row',
           }}
-        />
+        >
+          <HostDropdown
+            hosts={hosts() ?? []}
+            onHostSelected={(host) => {
+              setSelectedHost(host);
+            }}
+          />
+        </div>
+
         <button
           style={{ width: 'fit-content', 'margin-left': 'auto' }}
           onClick={() => {
             props.onProceed(selectedHost()!);
             setSelectedHost(null);
           }}
+          disabled={!selectedHost()}
         >
-          LOGIN
+          Give A Shot!
         </button>
 
         <Show when={hosts()?.length === 0}>
@@ -146,7 +149,6 @@ const HostSetup: Component<Props> = (props) => {
             }}
             style={{
               width: 'fit-content',
-              'flex-grow': 1,
               'margin-right': 'auto',
               color: 'gray',
             }}

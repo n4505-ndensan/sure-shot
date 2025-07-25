@@ -1,5 +1,6 @@
 import { ReceivedMessage } from '@sureshot/api/src';
 import { Component, For, Show } from 'solid-js';
+import LinkifiedText from '../common/LinkifiedText';
 
 interface Props {
   message: ReceivedMessage;
@@ -22,7 +23,7 @@ const MessageItem: Component<Props> = (props) => {
   return (
     <div
       style={{
-        padding: '0.5rem 0.75rem',
+        padding: '1rem',
         margin: '8px 0',
         'background-color': isSelf ? '#e3f2fd' : '#f1f1f1',
         'border-radius': '4px',
@@ -44,10 +45,10 @@ const MessageItem: Component<Props> = (props) => {
             display: 'flex',
             'flex-direction': 'row',
             'align-items': 'baseline',
-            gap: '0.25rem',
+            gap: '0.5rem',
           }}
         >
-          <strong
+          <p
             style={{
               'font-size': '12px',
               color: isSelf ? '#1976d2' : '#495057',
@@ -56,7 +57,7 @@ const MessageItem: Component<Props> = (props) => {
             {message.from_name}
             {isSelf ? ' [You]' : ''}
             {/* {message.from_name} */}
-          </strong>
+          </p>
           <div
             style={{
               'font-size': '10px',
@@ -78,8 +79,8 @@ const MessageItem: Component<Props> = (props) => {
       >
         {/* メッセージテキスト */}
         <Show when={message.message.trim()}>
-          <div>
-            <p>{message.message}</p>
+          <div style={{ width: '100%', 'word-break': 'break-word', overflow: 'hidden' }}>
+            <LinkifiedText text={message.message} style={{ 'font-size': '16px' }}></LinkifiedText>
           </div>
         </Show>
 

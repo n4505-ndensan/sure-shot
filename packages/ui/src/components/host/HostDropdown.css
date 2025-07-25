@@ -1,6 +1,7 @@
 .host_dropdown {
   position: relative;
-  display: block;
+  display: flex;
+  box-sizing: border-box;
   width: 100%;
 }
 
@@ -41,12 +42,15 @@
 }
 
 .host_dropdown_select:first-of-type {
+  width: 100%;
   color: #007bff;
 }
 .host_dropdown_select:first-of-type:disabled {
+  width: 100%;
   color: #777;
   pointer-events: none;
 }
 .host_dropdown_select option {
+  width: 100%;
   color: #000;
 }

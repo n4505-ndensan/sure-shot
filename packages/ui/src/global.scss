@@ -1,45 +1,47 @@
-
-
 @font-face {
   font-family: 'ZFB03B';
-  src: url("../../../public/fonts/04B/04B_03B_.ttf") format('truetype');
+  src: url('../../../public/fonts/04B/04B_03B_.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Terminus';
-  src: url("../../../public/fonts/terminus/TerminusTTF-4.49.3.ttf") format('truetype');
+  src: url('../../../public/fonts/terminus/TerminusTTF-4.49.3.ttf') format('truetype');
   font-display: swap;
 }
 
-
-
 @font-face {
   font-family: 'K8x12';
-  src: url("../../../public/fonts/k8x12/k8x12.ttf") format('truetype');
+  src: url('../../../public/fonts/k8x12/k8x12.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'PixelMPlus';
-  src: url("../../../public/fonts/PixelMPlus/PixelMplus12-Regular.ttf");
+  src: url('../../../public/fonts/PixelMPlus/PixelMplus12-Regular.ttf');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'PixelMPlus';
-  src: url("../../../public/fonts/PixelMPlus/PixelMplus12-Bold.ttf");
+  src: url('../../../public/fonts/PixelMPlus/PixelMplus12-Bold.ttf');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
-html, body, main, #root {
+html,
+body,
+main,
+#root {
   overflow: hidden;
 }
-
+html {
+  font-size: 12px;
+}
 * {
+  font-size: 12px;
   font-family: 'PixelMPlus', sans-serif;
   user-select: none;
 
@@ -52,25 +54,27 @@ html, body, main, #root {
   font-size: 24px;
   font-weight: bold;
 }
-
-p, a, label, span, button, select, option {
+p,
+a,
+label,
+span,
+button,
+select,
+option {
   margin: 0;
   padding: 0;
-  font-size: 12px;
 }
 
 div {
-  font-size: 12px;
   box-sizing: border-box;
 }
 
 @media screen and (min-resolution: 250dpi) {
-
-  p, a, label, span, button, select, option {
+  html,
+  input {
     font-size: 16px;
   }
-
-  div {
+  * {
     font-size: 16px;
   }
 }
@@ -81,10 +85,6 @@ a {
 
 a:hover {
   text-decoration: underline;
-}
-
-input {
-  font-size: 12px;
 }
 
 button {

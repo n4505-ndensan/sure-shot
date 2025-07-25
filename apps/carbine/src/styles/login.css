@@ -1,0 +1,15 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  width: 90vw;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+@media screen and (min-resolution: 250dpi) {
+  .content {
+    margin-bottom: 80px;
+  }
+}

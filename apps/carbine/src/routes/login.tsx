@@ -47,7 +47,7 @@ const Login: Component = () => {
             display: 'flex',
             'flex-direction': 'row',
             'box-sizing': 'border-box',
-            margin: isMobile() ? '24px 12px' : '12px -12px',
+            margin: isMobile() ? '80px 12px' : '12px -12px',
             'align-items': 'center',
             'justify-content': 'center',
           }}

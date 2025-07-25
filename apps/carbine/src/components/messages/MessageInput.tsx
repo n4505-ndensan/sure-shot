@@ -218,8 +218,7 @@ const MessageInput: Component = () => {
               padding: '4px 16px',
               color: isSendDisabled() ? '#ccc' : 'white',
               'background-color': isSendDisabled() ? 'white' : '#248effff',
-              'font-weight': 'bold',
-              margin: '0.75rem',
+              margin: '1rem',
               border: `1px solid ${isSendDisabled() ? '#ccc' : '#248effff'}`,
               cursor: isSending() ? 'not-allowed' : 'pointer',
             }}

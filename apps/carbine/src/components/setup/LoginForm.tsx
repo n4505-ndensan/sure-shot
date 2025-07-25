@@ -5,6 +5,8 @@ import { Component, createSignal } from 'solid-js';
 import { tryLogin } from '~/api/tryLogin';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
 
+import '@styles/login.css';
+
 interface Props {
   host: HostInfo;
 }
@@ -50,22 +52,14 @@ const LoginForm: Component<Props> = (props) => {
     }
   };
   return (
-    <form
-      onSubmit={onSubmit}
-      style={{
-        display: 'flex',
-        'flex-direction': 'column',
-        'box-sizing': 'border-box',
-        height: '100%',
-        padding: '0 24px',
-        'padding-top': '32px',
-      }}
-    >
+    <form onSubmit={onSubmit} class='content'>
       <div
         style={{
           display: 'flex',
           'flex-direction': 'column',
           gap: '1rem',
+          width: '100%',
+          'margin-bottom': '2rem',
         }}
       >
         <p>

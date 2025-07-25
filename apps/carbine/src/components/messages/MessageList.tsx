@@ -1,9 +1,8 @@
-import { getAuthStatus, ReceivedMessage } from '@sureshot/api';
+import { ReceivedMessage } from '@sureshot/api';
 import { getMessages, useEventsSource } from '@sureshot/api/src';
 import { sendNotification } from '@tauri-apps/plugin-notification';
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
-import { onPause, onResume } from 'tauri-plugin-app-events-api';
-import { startBackgroundService, stopBackgroundService } from 'tauri-plugin-carbine-notifications';
+import { onResume } from 'tauri-plugin-app-events-api';
 import { globalStore } from '~/store/GlobalStore';
 import { isMobile } from '~/utils/PlatformUtils';
 import MessageItem from './MessageItem';
@@ -99,6 +98,7 @@ const MessageList: Component<Props> = (props) => {
           left: 0,
           right: 0,
           bottom: 0,
+          'overflow-x': 'hidden',
           'overflow-y': 'auto',
           padding: '0.5rem',
         }}
