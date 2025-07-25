@@ -3,6 +3,7 @@ import { sendMessage } from '@sureshot/api/src';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
+import { nickName } from '~/store/PersistData';
 import { readFileFromPath } from '~/utils/FileUtils';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
 import AttachmentList from './attachment/AttachmentList';
@@ -33,7 +34,7 @@ const MessageInput: Component = () => {
     setIsSending(true);
 
     try {
-      const result = await sendMessage(globalStore.deviceName || 'Unknown', globalStore.localIp || 'unknown', msg, 'text', currentAttachments);
+      const result = await sendMessage(nickName(), globalStore.localIp || 'unknown', msg, 'text', currentAttachments);
 
       if (result.success) {
         setMessage(''); // メッセージフィールドをクリア

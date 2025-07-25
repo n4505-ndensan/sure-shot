@@ -1,0 +1,3 @@
+.icon:hover {
+  filter: brightness(0) saturate(100%) invert(21%) sepia(92%) saturate(6174%) hue-rotate(356deg) brightness(93%) contrast(118%);
+}

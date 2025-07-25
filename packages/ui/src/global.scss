@@ -35,6 +35,10 @@
   font-display: swap;
 }
 
+html, body, main, #root {
+  overflow: hidden;
+}
+
 * {
   font-family: 'PixelMPlus', sans-serif;
   user-select: none;

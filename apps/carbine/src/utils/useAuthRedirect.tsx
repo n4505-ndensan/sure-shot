@@ -40,6 +40,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
           decorations: false,
           dragDropEnabled: true,
           acceptFirstMouse: true,
+          preventOverflow: true,
         });
         homeWindow.show();
         homeWindow.setFocus();
@@ -65,6 +66,7 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
           closable: true,
           resizable: false,
           decorations: false,
+          preventOverflow: true,
         });
         setupWindow.show();
         setupWindow.setFocus();

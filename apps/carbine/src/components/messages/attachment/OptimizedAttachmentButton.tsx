@@ -2,6 +2,8 @@ import { Attachment } from '@sureshot/api';
 import { Component } from 'solid-js';
 import { createAttachment } from './createAttachment';
 
+import '@styles/components/AttachmentButton.css';
+
 interface Props {
   onAttachmentLoadStart?: () => void;
   onAttachmentLoad?: (attachments: Attachment[]) => void;
@@ -44,6 +46,7 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
         }}
       />
       <img
+        class='icon'
         src={'/icons/clip_8.svg'}
         width={8}
         height={8}

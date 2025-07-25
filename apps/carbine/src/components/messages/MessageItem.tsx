@@ -78,7 +78,7 @@ const MessageItem: Component<Props> = (props) => {
       >
         {/* メッセージテキスト */}
         <Show when={message.message.trim()}>
-          <div style={{ 'margin-bottom': '0.5rem' }}>
+          <div>
             <p>{message.message}</p>
           </div>
         </Show>
@@ -90,6 +90,7 @@ const MessageItem: Component<Props> = (props) => {
               display: 'flex',
               'flex-wrap': 'wrap',
               gap: '0.5rem',
+              'margin-top': '0.5rem',
             }}
           >
             <For each={message.attachments}>
@@ -191,19 +192,6 @@ const MessageItem: Component<Props> = (props) => {
               )}
             </For>
           </div>
-        </Show>
-
-        {/* 従来の画像表示（下位互換性のため） */}
-        <Show when={message.message_type === 'image' && !message.attachments?.length}>
-          <img
-            src={message.message}
-            alt='Image message'
-            style={{
-              'max-width': '100%',
-              'max-height': '200px',
-              'border-radius': '4px',
-            }}
-          />
         </Show>
       </div>
     </div>

@@ -29,35 +29,6 @@
         "shadow": false,
         "alwaysOnTop": true,
         "focus": true
-      },
-      {
-        "label": "login",
-        "title": "sure-shot",
-        "url": "/login",
-        "width": 320,
-        "height": 450,
-        "maximizable": false,
-        "minimizable": false,
-        "closable": true,
-        "resizable": false,
-        "decorations": false,
-        "create": false
-      },
-      {
-        "label": "home",
-        "title": "sure-shot",
-        "url": "/home",
-        "width": 800,
-        "height": 540,
-        "maximizable": true,
-        "minimizable": true,
-        "closable": true,
-        "resizable": true,
-        "acceptFirstMouse": true,
-        "dragDropEnabled": true,
-        "contentProtected": false,
-        "decorations": false,
-        "create": false
       }
     ],
     "security": {
