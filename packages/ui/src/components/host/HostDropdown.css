@@ -12,11 +12,11 @@
   width: 100%;
   background: none;
   border: 1px solid transparent;
-  font-size: 12px;
   outline: none;
   display: flex;
   flex-direction: row;
   padding: 8px;
+  padding-right: 32px;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;

@@ -6,11 +6,12 @@ import { findHosts } from '~/api/hostApi';
 import { globalStore } from '~/store/GlobalStore';
 
 interface Props {
-  onSelect: (host: HostInfo) => void;
+  onProceed: (selectedHost: HostInfo) => void;
 }
 
 const HostSetup: Component<Props> = (props) => {
   const [hosts, setHosts] = createSignal<HostInfo[] | undefined>(undefined);
+  const [selectedHost, setSelectedHost] = createSignal<HostInfo | null>(null);
 
   const [customFormShown, setCustomFormShown] = createSignal(false);
 
@@ -57,8 +58,6 @@ const HostSetup: Component<Props> = (props) => {
             is_self: data.is_self,
           };
           setHosts([...(hosts() || []), host]);
-          props.onSelect(host);
-
           await message(`Host "${data.name}" found.`, { title: 'carbine', kind: 'info' });
         } else {
           await message(`Host "${customIp()}" responsed invalid response.`, { title: 'carbine', kind: 'warning' });
@@ -87,7 +86,7 @@ const HostSetup: Component<Props> = (props) => {
         'flex-direction': 'column',
         'box-sizing': 'border-box',
         height: '100%',
-        width: '100%',
+        'justify-content': 'center',
         padding: '0 24px',
       }}
     >
@@ -95,8 +94,6 @@ const HostSetup: Component<Props> = (props) => {
         style={{
           display: 'flex',
           'flex-direction': 'column',
-          'flex-grow': 1,
-          width: '100%',
           gap: '12px',
         }}
       >
@@ -105,6 +102,7 @@ const HostSetup: Component<Props> = (props) => {
             display: 'flex',
             'flex-direction': 'row',
             'align-items': 'center',
+            width: '240px',
             'justify-content': 'space-between',
           }}
         >
@@ -117,9 +115,18 @@ const HostSetup: Component<Props> = (props) => {
         <HostDropdown
           hosts={hosts() ?? []}
           onHostSelected={(host) => {
-            props.onSelect(host);
+            setSelectedHost(host);
           }}
         />
+        <button
+          style={{ width: 'fit-content', 'margin-left': 'auto' }}
+          onClick={() => {
+            props.onProceed(selectedHost()!);
+            setSelectedHost(null);
+          }}
+        >
+          LOGIN
+        </button>
 
         <Show when={hosts()?.length === 0}>
           <p style={{ color: '#559955' }}>Make sure that host server (server.exe) is running in your local LAN ({localIpMask()}).</p>
@@ -130,10 +137,7 @@ const HostSetup: Component<Props> = (props) => {
             display: 'flex',
             'flex-direction': 'row',
             'align-items': 'center',
-            'margin-top': 'auto',
-            'margin-bottom': '8px',
             height: '32px',
-            width: '100%',
           }}
         >
           <a
@@ -144,6 +148,7 @@ const HostSetup: Component<Props> = (props) => {
               width: 'fit-content',
               'flex-grow': 1,
               'margin-right': 'auto',
+              color: 'gray',
             }}
           >
             {customFormShown() ? 'Hide' : 'Use custom host'}

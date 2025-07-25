@@ -62,6 +62,7 @@ export default function TitleBar() {
             display: 'flex',
             'flex-direction': 'row',
             height: '100%',
+            width: '100%',
             'align-items': 'center',
             gap: '12px',
             'flex-grow': 1,
@@ -115,8 +116,8 @@ export default function TitleBar() {
               />
             </Show>
           </Show>
-          <Show when={location.pathname.startsWith('/setup')}>
-            <p style={{ 'font-weight': 'bold' }}>setup</p>
+          <Show when={location.pathname.startsWith('/login')}>
+            <p style={{ 'font-weight': 'bold' }}>login to magazine!</p>
           </Show>
         </div>
 

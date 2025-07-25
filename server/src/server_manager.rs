@@ -266,66 +266,6 @@ impl ServerManager {
         Ok(())
     }
 
-    // ログ設定を変更するメソッド
-    pub async fn toggle_request_logs(&self) -> Result<()> {
-        if let Some(app_state) = self.get_app_state().await {
-            let mut config = app_state.config.lock().await;
-            config.log_config.show_requests = !config.log_config.show_requests;
-            let _ = config.save();
-            let status = if config.log_config.show_requests {
-                "enabled"
-            } else {
-                "disabled"
-            };
-            let _ = self
-                .message_sender
-                .send(ServerMessage::Log(format!("Request logging {}", status)));
-        }
-        Ok(())
-    }
-
-    pub async fn toggle_response_logs(&self) -> Result<()> {
-        if let Some(app_state) = self.get_app_state().await {
-            let mut config = app_state.config.lock().await;
-            config.log_config.show_responses = !config.log_config.show_responses;
-            let _ = config.save();
-            let status = if config.log_config.show_responses {
-                "enabled"
-            } else {
-                "disabled"
-            };
-            let _ = self
-                .message_sender
-                .send(ServerMessage::Log(format!("Response logging {}", status)));
-        }
-        Ok(())
-    }
-
-    pub async fn toggle_quiet_mode(&self) -> Result<()> {
-        if let Some(app_state) = self.get_app_state().await {
-            let mut config = app_state.config.lock().await;
-            if config.log_config.quiet_endpoints.is_empty() {
-                // Quiet mode を有効にする
-                config.log_config.quiet_endpoints = vec![
-                    "/ping".to_string(),
-                    "/auth/verify".to_string(),
-                    "/events".to_string(),
-                ];
-                let _ = self.message_sender.send(ServerMessage::Log(
-                    "Quiet mode enabled for /ping, /auth/verify, /events".to_string(),
-                ));
-            } else {
-                // Quiet mode を無効にする
-                config.log_config.quiet_endpoints.clear();
-                let _ = self
-                    .message_sender
-                    .send(ServerMessage::Log("Quiet mode disabled".to_string()));
-            }
-            let _ = config.save();
-        }
-        Ok(())
-    }
-
     // AppStateを取得するヘルパーメソッド
     async fn get_app_state(&self) -> Option<AppState> {
         let app_state_guard = self.app_state.lock().await;

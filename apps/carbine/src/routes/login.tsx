@@ -6,6 +6,7 @@ import LoginForm from '~/components/setup/LoginForm';
 
 import '@styles/main.css';
 import { CarbineAnimLogo } from '@sureshot/ui/src';
+import { isMobile } from '~/utils/PlatformUtils';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
 
 enum LoginStep {
@@ -30,110 +31,98 @@ const Login: Component = () => {
 
   return (
     <AppLayout showConnectionStatus={false}>
-      <div style={{ display: 'flex', 'flex-direction': 'column', width: '100%', height: '100%', 'align-items': 'center', 'padding-top': '12px' }}>
+      <div
+        style={{
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100%',
+          height: '100%',
+          'align-items': 'center',
+          'justify-content': 'center',
+          'padding-top': '12px',
+        }}
+      >
         <div
           style={{
             display: 'flex',
             'flex-direction': 'row',
             'box-sizing': 'border-box',
-            margin: '-12px',
+            margin: isMobile() ? '24px 12px' : '12px -12px',
             'align-items': 'center',
             'justify-content': 'center',
           }}
         >
-          <CarbineAnimLogo scale={0.7} />
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            'flex-direction': 'row',
-            gap: '20px',
-            padding: '24px',
-            'box-sizing': 'border-box',
-            'align-items': 'center',
-          }}
-        >
-          {/* <p class="setup_header">SETUP</p> */}
-          <p
-            class='setup_subheader'
-            onClick={() => {
-              setSelectedHost(null);
-              setStep(LoginStep.Host);
-            }}
-            style={{
-              cursor: canBack(LoginStep.Host) ? 'pointer' : 'default',
-              opacity: !isHostSetupDone() ? 1 : 0.5,
-            }}
-          >
-            1. SELECT HOST
-          </p>
-
-          <p>&gt;</p>
-          <p
-            class='setup_subheader'
-            onClick={() => {
-              if (canBack(LoginStep.Login)) setStep(LoginStep.Login);
-            }}
-            style={{
-              cursor: canBack(LoginStep.Login) ? 'pointer' : 'default',
-              opacity: isHostSetupDone() ? 1 : 0.5,
-            }}
-          >
-            2. LOGIN
-          </p>
+          <CarbineAnimLogo scale={isMobile() ? 1 : 0.7} />
         </div>
 
         <div
           style={{
             display: 'flex',
             'flex-direction': 'column',
-            width: '100%',
-            'flex-grow': 1,
+            'box-sizing': 'border-box',
+            height: '100%',
+            'align-items': 'center',
           }}
         >
-          <Show
-            when={isHostSetupDone()}
-            fallback={
-              <HostSetup
-                onSelect={(host) => {
-                  setSelectedHost(host);
-                }}
-              />
-            }
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'row',
+              gap: '20px',
+              'box-sizing': 'border-box',
+              'align-items': 'center',
+            }}
           >
-            <LoginForm host={selectedHost()!} />
-          </Show>
-
-          <div style={{ display: 'flex', 'flex-direction': 'row', gap: '8px', 'justify-content': 'space-between', margin: '0 24px 24px 24px' }}>
-            <a
+            {/* <p class="setup_header">SETUP</p> */}
+            <p
+              class='setup_subheader'
               onClick={() => {
                 setSelectedHost(null);
                 setStep(LoginStep.Host);
               }}
               style={{
-                'font-family': 'ZFB03B',
-                'font-size': '16px',
-                visibility: canBack(step() - 1) ? 'visible' : 'hidden',
+                cursor: canBack(LoginStep.Host) ? 'pointer' : 'default',
+                opacity: !isHostSetupDone() ? 1 : 0.5,
               }}
             >
-              back
-            </a>
-            <a
+              1. SELECT HOST
+            </p>
+
+            <p>&gt;</p>
+            <p
+              class='setup_subheader'
               onClick={() => {
-                if (selectedHost()) {
-                  setStep(LoginStep.Login);
-                }
+                if (canBack(LoginStep.Login)) setStep(LoginStep.Login);
               }}
               style={{
-                'font-family': 'ZFB03B',
-                'font-size': '16px',
-                visibility: step() === LoginStep.Host ? 'visible' : 'hidden',
-                'pointer-events': selectedHost() ? 'auto' : 'none',
-                opacity: selectedHost() ? 1 : 0.5,
+                cursor: canBack(LoginStep.Login) ? 'pointer' : 'default',
+                opacity: isHostSetupDone() ? 1 : 0.5,
               }}
             >
-              NEXT &gt;
-            </a>
+              2. LOGIN
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              'flex-direction': 'column',
+              'flex-grow': 1,
+            }}
+          >
+            <Show
+              when={isHostSetupDone()}
+              fallback={
+                <HostSetup
+                  onProceed={(host) => {
+                    setSelectedHost(host);
+                    setStep(LoginStep.Login);
+                  }}
+                />
+              }
+            >
+              <LoginForm host={selectedHost()!} />
+            </Show>
           </div>
         </div>
       </div>

@@ -55,9 +55,10 @@ const LoginForm: Component<Props> = (props) => {
       style={{
         display: 'flex',
         'flex-direction': 'column',
+        'box-sizing': 'border-box',
         height: '100%',
-        width: '100%',
-        'align-items': 'center',
+        padding: '0 24px',
+        'padding-top': '32px',
       }}
     >
       <div
@@ -67,18 +68,6 @@ const LoginForm: Component<Props> = (props) => {
           gap: '1rem',
         }}
       >
-        {/* <label class='form_label_container'>
-          <p class='form_label'>ID</p>
-          <input
-            class='form_input'
-            type='text'
-            name='deviceId'
-            autocomplete='off'
-            value={deviceId()}
-            onInput={(e) => setDeviceId(e.target.value)}
-            disabled={isLoading()}
-          />
-        </label> */}
         <p>
           Login to <span style={{ color: '#007bff' }}>{props.host.name}</span>
         </p>
@@ -111,30 +100,6 @@ const LoginForm: Component<Props> = (props) => {
             {isLoading() ? 'ログイン中...' : 'Login'}
           </button>
         </div>
-        {/* デバッグメッセージ表示 */}
-        {/* {debugMessages().length > 0 && (
-          <div
-            style={{
-              "margin-top": "1rem",
-              "max-width": "400px",
-              "max-height": "200px",
-              "overflow-y": "auto",
-              "background-color": "#f5f5f5",
-              padding: "0.5rem",
-              "border-radius": "4px",
-              border: "1px solid #ccc",
-              "font-family": "monospace",
-              "font-size": "0.8rem",
-            }}
-          >
-            <p style={{ margin: "0 0 0.5rem 0", "font-weight": "bold" }}>
-              Debug Log:
-            </p>
-            <For each={debugMessages()}>
-              {(msg) => <p style={{ "margin-bottom": "0.2rem" }}>{msg}</p>}
-            </For>
-          </div>
-        )} */}
       </div>
     </form>
   );

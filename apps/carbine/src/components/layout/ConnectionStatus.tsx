@@ -64,7 +64,9 @@ export const ConnectionStatus: Component = () => {
           }}
         >
           <Light on={true} color={status().color} />
-          <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red' }}>{lastAuthStatus()?.host?.name ?? status().text}</p>
+          <p style={{ color: lastAuthStatus()?.host !== null ? 'inherit' : 'red', 'white-space': 'nowrap' }}>
+            {lastAuthStatus()?.host?.name ?? status().text}
+          </p>
         </div>
       </div>
 

@@ -225,7 +225,7 @@ pub fn run() {
             get_local_ip,
             get_device_name,
         ])
-        .setup(|_app| {
+        .setup(|app| {
             #[cfg(mobile)]
             app.handle().plugin(tauri_plugin_app_events::init())?;
             Ok(())

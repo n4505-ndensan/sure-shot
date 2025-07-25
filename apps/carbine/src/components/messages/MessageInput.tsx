@@ -97,18 +97,7 @@ const MessageInput: Component = () => {
   let fileInput: HTMLInputElement | undefined;
   const maxSizeForBase64 = 1024 * 1024; // 1MB
 
-  const shouldUseBase64 = (file: File): boolean => {
-    // 小さなファイルや特定のファイル形式はBase64を使用
-    if (file.size <= maxSizeForBase64) return true;
-
-    // 画像は表示のためBase64が便利
-    if (file.type.startsWith('image/')) return true;
-
-    // テキストファイルは可読性のためBase64
-    if (file.type.startsWith('text/')) return true;
-
-    return false;
-  };
+  const isSendDisabled = () => isSending() || (!message().trim() && attachments().length === 0);
 
   return (
     <div
@@ -224,13 +213,14 @@ const MessageInput: Component = () => {
           </label>
           <button
             onClick={handleSendMessage}
-            disabled={isSending() || (!message().trim() && attachments().length === 0)}
+            disabled={isSendDisabled()}
             style={{
               padding: '4px 16px',
-              color: isSending() || (!message().trim() && attachments().length === 0) ? '#ccc' : '#248effff',
+              color: isSendDisabled() ? '#ccc' : 'white',
+              'background-color': isSendDisabled() ? 'white' : '#248effff',
               'font-weight': 'bold',
               margin: '0.75rem',
-              border: `1px solid ${isSending() || (!message().trim() && attachments().length === 0) ? '#ccc' : '#248effff'}`,
+              border: `1px solid ${isSendDisabled() ? '#ccc' : '#248effff'}`,
               cursor: isSending() ? 'not-allowed' : 'pointer',
             }}
           >

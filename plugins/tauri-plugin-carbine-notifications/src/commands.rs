@@ -1,5 +1,5 @@
 use crate::models::*;
-use tauri::{command, AppHandle, Runtime};
+use tauri::{command, AppHandle, Manager, Runtime};
 
 #[command]
 pub(crate) async fn start_background_service<R: Runtime>(
@@ -8,7 +8,7 @@ pub(crate) async fn start_background_service<R: Runtime>(
 ) -> Result<ServiceStatusResponse, String> {
     #[cfg(mobile)]
     {
-        let carbine_notifications = app.state::<crate::mobile::CarbineNotifications<R>>();
+        let carbine_notifications = Manager::state::<crate::mobile::CarbineNotifications<R>>(&app);
         carbine_notifications
             .0
             .run_mobile_plugin("startBackgroundService", payload)

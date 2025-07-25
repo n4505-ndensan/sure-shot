@@ -340,14 +340,6 @@ impl App {
             .block(Block::bordered().title("Stop"))
             .centered();
         frame.render_widget(stop_button, control_chunks[2]);
-
-        // ログ設定
-        // let log_config_text = "Log Controls:\n'R' - Toggle Request Logs  |  'P' - Toggle Response Logs\n'M' - Toggle Quiet Mode for /ping, /events, /auth/verify";
-        // let log_config_paragraph = Paragraph::new(log_config_text)
-        //     .style(Style::default().cyan())
-        //     .block(Block::bordered().title("Log Settings"))
-        //     .wrap(ratatui::widgets::Wrap { trim: true });
-        // frame.render_widget(log_config_paragraph, control_chunks[3]);
     }
 
     /// Reads the crossterm events and updates the state of [`App`].
@@ -375,8 +367,8 @@ impl App {
                 }
             }
             (_, KeyCode::Right) => {
-                if self.selected_tab < 2 {
-                    // 現在は3つのタブ（0, 1, 2）
+                if self.selected_tab < 1 {
+                    // 現在は2つのタブ（0, 1）
                     self.selected_tab += 1;
                 }
             }
@@ -384,10 +376,9 @@ impl App {
             // 数字キーでの直接タブ選択
             (_, KeyCode::Char('1')) => self.selected_tab = 0,
             (_, KeyCode::Char('2')) => self.selected_tab = 1,
-            (_, KeyCode::Char('3')) => self.selected_tab = 2,
 
             // Controlタブでのサーバー操作
-            (_, KeyCode::Char('s') | KeyCode::Char('S')) if self.selected_tab == 2 => {
+            (_, KeyCode::Char('s') | KeyCode::Char('S')) if self.selected_tab == 1 => {
                 if matches!(
                     self.server_status.state,
                     ServerState::Stopped | ServerState::Error(_)
@@ -400,7 +391,7 @@ impl App {
                     });
                 }
             }
-            (_, KeyCode::Char('x') | KeyCode::Char('X')) if self.selected_tab == 2 => {
+            (_, KeyCode::Char('x') | KeyCode::Char('X')) if self.selected_tab == 1 => {
                 if matches!(self.server_status.state, ServerState::Running) {
                     let server_manager = self.server_manager.clone();
                     tokio::spawn(async move {
@@ -409,32 +400,6 @@ impl App {
                         }
                     });
                 }
-            }
-
-            // Controlタブでのログ設定操作
-            (_, KeyCode::Char('r') | KeyCode::Char('R')) if self.selected_tab == 2 => {
-                let server_manager = self.server_manager.clone();
-                tokio::spawn(async move {
-                    if let Err(e) = server_manager.toggle_request_logs().await {
-                        eprintln!("Failed to toggle request logs: {}", e);
-                    }
-                });
-            }
-            (_, KeyCode::Char('p') | KeyCode::Char('P')) if self.selected_tab == 2 => {
-                let server_manager = self.server_manager.clone();
-                tokio::spawn(async move {
-                    if let Err(e) = server_manager.toggle_response_logs().await {
-                        eprintln!("Failed to toggle response logs: {}", e);
-                    }
-                });
-            }
-            (_, KeyCode::Char('m') | KeyCode::Char('M')) if self.selected_tab == 2 => {
-                let server_manager = self.server_manager.clone();
-                tokio::spawn(async move {
-                    if let Err(e) = server_manager.toggle_quiet_mode().await {
-                        eprintln!("Failed to toggle quiet mode: {}", e);
-                    }
-                });
             }
 
             // その他のキーは無視
