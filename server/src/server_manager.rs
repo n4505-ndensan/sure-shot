@@ -95,10 +95,6 @@ impl ServerManager {
             "Server nickname: {}",
             config.nickname
         )));
-        let _ = self.message_sender.send(ServerMessage::Log(format!(
-            "Authorized devices: {}",
-            config.authorized_devices.len()
-        )));
 
         // アプリケーション状態を初期化
         let messages = Arc::new(Mutex::new(Vec::<ReceivedMessage>::new()));

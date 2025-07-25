@@ -1,7 +1,6 @@
 import { HostInfo } from '../types/generated/api-types';
 
 export interface AuthCredentials {
-  name: string;
   password: string;
 }
 
@@ -97,7 +96,6 @@ export class AuthManager {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          device_id: credentials.name,
           password: credentials.password,
         }),
         signal: AbortSignal.timeout(5000),
@@ -201,7 +199,6 @@ export class AuthManager {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            device_id: this.authStatus.credentials.name,
             password: this.authStatus.credentials.password,
           }),
           signal: AbortSignal.timeout(5000),

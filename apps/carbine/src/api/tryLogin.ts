@@ -1,16 +1,16 @@
 import { HostInfo, login } from '@sureshot/api/src';
 
-export const tryLogin = async (host: HostInfo, deviceId: string, password: string, debugFn?: (message: string) => void): Promise<boolean> => {
+export const tryLogin = async (host: HostInfo, password: string, debugFn?: (message: string) => void): Promise<boolean> => {
   const log = debugFn || console.log;
 
-  log(`tryLogin called with: host=${host.ip}:${host.port}, deviceId=${deviceId}, passwordLength=${password?.length}`);
+  log(`tryLogin called with: host=${host.ip}:${host.port}, passwordLength=${password?.length}`);
 
   try {
     log('Using provided host connection...');
     log(`Host connection info: ${JSON.stringify(host)}`);
 
     log(`Attempting login with hostInfo: ${JSON.stringify({ host })}`);
-    const authStatus = await login(host, deviceId, password, log);
+    const authStatus = await login(host, password, log);
     log(`Login API response: ${JSON.stringify(authStatus)}`);
 
     if (authStatus.isAuthenticated) {

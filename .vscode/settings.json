@@ -5,5 +5,5 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
-  "rust-analyzer.linkedProjects": ["plugins\\tauri-plugin-carbine-notifications\\Cargo.toml"]
+  "rust-analyzer.linkedProjects": ["plugins\\tauri-plugin-carbine-notifications\\Cargo.toml", "server\\Cargo.toml"]
 }

@@ -16,7 +16,6 @@ const LoginForm: Component<Props> = (props) => {
   const [isLoading, setIsLoading] = createSignal(false);
 
   // フォームの値を管理するためのsignals
-  const [deviceId, setDeviceId] = createSignal('');
   const [password, setPassword] = createSignal('');
 
   const onSubmit = async (e: Event) => {
@@ -24,11 +23,10 @@ const LoginForm: Component<Props> = (props) => {
     setIsLoading(true);
 
     // FormDataの代わりにsignalsの値を直接使用
-    const deviceIdValue = deviceId();
     const passwordValue = password();
 
-    if (!deviceIdValue || !passwordValue) {
-      await message('Please enter both device ID and password', { title: 'Login Failed', kind: 'error' });
+    if (!passwordValue) {
+      await message('Please enter a password', { title: 'Login Failed', kind: 'error' });
       setIsLoading(false);
       return;
     }
@@ -37,12 +35,12 @@ const LoginForm: Component<Props> = (props) => {
     AuthManager.getInstance().setPersistAuth(persistAuth());
 
     try {
-      const result = await tryLogin(props.host, deviceIdValue, passwordValue);
+      const result = await tryLogin(props.host, passwordValue);
 
       if (result) {
         validateAuth('preserve');
       } else {
-        await message(`Invalid device ID or password`, { title: 'Login Failed', kind: 'error' });
+        await message(`Invalid password`, { title: 'Login Failed', kind: 'error' });
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
@@ -69,7 +67,7 @@ const LoginForm: Component<Props> = (props) => {
           gap: '1rem',
         }}
       >
-        <label class='form_label_container'>
+        {/* <label class='form_label_container'>
           <p class='form_label'>ID</p>
           <input
             class='form_input'
@@ -80,7 +78,10 @@ const LoginForm: Component<Props> = (props) => {
             onInput={(e) => setDeviceId(e.target.value)}
             disabled={isLoading()}
           />
-        </label>
+        </label> */}
+        <p>
+          Login to <span style={{ color: '#007bff' }}>{props.host.name}</span>
+        </p>
         <label class='form_label_container'>
           <p class='form_label'>Key</p>
           <input
@@ -88,6 +89,7 @@ const LoginForm: Component<Props> = (props) => {
             type='password'
             name='password'
             autocomplete='off'
+            autocorrect='off'
             value={password()}
             onInput={(e) => setPassword(e.target.value)}
             disabled={isLoading()}
@@ -103,7 +105,7 @@ const LoginForm: Component<Props> = (props) => {
             }}
           >
             <input type='checkbox' checked={persistAuth()} onChange={(e) => setPersistAuth(e.target.checked)} disabled={isLoading()} />
-            <p>Remember Me</p>
+            <p>Save Password</p>
           </label>
           <button type='submit' disabled={isLoading()}>
             {isLoading() ? 'ログイン中...' : 'Login'}

@@ -41,8 +41,7 @@ const Login: Component = () => {
             'justify-content': 'center',
           }}
         >
-          <CarbineAnimLogo scale={0.7} width={100} height={100} />
-          {/* <SidearmAnimLogo scale={0.7} /> */}
+          <CarbineAnimLogo scale={0.7} />
         </div>
         <div
           style={{

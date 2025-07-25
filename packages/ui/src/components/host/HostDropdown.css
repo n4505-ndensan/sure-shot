@@ -41,8 +41,12 @@
 }
 
 .host_dropdown_select:first-of-type {
-    color: #007bff;
+  color: #007bff;
+}
+.host_dropdown_select:first-of-type:disabled {
+  color: #777;
+  pointer-events: none;
 }
 .host_dropdown_select option {
-    color: #000;
+  color: #000;
 }

@@ -3,6 +3,7 @@ import { HostDropdown } from '@sureshot/ui/src';
 import { message } from '@tauri-apps/plugin-dialog';
 import { Component, createSignal, onMount, Show } from 'solid-js';
 import { findHosts } from '~/api/hostApi';
+import { globalStore } from '~/store/GlobalStore';
 
 interface Props {
   onSelect: (host: HostInfo) => void;
@@ -25,6 +26,60 @@ const HostSetup: Component<Props> = (props) => {
     setHosts(hosts);
   };
 
+  const [customHostLoading, setCustomHostLoading] = createSignal(false);
+
+  const addCustomHost = async () => {
+    if (!customIp()) {
+      alert('Please enter both IP and Port');
+      return;
+    }
+    if (hosts()?.some((h) => h.ip === customIp())) {
+      alert('This host is already in the list');
+      return;
+    }
+
+    setCustomHostLoading(true);
+
+    try {
+      // pingをフェッチ
+      const result = await fetch(`http://${customIp()}:8000/ping`, {
+        method: 'GET',
+      });
+      if (result.ok) {
+        const data = await result.json();
+        if (data.name) {
+          const host: HostInfo = {
+            ip: customIp(),
+            port: 8000,
+            name: (data.name as string) || 'Custom Host',
+            status: result.status.toString(),
+            message: (data.message as string) || 'no message',
+            is_self: data.is_self,
+          };
+          setHosts([...(hosts() || []), host]);
+          props.onSelect(host);
+
+          await message(`Host "${data.name}" found.`, { title: 'carbine', kind: 'info' });
+        } else {
+          await message(`Host "${customIp()}" responsed invalid response.`, { title: 'carbine', kind: 'warning' });
+        }
+      } else {
+        await message(`Host "${customIp()}" not found.`, { title: 'carbine', kind: 'warning' });
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      await message(`Error: ${errorMsg} ("${customIp()}")`, { title: 'carbine', kind: 'error' });
+    } finally {
+      setCustomHostLoading(false);
+    }
+    setCustomHostLoading(false);
+  };
+
+  const localIpMask = () => {
+    const localIp = globalStore.localIp;
+    return localIp ? localIp.split('.').slice(0, 3).join('.') + '.0/24' : '';
+  };
+
   return (
     <div
       style={{
@@ -42,14 +97,13 @@ const HostSetup: Component<Props> = (props) => {
           'flex-direction': 'column',
           'flex-grow': 1,
           width: '100%',
-          gap: '16px',
+          gap: '12px',
         }}
       >
         <div
           style={{
             display: 'flex',
             'flex-direction': 'row',
-            width: '100%',
             'align-items': 'center',
             'justify-content': 'space-between',
           }}
@@ -59,82 +113,68 @@ const HostSetup: Component<Props> = (props) => {
             RELOAD
           </a>
         </div>
-        <Show when={hosts()?.length}>
-          <HostDropdown
-            hosts={hosts()!}
-            onHostSelected={(host) => {
-              props.onSelect(host);
-            }}
-          />
-          {/* <HostList
-            hosts={hosts()!}
-            selectable
-            onHostSelected={(host) => {
-              props.onSelect(host);
-            }}
-          /> */}
+
+        <HostDropdown
+          hosts={hosts() ?? []}
+          onHostSelected={(host) => {
+            props.onSelect(host);
+          }}
+        />
+
+        <Show when={hosts()?.length === 0}>
+          <p style={{ color: '#559955' }}>Make sure that host server (server.exe) is running in your local LAN ({localIpMask()}).</p>
         </Show>
 
-        <a
-          onClick={() => {
-            setCustomFormShown(!customFormShown());
+        <div
+          style={{
+            display: 'flex',
+            'flex-direction': 'row',
+            'align-items': 'center',
+            'margin-top': 'auto',
+            'margin-bottom': '8px',
+            height: '32px',
+            width: '100%',
           }}
         >
-          {customFormShown() ? 'Hide' : 'Use custom host'}
-        </a>
-
-        <Show when={customFormShown()}>
-          <form
-            style={{
-              display: 'flex',
-              'flex-direction': 'column',
-              gap: '8px',
-              width: '100%',
+          <a
+            onClick={() => {
+              setCustomFormShown(!customFormShown());
             }}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (!customIp()) {
-                alert('Please enter both IP and Port');
-                return;
-              }
-              if (hosts()?.some((h) => h.ip === customIp())) {
-                alert('This host is already in the list');
-                return;
-              }
-
-              // pingをフェッチ
-              const result = await fetch(`http://${customIp()}:8000/ping`, {
-                method: 'GET',
-              });
-              if (result.ok) {
-                const data = await result.json();
-                if (data.name) {
-                  const host: HostInfo = {
-                    ip: customIp(),
-                    port: 8000,
-                    name: (data.name as string) || 'Custom Host',
-                    status: result.status.toString(),
-                    message: (data.message as string) || 'no message',
-                    is_self: data.is_self,
-                  };
-                  setHosts([...(hosts() || []), host]);
-                  props.onSelect(host);
-
-                  await message(`Host "${data.name}" found.`, { title: 'carbine', kind: 'info' });
-                  return;
-                }
-              }
-              await message(`Host not found.`, { title: 'carbine', kind: 'warning' });
+            style={{
+              width: 'fit-content',
+              'flex-grow': 1,
+              'margin-right': 'auto',
             }}
           >
-            <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2px' }}>
-              <input type='text' value={customIp()} placeholder='IP' onInput={(e) => setCustomIp(e.currentTarget.value.toString().trim())} />
-              <button type='submit' style={{ width: 'fit-content' }}>
-                Connect
-              </button>
-            </div>
-          </form>
-        </Show>
+            {customFormShown() ? 'Hide' : 'Use custom host'}
+          </a>
+
+          <Show when={customFormShown()}>
+            <form
+              style={{
+                display: 'flex',
+                'flex-direction': 'column',
+                gap: '8px',
+              }}
+              onSubmit={async (e) => {
+                e.preventDefault();
+                addCustomHost();
+              }}
+            >
+              <div style={{ display: 'flex', 'flex-direction': 'row', gap: '2px' }}>
+                <input
+                  type='text'
+                  value={customIp()}
+                  placeholder='e.g. 192.168.X.X'
+                  onInput={(e) => setCustomIp(e.currentTarget.value.toString().trim())}
+                />
+                <button type='submit' style={{ width: 'fit-content' }} disabled={customHostLoading()}>
+                  {customHostLoading() ? 'Connecting...' : 'Connect'}
+                </button>
+              </div>
+            </form>
+          </Show>
+        </div>
       </div>
     </div>
   );

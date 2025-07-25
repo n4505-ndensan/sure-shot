@@ -13,18 +13,12 @@ export interface Attachment {
 
 export interface AuthRequest {
 	password: string;
-	device_id: string;
 }
 
 export interface AuthResponse {
 	success: boolean;
 	message: string;
 	token?: string;
-}
-
-export interface AuthorizeDeviceRequest {
-	device_id: string;
-	password: string;
 }
 
 export interface HostInfo {

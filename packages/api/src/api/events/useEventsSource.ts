@@ -15,7 +15,6 @@ export function useEventsSource(props: Props): {
   const [isConnected, setIsConnected] = createSignal<boolean | undefined>(undefined);
 
   const onEventSourceOpen = () => {
-    console.log('SSE connection opened');
     setIsConnected(true);
     setConnectionError(undefined);
   };
@@ -58,7 +57,6 @@ export function useEventsSource(props: Props): {
 
       eventSource.addEventListener('error', onEventSourceError);
     } catch (error) {
-      console.error('Failed to initialize SSE:', error);
       setIsConnected(false);
       setConnectionError('Failed to initialize connection');
     }
@@ -77,7 +75,7 @@ export function useEventsSource(props: Props): {
   validateIntervalId = setInterval(() => {
     console.log(eventSource?.readyState);
     initializeSSE();
-  }, 3000);
+  }, 10000);
 
   // クリーンアップ
   onCleanup(() => {

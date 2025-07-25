@@ -1,6 +1,5 @@
 import { ReceivedMessage } from '@sureshot/api/src';
 import { Component, For, Show } from 'solid-js';
-import LinkifiedText from '../common/LinkifiedText';
 
 interface Props {
   message: ReceivedMessage;
@@ -54,7 +53,8 @@ const MessageItem: Component<Props> = (props) => {
               color: isSelf ? '#1976d2' : '#495057',
             }}
           >
-            {isSelf ? 'You' : message.from_name}
+            {message.from_name}
+            {isSelf ? ' [You]' : ''}
             {/* {message.from_name} */}
           </strong>
           <div

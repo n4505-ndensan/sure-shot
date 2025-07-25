@@ -3,7 +3,6 @@ import { AuthManager, getAuthStatus } from '@sureshot/api/src';
 import { AuthStatus } from '@sureshot/api/src/auth/AuthManager';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { platform } from '@tauri-apps/plugin-os';
 import { createSignal, onCleanup } from 'solid-js';
 import { isMobile } from './PlatformUtils';
 
@@ -19,7 +18,6 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
   const navigate = useNavigate();
 
   const [lastAuthStatus, setLastAuthStatus] = createSignal<AuthStatus | null>(getAuthStatus());
-
 
   const redirectByAuthStatus = (authenticated: boolean) => {
     if (authenticated) {
@@ -40,6 +38,8 @@ export const useAuthRedirect = (interval?: RedirectMode) => {
           closable: true,
           resizable: true,
           decorations: false,
+          dragDropEnabled: true,
+          acceptFirstMouse: true,
         });
         homeWindow.show();
         homeWindow.setFocus();

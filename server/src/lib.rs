@@ -5,7 +5,6 @@ pub mod whoami;
 use message_store::MessageStore;
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::sync::{Mutex, broadcast, mpsc};
 use typeshare::typeshare;
@@ -48,7 +47,6 @@ pub struct AppState {
 pub struct ServerConfig {
     pub nickname: String,
     pub password_hash: String,
-    pub authorized_devices: HashSet<String>, // IPアドレス or デバイスID
     pub salt: String,
     pub log_config: LogConfig,
 }
@@ -90,7 +88,6 @@ impl Default for ServerConfig {
         Self {
             nickname: whoami::whoami().unwrap_or_else(|_| "Unknown".to_string()),
             password_hash,
-            authorized_devices: HashSet::new(),
             salt,
             log_config: LogConfig::default(),
         }
@@ -170,7 +167,6 @@ impl ServerConfig {
         let config = Self {
             nickname,
             password_hash,
-            authorized_devices: HashSet::new(),
             salt,
             log_config: LogConfig::default(),
         };
@@ -196,18 +192,6 @@ impl ServerConfig {
         let password_hash = hex::encode(hasher.finalize());
 
         password_hash == self.password_hash
-    }
-
-    pub fn is_device_authorized(&self, device_id: &str) -> bool {
-        self.authorized_devices.contains(device_id)
-    }
-
-    pub fn authorize_device(&mut self, device_id: String) {
-        self.authorized_devices.insert(device_id);
-    }
-
-    pub fn revoke_device(&mut self, device_id: &str) {
-        self.authorized_devices.remove(device_id);
     }
 }
 
@@ -254,7 +238,6 @@ pub struct ReceivedMessage {
 #[typeshare]
 pub struct AuthRequest {
     pub password: String,
-    pub device_id: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -263,13 +246,6 @@ pub struct AuthResponse {
     pub success: bool,
     pub message: String,
     pub token: Option<String>,
-}
-
-#[derive(Serialize, Deserialize)]
-#[typeshare]
-pub struct AuthorizeDeviceRequest {
-    pub device_id: String,
-    pub password: String,
 }
 
 #[derive(Debug, Serialize)]

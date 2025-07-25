@@ -35,6 +35,8 @@ tauri-plugin-notification = "2"
 tauri-plugin-machine-uid = "0.1.1"
 tauri-plugin-dialog = "2"
 tauri-plugin-carbine-notifications = { path = "../../../plugins/tauri-plugin-carbine-notifications" }
+tauri-plugin-store = "2"
+tauri-plugin-fs = "2"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 tauri-plugin-app-events = { version = "0.2.0" }

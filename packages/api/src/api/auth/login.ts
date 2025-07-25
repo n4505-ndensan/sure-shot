@@ -1,7 +1,7 @@
 import { AuthManager, AuthStatus } from '../../auth/AuthManager';
 import { HostInfo } from '../../types/generated/api-types';
 
-export async function login(hostInfo: HostInfo, deviceId: string, password: string, debugFn?: (message: string) => void): Promise<AuthStatus> {
+export async function login(hostInfo: HostInfo, password: string, debugFn?: (message: string) => void): Promise<AuthStatus> {
   const log = debugFn || console.log;
   const authManager = AuthManager.getInstance();
 
@@ -10,19 +10,17 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
     isAuthenticated: false,
     host: hostInfo,
     credentials: {
-      name: deviceId,
       password,
     },
   };
 
-  log(`login function called with: hostInfo=${JSON.stringify(hostInfo)}, deviceId=${deviceId}, passwordLength=${password?.length}`);
+  log(`login function called with: hostInfo=${JSON.stringify(hostInfo)},  passwordLength=${password?.length}`);
 
   try {
     const url = `http://${hostInfo.ip}:${hostInfo.port}/auth/login`;
     // log(`Making fetch request to: ${url}`);
 
     const requestBody = {
-      device_id: deviceId,
       password,
     };
     // log(`Request body: ${JSON.stringify(requestBody)}`);
@@ -41,20 +39,8 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
       authManager.setAuthStatus({
         ...failedStatus,
         lastError: {
-          type: "auth",
-          message: "Invalid password",
-        },
-      });
-      return failedStatus;
-    }
-
-    if (response.status === 403) {
-      log('Authentication failed: Device not authorized');
-      authManager.setAuthStatus({
-        ...failedStatus,
-        lastError: {
-          type: "auth",
-          message: "Device not authorized",
+          type: 'auth',
+          message: 'Invalid password',
         },
       });
       return failedStatus;
@@ -65,7 +51,7 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
       authManager.setAuthStatus({
         ...failedStatus,
         lastError: {
-          type: "auth",
+          type: 'auth',
           message: `Authentication failed with status: ${response.status}`,
         },
       });
@@ -83,7 +69,6 @@ export async function login(hostInfo: HostInfo, deviceId: string, password: stri
       isAuthenticated: true,
       host: hostInfo,
       credentials: {
-        name: deviceId,
         password,
       },
     };

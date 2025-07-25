@@ -1,54 +1,26 @@
-import { Component } from "solid-js";
-import { Attachment } from "@sureshot/api";
-import { arrayBufferToBase64, getMimeType } from "../../../utils/FileUtils";
-import { generateId } from "../../../utils/IdUtils";
-import { createAttachment } from "./createAttachment";
+import { Attachment } from '@sureshot/api';
+import { Component } from 'solid-js';
+import { createAttachment } from './createAttachment';
 
 interface Props {
-  dropZone: any;
   onAttachmentLoadStart?: () => void;
   onAttachmentLoad?: (attachments: Attachment[]) => void;
   onAttachmentLoadEnd?: () => void;
   acceptedTypes?: string;
   multiple?: boolean;
-  maxSizeForBase64?: number; // バイト単位（デフォルト: 1MB）
 }
 
 export const OptimizedAttachmentButton: Component<Props> = (props) => {
   let fileInput: HTMLInputElement | undefined;
-  const maxSizeForBase64 = props.maxSizeForBase64 || 1024 * 1024; // 1MB
-
-  const shouldUseBase64 = (file: File): boolean => {
-    // 小さなファイルや特定のファイル形式はBase64を使用
-    if (file.size <= maxSizeForBase64) return true;
-
-    // 画像は表示のためBase64が便利
-    if (file.type.startsWith("image/")) return true;
-
-    // テキストファイルは可読性のためBase64
-    if (file.type.startsWith("text/")) return true;
-
-    return false;
-  };
 
   return (
-    <>
+    <div style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'center', margin: '0 16px' }}>
       <input
         ref={fileInput}
-        {...props.dropZone.getInputProps()}
-        type="file"
+        type='file'
+        style={{ display: 'none' }}
         multiple={props.multiple ?? true}
-        accept={props.acceptedTypes ?? "*/*"}
-        style={{ display: "none" }}
-        onDrop={(e) => {
-          console.log("huh");
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-        }}
-        onBeforeInput={(e) => {
-          console.log("onBeforeInput triggered");
-        }}
+        accept={props.acceptedTypes ?? '*/*'}
         onChange={async (e) => {
           const files = e.currentTarget.files;
           if (files) {
@@ -58,38 +30,13 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
               const attachments: Attachment[] = [];
 
               for (const file of Array.from(files)) {
-                const mimeType = getMimeType(file);
-                const useBase64 = shouldUseBase64(file);
-
-                if (useBase64) {
-                  attachments.push(await createAttachment(file));
-                } else {
-                  // 大きなファイルの場合は別の処理を提案
-                  console.warn(
-                    `File ${file.name} is too large (${file.size} bytes) for Base64 encoding. Consider implementing binary upload.`
-                  );
-
-                  // とりあえず警告を出して、Base64でエンコード
-                  const arrayBuffer = await file.arrayBuffer();
-                  const base64Data = arrayBufferToBase64(arrayBuffer);
-
-                  const attachment: Attachment = {
-                    id: generateId(),
-                    filename: file.name,
-                    mime_type: mimeType,
-                    size: file.size,
-                    data: base64Data,
-                    thumbnail: undefined,
-                  };
-
-                  attachments.push(attachment);
-                }
+                attachments.push(await createAttachment(file));
               }
 
               props.onAttachmentLoad?.(attachments);
-              if (e.currentTarget) e.currentTarget.value = "";
+              if (e.currentTarget) e.currentTarget.value = '';
             } catch (error) {
-              console.error("Failed to process attachments:", error);
+              console.error('Failed to process attachments:', error);
             } finally {
               props.onAttachmentLoadEnd?.();
             }
@@ -97,21 +44,24 @@ export const OptimizedAttachmentButton: Component<Props> = (props) => {
         }}
       />
       <img
-        src={"/folder.png"}
-        width={12}
-        height={12}
+        src={'/icons/clip_8.svg'}
+        width={8}
+        height={8}
         style={{
-          width: "12px",
-          height: "12px",
-          cursor: "pointer",
-          "pointer-events": "all",
-          "image-rendering": "pixelated",
+          display: 'flex',
+          'align-items': 'center',
+          'justify-content': 'center',
+          width: '16px',
+          height: '16px',
+          cursor: 'pointer',
+          'pointer-events': 'all',
+          'image-rendering': 'pixelated',
         }}
         onClick={() => {
           fileInput?.click();
         }}
       />
-    </>
+    </div>
   );
 };
 

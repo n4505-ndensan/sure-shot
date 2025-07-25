@@ -1,18 +1,21 @@
 import { useLocation } from '@solidjs/router';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { platform } from '@tauri-apps/plugin-os';
-import { createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { createEffect, createSignal, onMount, Show } from 'solid-js';
 import { globalStore } from '~/store/GlobalStore';
+import { nickName, setNickName } from '~/store/PersistData';
 import '~/styles/title_bar_region.css';
 import { useAuthRedirect } from '~/utils/useAuthRedirect';
 import HomeTitleBarContent from './HomeTitleBarContent';
 
 export default function TitleBar() {
+  let nickNameInputRef: HTMLInputElement | undefined;
   const [isMaximizable, setIsMaximizable] = createSignal(false);
   const [isMinimizable, setIsMinimizable] = createSignal(false);
   const [isClosable, setIsClosable] = createSignal(false);
   const [isMaximized, setMaximized] = createSignal(false);
   const [title, setTitle] = createSignal('');
+
+  const [isNickNameEditing, setIsNickNameEditing] = createSignal(false);
 
   const { lastAuthStatus } = useAuthRedirect('preserve');
 
@@ -66,8 +69,51 @@ export default function TitleBar() {
           }}
         >
           <Show when={location.pathname.startsWith('/home')}>
-            <p style={{ 'font-weight': 'bold', 'text-align': 'start' }}>{lastAuthStatus()?.credentials?.name}</p>
-            <p style={{ opacity: 0.5, 'text-align': 'end' }}>({globalStore.localIp})</p>
+            <Show
+              when={isNickNameEditing()}
+              fallback={
+                <>
+                  <p
+                    style={{ 'font-weight': 'bold', 'text-align': 'start', cursor: 'pointer' }}
+                    onClick={() => {
+                      setIsNickNameEditing(true);
+                      nickNameInputRef?.focus();
+                    }}
+                    data-tauri-drag-region-exclude
+                  >
+                    {nickName()}
+                  </p>
+                  <p style={{ opacity: 0.5, 'text-align': 'end' }}>({globalStore.localIp})</p>
+                </>
+              }
+            >
+              <input
+                ref={(ref) => (nickNameInputRef = ref)}
+                type='text'
+                value={nickName()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsNickNameEditing(false);
+                    setNickName(e.currentTarget.value);
+                  } else if (e.key === 'Escape') {
+                    setIsNickNameEditing(false);
+                  }
+                }}
+                onBlur={() => setIsNickNameEditing(false)}
+                style={{
+                  'font-weight': 'bold',
+                  'text-align': 'start',
+                  outline: 'none',
+                  border: 'none',
+                  'border-bottom': '1px solid #ccc',
+                  'user-select': 'text',
+                  'pointer-events': 'initial',
+                  cursor: 'initial',
+                  'max-width': '100px',
+                }}
+                data-tauri-drag-region-exclude
+              />
+            </Show>
           </Show>
           <Show when={location.pathname.startsWith('/setup')}>
             <p style={{ 'font-weight': 'bold' }}>setup</p>

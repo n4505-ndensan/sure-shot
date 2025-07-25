@@ -4,8 +4,6 @@ import './SidearmAnimLogo.css';
 
 interface Props {
   scale?: number;
-  width?: string;
-  height?: string;
 }
 
 const SidearmAnimLogo: Component<Props> = (props) => {

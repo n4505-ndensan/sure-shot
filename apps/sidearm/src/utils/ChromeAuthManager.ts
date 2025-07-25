@@ -188,7 +188,6 @@ export class ChromeAuthManager {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          device_id: credentials.name,
           password: credentials.password,
         }),
         signal: AbortSignal.timeout(5000),

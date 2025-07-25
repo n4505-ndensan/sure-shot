@@ -212,22 +212,24 @@ async fn get_local_ip() -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_machine_uid::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_carbine_notifications::init())
         .invoke_handler(tauri::generate_handler![
             find_host,
             get_local_ip,
             get_device_name,
         ])
-         .setup(|app| {
+        .setup(|_app| {
             #[cfg(mobile)]
             app.handle().plugin(tauri_plugin_app_events::init())?;
             Ok(())
-         })
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

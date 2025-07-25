@@ -13,6 +13,12 @@
     "notification:default",
     "carbine-notifications:default",
 
+    "fs:read-all",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "**" }, { "path": "$RESOURCE/**" }]
+    },
+
     "core:window:allow-show",
     "core:window:allow-center",
     "core:window:allow-close",
@@ -27,12 +33,18 @@
     "core:window:allow-unmaximize",
     "core:webview:default",
     "core:webview:allow-create-webview-window",
-    
+
     "dialog:default",
 
     "notification:allow-register-action-types",
     "notification:allow-check-permissions",
     "notification:allow-create-channel",
-    "notification:allow-register-listener"
+    "notification:allow-register-listener",
+
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-delete",
+    "store:allow-keys",
+    "store:allow-clear"
   ]
 }

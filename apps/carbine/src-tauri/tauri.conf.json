@@ -11,13 +11,14 @@
   },
 
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "setup",
         "title": "sure-shot",
         "url": "/setup",
-        "width": 260,
-        "height": 100,
+        "width": 220,
+        "height": 75,
         "maximizable": false,
         "minimizable": false,
         "closable": true,
@@ -52,6 +53,9 @@
         "minimizable": true,
         "closable": true,
         "resizable": true,
+        "acceptFirstMouse": true,
+        "dragDropEnabled": true,
+        "contentProtected": false,
         "decorations": false,
         "create": false
       }

@@ -1,5 +1,5 @@
 use crate::models::*;
-use tauri::{command, AppHandle, Manager, Runtime};
+use tauri::{command, AppHandle, Runtime};
 
 #[command]
 pub(crate) async fn start_background_service<R: Runtime>(

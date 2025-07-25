@@ -30,7 +30,7 @@ pub fn external_send_message(router: routing::Router, app_state: AppState) -> ro
                         Some(token) => {
                             // トークンの検証
                             match verify_token(token).await {
-                                Some(_device_id) => {
+                                Some(_) => {
                                     // 認証成功、メッセージ処理を続行
                                     let config = state.config.lock().await;
                                     drop(config); // ロックを早期に解放

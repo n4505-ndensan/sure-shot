@@ -29,7 +29,7 @@ pub fn external_get_messages(router: routing::Router, app_state: AppState) -> ro
                     Some(token) => {
                         // トークンの検証
                         match verify_token(token).await {
-                            Some(_device_id) => {
+                            Some(_) => {
                                 // 認証成功、メッセージを返却
                                 // データベースから最新のメッセージを取得
                                 match state.message_store.get_recent_messages(100).await {
